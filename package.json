@@ -1,0 +1,33 @@
+{
+	"name": "cl-fe",
+	"type": "module",
+	"version": "0.0.1",
+	"scripts": {
+		"dev": "astro dev",
+		"build": "astro build",
+		"preview": "astro preview",
+		"astro": "astro",
+		"lint": "pnpm biome lint ./src",
+		"format": "pnpm biome format ./src --write",
+		"check": "pnpm biome check --write ./src",
+		"seo": "start-server-and-test 'astro dev --port 4245' http://localhost:4245 'npx unlighthouse --site http://localhost:4245'",
+		"prepare": "husky"
+	},
+	"lint-staged": {
+		"*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}": [
+			"biome check --write --no-errors-on-unmatched"
+		]
+	},
+	"dependencies": {
+		"@astrojs/sitemap": "^3.7.0",
+		"@tailwindcss/vite": "^4.1.18",
+		"astro": "^5.17.1",
+		"tailwindcss": "^4.1.18"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.3.14",
+		"husky": "^9.1.7",
+		"lint-staged": "^16.2.7",
+		"start-server-and-test": "^2.1.3"
+	}
+}
