@@ -34,7 +34,7 @@ const canonicalURL = new URL(
 
         <meta
             http-equiv="Content-Security-Policy"
-            content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; font-src 'self'; base-uri 'self'; form-action 'self';"
+            content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; img-src 'self' data:; font-src 'self'; base-uri 'self'; form-action 'self';"
         />
 
         <meta property="og:type" content="website" />
