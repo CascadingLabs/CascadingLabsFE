@@ -7,9 +7,9 @@
 		"build": "astro build",
 		"preview": "astro preview",
 		"astro": "astro",
-		"lint": "pnpm biome lint ./src",
-		"format": "pnpm biome format ./src --write",
-		"check": "pnpm biome check --write ./src",
+		"lint": "biome lint .",
+		"format": "biome format . --write",
+		"check": "biome check --write --no-errors-on-unmatched .",
 		"seo": "start-server-and-test 'astro dev --port 4245' http://localhost:4245 'npx unlighthouse --site http://localhost:4245'",
 		"prepare": "husky"
 	},
