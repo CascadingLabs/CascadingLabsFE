@@ -1,55 +1,54 @@
 ---
-import '../styles/global.css';
+import "../styles/global.css";
 
 const {
-	title = 'Cascading Labs',
-	description = 'We are building the future of data and algorithms.',
-	image = '/favicon.svg',
+    title = "Cascading Labs",
+    description = "We are building the future of data and algorithms.",
+    image = "/favicon.svg",
 } = Astro.props;
 
 // Create the canonical URL
 const canonicalURL = new URL(
-	Astro.url.pathname,
-	Astro.site || 'https://cascadinglabs.com',
+    Astro.url.pathname,
+    Astro.site || "https://cascadinglabs.com",
 );
 ---
 
 <!doctype html>
-<html lang='en'>
-	<head>
-		<meta charset='UTF-8' />
-		<meta name='viewport' content='width=device-width' />
-		<link rel='icon' type='image/svg+xml' href='/favicon.svg' />
-		<meta name='generator' content={Astro.generator} />
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <meta name="generator" content={Astro.generator} />
 
-		<title>{title}</title>
-		<meta name='description' content={description} />
-		<link rel='canonical' href={canonicalURL} />
+        <title>{title}</title>
+        <meta name="description" content={description} />
+        <link rel="canonical" href={canonicalURL} />
 
-		<meta http-equiv='Content-Security-Policy' content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:; font-src 'self'; base-uri 'self'; form-action 'self';" />
+        <meta
+            http-equiv="Content-Security-Policy"
+            content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; img-src 'self' data:; font-src 'self'; base-uri 'self'; form-action 'self';"
+        />
 
-		<meta property='og:type' content='website' />
-		<meta property='og:url' content={Astro.url} />
-		<meta property='og:title' content={title} />
-		<meta property='og:description' content={description} />
-		<meta property='og:image' content={new URL(image, Astro.url)} />
-
-		<meta property='twitter:card' content='summary_large_image' />
-		<meta property='twitter:url' content={Astro.url} />
-		<meta property='twitter:title' content={title} />
-		<meta property='twitter:description' content={description} />
-		<meta property='twitter:image' content={new URL(image, Astro.url)} />
-	</head>
-	<body class='bg-[#0b0c0d] text-[#e5e7eb] antialiased flex justify-center min-h-screen py-20 px-5'>
-		<div class='w-full max-w-[720px] border-x border-[#3f3f46] px-10'>
-			<slot />
-		</div>
-	</body>
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={Astro.url} />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:image" content={new URL(image, Astro.url)} />
+    </head>
+    <body
+        class="bg-[#0b0c0d] text-[#e5e7eb] antialiased flex justify-center min-h-screen py-20 px-5"
+    >
+        <div class="w-full max-w-[720px] border-x border-[#3f3f46] px-10">
+            <slot />
+        </div>
+    </body>
 </html>
 
 <style is:global>
-	::selection {
-		background: #64748b;
-		color: #fff;
-	}
+    ::selection {
+        background: #64748b;
+        color: #fff;
+    }
 </style>
