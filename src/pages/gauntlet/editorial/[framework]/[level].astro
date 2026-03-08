@@ -1,11 +1,20 @@
 ---
-import EditorialSwamp from '../../../components/gauntlet/EditorialSwamp.vue';
+import EditorialVue from '../../../../components/gauntlet/EditorialSwamp.vue';
+import EditorialReact from '../../../../components/gauntlet/react/EditorialSwamp.tsx';
+import EditorialSolid from '../../../../components/gauntlet/solid/EditorialSwamp.tsx';
+import { EditorialSwamp as LitComp } from '../../../../components/gauntlet/lit/EditorialSwamp.ts';
 
 export function getStaticPaths() {
-	return [{ params: { level: 'level-1' } }, { params: { level: 'level-2' } }];
+	return [
+		{ params: { framework: 'html', level: 'level-1' } },
+		{ params: { framework: 'vue', level: 'level-2' } },
+		{ params: { framework: 'react', level: 'level-2' } },
+		{ params: { framework: 'solid', level: 'level-2' } },
+		{ params: { framework: 'lit', level: 'level-2' } },
+	];
 }
 
-const { level } = Astro.params;
+const { framework, level } = Astro.params;
 
 const payload = {
 	title: 'The Quiet Collapse of the Attention Economy',
@@ -20,11 +29,11 @@ const payload = {
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
-		<title>Gauntlet – Editorial {level}</title>
+		<title>Gauntlet – Editorial {framework} {level}</title>
 	</head>
 	<body>
 		{
-			level === 'level-1' ? (
+			framework === 'html' && level === 'level-1' && (
 				<article>
 					<header>
 						<h1>{payload.title}</h1>
@@ -33,9 +42,12 @@ const payload = {
 					</header>
 					<p>{payload.body}</p>
 				</article>
-			) : (
-				<EditorialSwamp client:load />
 			)
 		}
+		
+		{framework === 'vue' && level === 'level-2' && <EditorialVue client:load />}
+		{framework === 'react' && level === 'level-2' && <EditorialReact client:load />}
+		{framework === 'solid' && level === 'level-2' && <EditorialSolid client:load />}
+		{framework === 'lit' && level === 'level-2' && <LitComp client:load />}
 	</body>
 </html>
