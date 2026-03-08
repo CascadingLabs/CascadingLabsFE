@@ -1,6 +1,7 @@
 // @ts-check
 
 import sitemap from '@astrojs/sitemap';
+import vue from '@astrojs/vue';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
 
@@ -8,7 +9,7 @@ import { defineConfig } from 'astro/config';
 export default defineConfig({
 	site: 'https://cascadinglabs.com',
 	output: 'static',
-	integrations: [sitemap()],
+	integrations: [sitemap(), vue()],
 
 	vite: {
 		plugins: [tailwindcss()],
