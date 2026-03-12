@@ -12,13 +12,7 @@ import { defineConfig } from 'astro/config';
 export default defineConfig({
 	site: 'https://cascadinglabs.com',
 	output: 'static',
-	integrations: [
-		sitemap(),
-		vue(),
-		react({ include: ['**/react/**'] }),
-		solidJs({ include: ['**/solid/**'] }),
-		lit(),
-	],
+	integrations: [],
 
 	vite: {
 		plugins: [tailwindcss()],
