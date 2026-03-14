@@ -20,27 +20,19 @@
 	},
 	"formatter": {
 		"enabled": true,
-		"formatWithErrors": false,
 		"indentStyle": "tab",
 		"indentWidth": 2,
-		"lineWidth": 80,
-		"attributePosition": "auto"
+		"lineWidth": 80
 	},
 	"linter": {
 		"enabled": true,
 		"rules": {
 			"recommended": true,
-			"complexity": {
-				"noUselessEmptyExport": "error"
-			},
 			"correctness": {
+				"noUnusedImports": "error",
 				"noUnusedVariables": "warn"
 			},
-			"nursery": {
-				"useSortedClasses": "error"
-			},
 			"style": {
-				"useBlockStatements": "error",
 				"useSelfClosingElements": "error"
 			},
 			"a11y": {
@@ -65,7 +57,8 @@
 						"useSelfClosingElements": "off"
 					},
 					"correctness": {
-						"noUnusedVariables": "off"
+						"noUnusedVariables": "off",
+						"noUnusedImports": "off"
 					}
 				}
 			}
