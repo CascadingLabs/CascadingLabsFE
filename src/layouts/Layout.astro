@@ -1,16 +1,16 @@
 ---
-import "../styles/global.css";
+import '../styles/global.css';
 
 const {
-    title = "Cascading Labs",
-    description = "We are building the future of data and algorithms.",
-    image = "/favicon.svg",
+	title = 'Cascading Labs',
+	description = 'We are building the future of data and algorithms.',
+	image = '/favicon.svg',
 } = Astro.props;
 
 // Create the canonical URL
 const canonicalURL = new URL(
-    Astro.url.pathname,
-    Astro.site || "https://cascadinglabs.com",
+	Astro.url.pathname,
+	Astro.site || 'https://cascadinglabs.com',
 );
 ---
 
