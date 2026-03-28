@@ -1,34 +1,57 @@
 # Yosoi
 
-> AI-powered CSS selector discovery for web scraping. Give Yosoi a URL and it uses an LLM once to automatically discover the best CSS selectors for extracting structured data from any site.
+> AI-powered CSS selector discovery for web scraping. Discover selectors once with an LLM, cache them locally, and scrape forever at zero cost.
 
-- Fast — 3 seconds to discover selectors per domain
-- Cheap — ~$0.001 per domain (one-time cost)
-- Reusable — selectors are cached locally; scrape thousands of articles for free after discovery
+Yosoi stands for "You Only Scrape Once (iteratively)." It uses an LLM to identify stable CSS selectors for any site, validates them, and caches the result. Future scrapes reuse the cached selectors with no LLM call. When selectors go stale, Yosoi re-discovers only the broken fields — not the whole contract.
 
-## Docs
+- Python 3.10+, async-native, Pydantic contracts
+- 25+ LLM providers supported (Groq, Gemini, OpenAI, Anthropic, Ollama, and more)
+- Output formats: JSON, CSV, Markdown, JSONL, NDJSON, XLSX, Parquet
 
-- [Overview](/yosoi)
-- [Installation](/yosoi/installation)
-- [Quick Start](/yosoi/quickstart)
-- [Configuration](/yosoi/configuration)
+## Getting Started
+
+- [Overview](/yosoi): Introduction, how it works, and FAQs
+- [Installation](/yosoi/installation): Install from PyPI or source, set up API keys
+- [Quick Start](/yosoi/quickstart): CLI and Python API examples to start scraping in minutes
+- [Configuration](/yosoi/configuration): Environment variables, local storage layout, and observability
+- [Roadmap](/roadmap): Planned features including DOM-enabled scraping and distributed caching
+- [Contributing](/contributing): Dev setup, tools, commit guidelines, and maintainers
 
 ## Guides
 
-- [Multi-Item Extraction](/guides/multi-item)
-- [List Fields](/guides/list-fields)
-- [Validators](/guides/validators)
-- [Custom Types](/guides/custom-types)
-- [Concurrent Scraping](/guides/concurrent)
+- [Understanding the Web](/guides/understanding-the-web): How HTML, the DOM, and JS frameworks affect what Yosoi can extract
+- [Selectors](/guides/selectors): How Yosoi discovers, stores, and reuses selectors across scrapes
+- [Multi-Item Extraction](/guides/multi-item): Extract multiple items from listing and catalog pages
+- [List Fields](/guides/list-fields): Extract multiple values per field using list[T] annotations
+- [Validators](/guides/validators): Transform and normalise extracted values with built-in coercions and custom validators
+- [Custom Types](/guides/custom-types): Extend Yosoi with your own semantic field types via @register_coercion or YosoiType
+- [Concurrent Scraping](/guides/concurrent): Process multiple URLs in parallel with Pipeline.process_urls()
+- [Proxying](/guides/proxying): Using proxies with Yosoi for distributed scraping
+- [Scaling](/guides/scaling): Running Yosoi at scale with queues, observability, and distributed storage
+
+## Examples
+
+- [Examples Overview](/guides/examples): All examples use QScrape test sites for stability
+- [News Portal](/guides/examples/news-portal): Extract articles from a news portal
+- [E-Commerce Catalogue](/guides/examples/e-commerce): Extract products from an e-commerce catalogue
+- [Sports Scores](/guides/examples/sports-scores): Extract sports scores
+- [Concurrent Scraping](/guides/examples/concurrent): Scrape multiple sites concurrently
+- [JSON Output](/guides/examples/json-output): Save extraction results to structured files
 
 ## API Reference
 
-- [Classes](/reference/classes)
-- [Functions](/reference/functions)
-- [Types](/reference/types)
-- [Provider Helpers](/reference/helpers)
+- [Classes](/reference/classes): Contract, Pipeline, YosoiConfig, LLMConfig, and more
+- [Functions](/reference/functions): auto_config, css, xpath, regex, jsonld, discover, register_coercion, resolve_contract
+- [Types](/reference/types): Field, Title, Author, Price, Rating, Url, Datetime, BodyText, YosoiType
+- [Provider Helpers](/reference/helpers): Quick config functions for 25+ LLM providers
+
+## QScrape
+
+- [QScrape Overview](/qscrape): Fictional test websites for benchmarking scrapers across difficulty levels
+- [qscrape.dev](https://qscrape.dev): Live test sites
 
 ## Links
 
 - [GitHub](https://github.com/CascadingLabs/Yosoi)
-- [QScrape](https://qscrape.dev)
+- [PyPI](https://pypi.org/project/yosoi/)
+- [QScrape GitHub](https://github.com/CascadingLabs/QScrape)
