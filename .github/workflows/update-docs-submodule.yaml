@@ -28,16 +28,42 @@ jobs:
           git checkout main
           git pull origin main
 
-      - name: Commit submodule update
+      - name: Add version entry to src/versions.ts
+        if: ${{ github.event.client_payload.tag != '' }}
         env:
           TAG: ${{ github.event.client_payload.tag }}
         run: |
-          git add docs/yosoi-docs
+          # Strip leading 'v' for the label; use same string as URL slug
+          LABEL="${TAG#v}"
+          SLUG="${LABEL}"
+
+          echo "Archiving version: slug=${SLUG} label=${LABEL}"
+
+          node -e "
+            const fs = require('fs');
+            const file = 'src/versions.ts';
+            let content = fs.readFileSync(file, 'utf8');
+            const entry = \`\t{ slug: '${SLUG}', label: '${LABEL}' },\n\`;
+            const marker = 'export const versions: Version[] = [';
+            const idx = content.indexOf(marker);
+            if (idx === -1) { console.error('Could not find versions array'); process.exit(1); }
+            const insertAt = content.indexOf('\n', idx) + 1;
+            content = content.slice(0, insertAt) + entry + content.slice(insertAt);
+            fs.writeFileSync(file, content);
+            console.log('Inserted version entry for ${SLUG}');
+          "
+
+      - name: Commit updates
+        env:
+          TAG: ${{ github.event.client_payload.tag }}
+        run: |
+          git add docs/yosoi-docs src/versions.ts
 
           if git diff --cached --quiet; then
-            echo "Submodule already up to date — nothing to commit"
+            echo "Nothing changed — already up to date"
           else
-            git commit -m "chore: update yosoi-docs submodule to ${TAG}"
+            MSG="chore: update yosoi-docs submodule${TAG:+ to ${TAG}}"
+            git commit -m "$MSG"
             git push
-            echo "Pushed submodule update"
+            echo "Pushed update"
           fi

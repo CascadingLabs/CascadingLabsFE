@@ -53,6 +53,15 @@ site-search {
     height: 1rem;
 }
 
+/* Inline content GitHub icons — match nav bar size and color */
+.sl-markdown-content a svg {
+    width: 1rem;
+    height: 1rem;
+    fill: currentColor;
+    color: var(--sl-color-text-accent);
+    vertical-align: middle;
+}
+
 /* GitHub mark icon for GitHub sidebar item */
 .sl-github-link::after {
     content: '';

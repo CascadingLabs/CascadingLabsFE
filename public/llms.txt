@@ -1,0 +1,12 @@
+# Cascading Labs
+
+> Cascading Labs is building the future of data and algorithms, starting with web data and finance.
+
+## Projects
+
+- [Yosoi](/yosoi) — AI-powered CSS selector discovery for web scraping. Give Yosoi a URL and it uses an LLM to automatically discover the best CSS selectors for extracting headlines, authors, dates, body text, and related content from any site.
+
+## Links
+
+- [GitHub](https://github.com/CascadingLabs)
+- [Yosoi Docs](/yosoi)

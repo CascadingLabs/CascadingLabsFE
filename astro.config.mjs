@@ -35,10 +35,28 @@ export default defineConfig({
 					],
 				},
 				{
+					label: 'Guides',
+					items: [
+						{ label: 'Multi-Item Extraction', slug: 'guides/multi-item' },
+						{ label: 'List Fields', slug: 'guides/list-fields' },
+						{ label: 'Validators', slug: 'guides/validators' },
+						{ label: 'Custom Types', slug: 'guides/custom-types' },
+						{ label: 'Concurrent Scraping', slug: 'guides/concurrent' },
+					],
+				},
+				{
 					label: 'Reference',
 					items: [
 						{ label: 'Configuration', slug: 'yosoi/configuration' },
-						{ label: 'API Reference', slug: 'api-reference' },
+						{
+							label: 'API Reference',
+							items: [
+								{ label: 'Classes', slug: 'reference/classes' },
+								{ label: 'Functions', slug: 'reference/functions' },
+								{ label: 'Types', slug: 'reference/types' },
+								{ label: 'Provider Helpers', slug: 'reference/helpers' },
+							],
+						},
 					],
 				},
 				{

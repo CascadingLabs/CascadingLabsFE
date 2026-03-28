@@ -1,5 +1,6 @@
 ---
 import Default from '@astrojs/starlight/components/PageFrame.astro';
+import VersionSelect from './VersionSelect.astro';
 ---
 
 <Default {...Astro.props}>
@@ -7,6 +8,8 @@ import Default from '@astrojs/starlight/components/PageFrame.astro';
 	<slot name="sidebar" slot="sidebar" />
 	<slot />
 </Default>
+
+<VersionSelect />
 
 <!-- Hidden Google Translate initialisation target -->
 <div id="google_translate_element" style="display:none"></div>
