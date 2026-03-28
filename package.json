@@ -19,9 +19,11 @@
 		]
 	},
 	"dependencies": {
+		"@astrojs/compiler-rs": "^0.1.6",
 		"@astrojs/sitemap": "^3.7.0",
+		"@astrojs/starlight": "^0.38.2",
 		"@tailwindcss/vite": "^4.1.18",
-		"astro": "^5.17.1",
+		"astro": "^6.1.1",
 		"tailwindcss": "^4.1.18"
 	},
 	"devDependencies": {

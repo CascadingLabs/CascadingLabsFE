@@ -1,0 +1,43 @@
+name: Update Yosoi-Docs Submodule
+
+on:
+  repository_dispatch:
+    types: [update-yosoi-docs]
+
+jobs:
+  update-submodule:
+    name: Bump docs/yosoi-docs to latest
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout CascadingLabsFE (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.DOCS_DEPLOY_TOKEN }}
+
+      - name: Pull latest Yosoi-Docs
+        run: |
+          git config --global user.name  "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          cd docs/yosoi-docs
+          git fetch origin
+          git checkout main
+          git pull origin main
+
+      - name: Commit submodule update
+        env:
+          TAG: ${{ github.event.client_payload.tag }}
+        run: |
+          git add docs/yosoi-docs
+
+          if git diff --cached --quiet; then
+            echo "Submodule already up to date — nothing to commit"
+          else
+            git commit -m "chore: update yosoi-docs submodule to ${TAG}"
+            git push
+            echo "Pushed submodule update"
+          fi

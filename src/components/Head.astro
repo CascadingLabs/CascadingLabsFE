@@ -1,0 +1,90 @@
+---
+import Default from '@astrojs/starlight/components/Head.astro';
+---
+
+<Default {...Astro.props}><slot /></Default>
+
+<!-- Prevent browser's built-in translate from triggering (we handle translation ourselves) -->
+<meta name="google" content="notranslate" />
+
+<script is:inline>
+	function googleTranslateElementInit() {
+		new google.translate.TranslateElement(
+			{
+				pageLanguage: 'en',
+				layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL,
+				autoDisplay: false,
+			},
+			'google_translate_element',
+		);
+	}
+</script>
+<script
+	is:inline
+	src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+></script>
+
+<style is:global>
+	.anchor-copy-btn {
+		opacity: 0;
+		background: none;
+		border: none;
+		cursor: pointer;
+		padding: 0 0.3em;
+		margin-left: 0.25em;
+		color: var(--sl-color-text-accent);
+		vertical-align: middle;
+		transition: opacity 0.15s ease;
+		line-height: 1;
+		border-radius: 4px;
+	}
+
+	.anchor-copy-btn svg {
+		display: inline-block;
+		vertical-align: middle;
+		width: 0.75em;
+		height: 0.75em;
+	}
+
+	.sl-markdown-content h2:hover .anchor-copy-btn,
+	.sl-markdown-content h3:hover .anchor-copy-btn,
+	.sl-markdown-content h4:hover .anchor-copy-btn,
+	.anchor-copy-btn:focus-visible {
+		opacity: 1;
+	}
+
+	.anchor-copy-btn.copied {
+		color: var(--sl-color-green, #4ade80);
+	}
+</style>
+
+<script is:inline>
+	function initAnchorCopyButtons() {
+		const content = document.querySelector('.sl-markdown-content');
+		if (!content) return;
+
+		content.querySelectorAll('.anchor-copy-btn').forEach((b) => b.remove());
+
+		content.querySelectorAll('h2[id], h3[id], h4[id]').forEach((heading) => {
+			const btn = document.createElement('button');
+			btn.className = 'anchor-copy-btn';
+			btn.setAttribute('aria-label', 'Copy link to section');
+			btn.innerHTML =
+				'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
+
+			btn.addEventListener('click', () => {
+				const url =
+					location.origin + location.pathname + '#' + heading.id;
+				navigator.clipboard.writeText(url).then(() => {
+					btn.classList.add('copied');
+					setTimeout(() => btn.classList.remove('copied'), 1500);
+				});
+			});
+
+			heading.appendChild(btn);
+		});
+	}
+
+	document.addEventListener('DOMContentLoaded', initAnchorCopyButtons);
+	document.addEventListener('astro:page-load', initAnchorCopyButtons);
+</script>

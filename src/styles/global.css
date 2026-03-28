@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+:root {
+    --sl-content-width: 85rem;
+}
+
+.sl-markdown-content .sl-anchor-link {
+    vertical-align: middle;
+}
+
+.sl-markdown-content .sl-anchor-icon > svg {
+    vertical-align: middle;
+    transform: none;
+}
