@@ -48,12 +48,12 @@ export default defineConfig({
 						{
 							label: 'qscrape.dev',
 							link: 'https://qscrape.dev',
-							attrs: { target: '_blank' },
+							attrs: { target: '_blank', class: 'sl-external-link' },
 						},
 						{
 							label: 'GitHub',
 							link: 'https://github.com/CascadingLabs/QScrape',
-							attrs: { target: '_blank' },
+							attrs: { target: '_blank', class: 'sl-github-link' },
 						},
 					],
 				},
