@@ -4,6 +4,7 @@ import solidJs from '@astrojs/solid-js';
 import starlight from '@astrojs/starlight';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
+import remarkCallouts from './src/plugins/remark-callouts.mjs';
 
 // https://astro.build/config
 export default defineConfig({
@@ -134,6 +135,10 @@ export default defineConfig({
 
 	experimental: {
 		rustCompiler: true,
+	},
+
+	markdown: {
+		remarkPlugins: [remarkCallouts],
 	},
 
 	vite: {

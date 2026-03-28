@@ -408,6 +408,70 @@ site-search {
     background-color: #4ade80 !important;
 }
 
+/* ── Callouts (>[!Note], >[!Tip], etc.) ──────────────── */
+.cl-callout {
+    border: 1px solid var(--sl-color-hairline);
+    border-inline-start: 3px solid var(--cl-accent);
+    padding: 0.75rem 1rem;
+    margin-block: 1rem;
+    background: var(--sl-color-bg-sidebar);
+    font-size: var(--sl-text-sm);
+}
+
+.cl-callout__label {
+    font-weight: 600;
+    margin-block: 0 0.25rem;
+    color: var(--cl-accent-text);
+    text-transform: uppercase;
+    font-size: 0.75em;
+    letter-spacing: 0.05em;
+}
+
+.cl-callout > p:last-child {
+    margin-block-end: 0;
+}
+
+.cl-callout--tip {
+    border-inline-start-color: #4ade80;
+}
+
+.cl-callout--tip .cl-callout__label {
+    color: #4ade80;
+}
+
+.cl-callout--warning {
+    border-inline-start-color: #facc15;
+}
+
+.cl-callout--warning .cl-callout__label {
+    color: #facc15;
+}
+
+.cl-callout--caution {
+    border-inline-start-color: #f87171;
+}
+
+.cl-callout--caution .cl-callout__label {
+    color: #f87171;
+}
+
+.cl-callout--important {
+    border-inline-start-color: #c084fc;
+}
+
+.cl-callout--important .cl-callout__label {
+    color: #c084fc;
+}
+
+/* ── Roadmap cards ───────────────────────────────────── */
+.roadmap-section .card {
+    margin-block: 0.5rem;
+}
+
+.roadmap-section .sl-link-card {
+    margin-block-start: 0.75rem;
+}
+
 /* ── Landing page link style ─────────────────────────── */
 .cl-link {
     color: var(--cl-text-dim);

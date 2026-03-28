@@ -2,43 +2,35 @@ import { type Component, createSignal, onCleanup, onMount } from 'solid-js';
 import { useStarlightTheme } from './useStarlightTheme';
 
 const dark = {
-	axis: '#444444',
-	axisLabel: '#999999',
-	hint: '#666666',
-	grid: '#282828',
-	zone: 'rgba(44, 82, 130, 0.18)',
+	line: '#444444',
 	dot: '#777777',
 	dotYosoi: '#5b8cc7',
 	ringYosoi: '#5b8cc7',
 	label: '#cccccc',
 	sub: '#888888',
-	labelYosoi: '#90b8e0',
-	subYosoi: '#5b8cc7',
 };
 
 const light = {
-	axis: '#cccccc',
-	axisLabel: '#666666',
-	hint: '#aaaaaa',
-	grid: '#eeeeee',
-	zone: 'rgba(44, 82, 130, 0.12)',
+	line: '#cccccc',
 	dot: '#888888',
 	dotYosoi: '#2c5282',
 	ringYosoi: '#2c5282',
 	label: '#333333',
 	sub: '#777777',
-	labelYosoi: '#1e3a5f',
-	subYosoi: '#2c5282',
 };
 
-/* Plot area */
-const PL = 80;
-const PT = 40;
-const PW = 550;
-const PH = 300;
+const VW = 700;
+const VH = 175;
+const LINE_Y = 80;
+const LINE_L = 90;
+const LINE_R = 610;
+const LEFT_X = LINE_L;
+const CENTER_X = 350;
+const RIGHT_X = LINE_R;
 
-const plotX = (frac: number) => PL + frac * PW;
-const plotY = (frac: number) => PT + (1 - frac) * PH;
+const HEADER_Y = LINE_Y - 55;
+const SUB1_Y = LINE_Y + 26;
+const SUB2_Y = LINE_Y + 42;
 
 const CostEffortChart: Component = () => {
 	const [scale, setScale] = createSignal(1);
@@ -48,7 +40,7 @@ const CostEffortChart: Component = () => {
 
 	onMount(() => {
 		const ro = new ResizeObserver((entries) => {
-			for (const e of entries) setScale(e.contentRect.width / 700);
+			for (const e of entries) setScale(e.contentRect.width / VW);
 		});
 		if (containerRef) ro.observe(containerRef);
 		onCleanup(() => ro.disconnect());
@@ -60,20 +52,20 @@ const CostEffortChart: Component = () => {
 			style={{
 				position: 'relative',
 				width: '100%',
-				'max-width': '700px',
+				'max-width': `${VW}px`,
 				margin: '2rem auto',
 			}}
 		>
 			<div
 				style={{
 					position: 'relative',
-					'padding-bottom': '57.14%',
+					'padding-bottom': `${(VH / VW) * 100}%`,
 					overflow: 'hidden',
 				}}
 			>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
-					viewBox="0 0 700 400"
+					viewBox={`0 0 ${VW} ${VH}`}
 					style={{
 						position: 'absolute',
 						inset: '0',
@@ -81,71 +73,37 @@ const CostEffortChart: Component = () => {
 						height: '100%',
 					}}
 				>
-					{/* Ideal zone — bottom-left quadrant */}
-					<rect
-						x={PL}
-						y={PT + PH * 0.5}
-						width={PW * 0.5}
-						height={PH * 0.5}
-						fill={t().zone}
-					/>
-
-					{/* Grid midlines */}
+					{/* Continuum line */}
 					<line
-						x1={PL}
-						y1={PT + PH * 0.5}
-						x2={PL + PW}
-						y2={PT + PH * 0.5}
-						stroke={t().grid}
-						stroke-width="1"
-					/>
-					<line
-						x1={PL + PW * 0.5}
-						y1={PT}
-						x2={PL + PW * 0.5}
-						y2={PT + PH}
-						stroke={t().grid}
-						stroke-width="1"
+						x1={LINE_L}
+						y1={LINE_Y}
+						x2={LINE_R}
+						y2={LINE_Y}
+						stroke={t().line}
+						stroke-width="2"
+						stroke-linecap="round"
 					/>
 
-					{/* Axes */}
-					<line
-						x1={PL}
-						y1={PT + PH}
-						x2={PL + PW}
-						y2={PT + PH}
-						stroke={t().axis}
-						stroke-width="1.5"
-					/>
-					<line
-						x1={PL}
-						y1={PT}
-						x2={PL}
-						y2={PT + PH}
-						stroke={t().axis}
-						stroke-width="1.5"
-					/>
+					{/* Scraping APIs dot — left end */}
+					<circle cx={LEFT_X} cy={LINE_Y} r="6" fill={t().dot} />
 
-					{/* LLM Scraping APIs — low effort, high cost */}
-					<circle cx={plotX(0.15)} cy={plotY(0.85)} r="5" fill={t().dot} />
+					{/* Custom Scraping dot — right end */}
+					<circle cx={RIGHT_X} cy={LINE_Y} r="6" fill={t().dot} />
 
-					{/* Bespoke Scraping — high effort, medium cost */}
-					<circle cx={plotX(0.8)} cy={plotY(0.4)} r="5" fill={t().dot} />
-
-					{/* Yosoi — low effort, near-zero cost */}
+					{/* Yosoi dot with ring */}
 					<circle
-						cx={plotX(0.15)}
-						cy={plotY(0.08)}
-						r="16"
+						cx={CENTER_X}
+						cy={LINE_Y}
+						r="14"
 						fill="none"
 						stroke={t().ringYosoi}
 						stroke-width="1.5"
 						opacity="0.35"
 					/>
-					<circle cx={plotX(0.15)} cy={plotY(0.08)} r="7" fill={t().dotYosoi} />
+					<circle cx={CENTER_X} cy={LINE_Y} r="7" fill={t().dotYosoi} />
 				</svg>
 
-				{/* HTML text overlay — translatable by Google Translate */}
+				{/* HTML text overlay */}
 				<div
 					style={{
 						position: 'absolute',
@@ -158,160 +116,115 @@ const CostEffortChart: Component = () => {
 							position: 'absolute',
 							top: '0',
 							left: '0',
-							width: '700px',
-							height: '400px',
+							width: `${VW}px`,
+							height: `${VH}px`,
 							'transform-origin': 'top left',
 							transform: `scale(${scale()})`,
 							'font-family': 'system-ui, -apple-system, sans-serif',
 						}}
 					>
-						{/* X-axis */}
+						{/* Scraping APIs — header above, sub below */}
 						<span
 							style={{
 								position: 'absolute',
-								left: `${PL + PW / 2}px`,
-								top: `${PT + PH + 20}px`,
+								left: `${LEFT_X}px`,
+								top: `${HEADER_Y}px`,
 								transform: 'translateX(-50%)',
-								color: t().axisLabel,
-								'font-size': '12px',
-								'font-weight': '500',
+								color: t().label,
+								'font-size': '14px',
+								'font-weight': '600',
 								'text-align': 'center',
-								'max-width': `${PW}px`,
-							}}
-						>
-							Manual Effort &amp; Maintenance
-						</span>
-						<span
-							style={{
-								position: 'absolute',
-								left: `${PL + 10}px`,
-								top: `${PT + PH + 6}px`,
-								color: t().hint,
-								'font-size': '10px',
-							}}
-						>
-							Low
-						</span>
-						<span
-							style={{
-								position: 'absolute',
-								left: `${PL + PW - 28}px`,
-								top: `${PT + PH + 6}px`,
-								color: t().hint,
-								'font-size': '10px',
-							}}
-						>
-							High
-						</span>
-
-						{/* Y-axis */}
-						<span
-							style={{
-								position: 'absolute',
-								left: `${PL - 46}px`,
-								top: `${PT + PH / 2}px`,
-								transform: 'translate(-50%, -50%) rotate(-90deg)',
-								color: t().axisLabel,
-								'font-size': '12px',
-								'font-weight': '500',
 								'white-space': 'nowrap',
 							}}
 						>
-							Cost at Scale
+							Scraping APIs
 						</span>
 						<span
 							style={{
 								position: 'absolute',
-								left: `${PL - 20}px`,
-								top: `${PT + PH - 15}px`,
+								left: `${LEFT_X}px`,
+								top: `${SUB1_Y}px`,
 								transform: 'translateX(-50%)',
-								color: t().hint,
-								'font-size': '10px',
-							}}
-						>
-							Low
-						</span>
-						<span
-							style={{
-								position: 'absolute',
-								left: `${PL - 20}px`,
-								top: `${PT + 5}px`,
-								transform: 'translateX(-50%)',
-								color: t().hint,
-								'font-size': '10px',
-							}}
-						>
-							High
-						</span>
-
-						{/* LLM Scraping APIs */}
-						<span
-							style={{
-								position: 'absolute',
-								left: `${plotX(0.15) + 18}px`,
-								top: `${plotY(0.85) - 10}px`,
-								color: t().label,
-								'font-size': '13px',
-								'font-weight': '600',
-								'max-width': '180px',
-							}}
-						>
-							LLM Scraping APIs
-						</span>
-						<span
-							style={{
-								position: 'absolute',
-								left: `${plotX(0.15) + 18}px`,
-								top: `${plotY(0.85) + 7}px`,
 								color: t().sub,
 								'font-size': '11px',
-								'max-width': '180px',
+								'text-align': 'center',
+								'white-space': 'nowrap',
 							}}
 						>
-							Expensive per page
-						</span>
-
-						{/* Bespoke Scraping */}
-						<span
-							style={{
-								position: 'absolute',
-								left: `${plotX(0.8) - 18}px`,
-								top: `${plotY(0.4) - 10}px`,
-								transform: 'translateX(-100%)',
-								color: t().label,
-								'font-size': '13px',
-								'font-weight': '600',
-								'max-width': '180px',
-								'text-align': 'right',
-							}}
-						>
-							Bespoke Scraping
+							Expensive at scale
 						</span>
 						<span
 							style={{
 								position: 'absolute',
-								left: `${plotX(0.8) - 18}px`,
-								top: `${plotY(0.4) + 7}px`,
-								transform: 'translateX(-100%)',
+								left: `${LEFT_X}px`,
+								top: `${SUB2_Y}px`,
+								transform: 'translateX(-50%)',
 								color: t().sub,
 								'font-size': '11px',
-								'max-width': '180px',
-								'text-align': 'right',
+								'text-align': 'center',
+								'white-space': 'nowrap',
 							}}
 						>
-							Breaks on site redesigns
+							Easy to use
 						</span>
 
-						{/* Yosoi */}
+						{/* Custom Scraping — header above, sub below */}
 						<span
 							style={{
 								position: 'absolute',
-								left: `${plotX(0.15) + 26}px`,
-								top: `${plotY(0.08) - 38}px`,
-								color: t().labelYosoi,
+								left: `${RIGHT_X}px`,
+								top: `${HEADER_Y}px`,
+								transform: 'translateX(-50%)',
+								color: t().label,
 								'font-size': '14px',
-								'font-weight': '700',
-								'max-width': '180px',
+								'font-weight': '600',
+								'text-align': 'center',
+								'white-space': 'nowrap',
+							}}
+						>
+							Custom Scraping
+						</span>
+						<span
+							style={{
+								position: 'absolute',
+								left: `${RIGHT_X}px`,
+								top: `${SUB1_Y}px`,
+								transform: 'translateX(-50%)',
+								color: t().sub,
+								'font-size': '11px',
+								'text-align': 'center',
+								'white-space': 'nowrap',
+							}}
+						>
+							Cheap at scale
+						</span>
+						<span
+							style={{
+								position: 'absolute',
+								left: `${RIGHT_X}px`,
+								top: `${SUB2_Y}px`,
+								transform: 'translateX(-50%)',
+								color: t().sub,
+								'font-size': '11px',
+								'text-align': 'center',
+								'white-space': 'nowrap',
+							}}
+						>
+							Effortful and flaky
+						</span>
+
+						{/* Yosoi — header above, sub below */}
+						<span
+							style={{
+								position: 'absolute',
+								left: `${CENTER_X}px`,
+								top: `${HEADER_Y}px`,
+								transform: 'translateX(-50%)',
+								color: t().label,
+								'font-size': '14px',
+								'font-weight': '600',
+								'text-align': 'center',
+								'white-space': 'nowrap',
 							}}
 						>
 							Yosoi
@@ -319,14 +232,30 @@ const CostEffortChart: Component = () => {
 						<span
 							style={{
 								position: 'absolute',
-								left: `${plotX(0.15) + 26}px`,
-								top: `${plotY(0.08) - 19}px`,
-								color: t().subYosoi,
+								left: `${CENTER_X}px`,
+								top: `${SUB1_Y}px`,
+								transform: 'translateX(-50%)',
+								color: t().sub,
 								'font-size': '11px',
-								'max-width': '180px',
+								'text-align': 'center',
+								'white-space': 'nowrap',
 							}}
 						>
-							Optimal cost
+							Cheap at scale
+						</span>
+						<span
+							style={{
+								position: 'absolute',
+								left: `${CENTER_X}px`,
+								top: `${SUB2_Y}px`,
+								transform: 'translateX(-50%)',
+								color: t().sub,
+								'font-size': '11px',
+								'text-align': 'center',
+								'white-space': 'nowrap',
+							}}
+						>
+							Easy to use
 						</span>
 					</div>
 				</div>

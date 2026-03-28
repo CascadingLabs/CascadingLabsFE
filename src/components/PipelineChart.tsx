@@ -66,7 +66,7 @@ interface StepDef {
 const leftSteps: StepDef[] = [
 	{ label: 'Define Contract', type: 'normal' },
 	{ label: 'Fetch HTML', type: 'normal' },
-	{ label: 'Discover Selectors', type: 'accent' },
+	{ label: 'AI Discovery', type: 'accent' },
 	{ label: 'Verify & Cache', type: 'normal' },
 	{ label: 'Extract Data', type: 'normal' },
 	{ label: 'Structured Output', type: 'output' },
@@ -274,15 +274,6 @@ const PipelineChart: Component = () => {
 						stroke-dasharray="6,3"
 						marker-end="url(#seqArrowAccent)"
 					/>
-
-					{/* AI badge circle on left row 2 */}
-					<circle
-						cx={LX + BW / 2 - 22}
-						cy={rowY(2) + 13}
-						r="9"
-						fill={t().aiBg}
-						opacity="0.25"
-					/>
 				</svg>
 
 				{/* HTML text overlay — translatable by Google Translate */}
@@ -359,22 +350,6 @@ const PipelineChart: Component = () => {
 								{step.label}
 							</span>
 						))}
-
-						{/* AI badge text */}
-						<span
-							style={{
-								position: 'absolute',
-								left: `${LX + BW / 2 - 22}px`,
-								top: `${rowY(2) - 7}px`,
-								transform: 'translate(-50%, -50%)',
-								color: t().accent,
-								'font-size': '10px',
-								'font-weight': '600',
-								'white-space': 'nowrap',
-							}}
-						>
-							AI
-						</span>
 
 						{/* Right step labels */}
 						{rightSteps.map((step, i) => {
