@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Outfit:wght@100..900&display=swap");
+@import "tailwindcss";
 
 body {
     font-family: "Outfit", sans-serif;
@@ -44,6 +44,90 @@ site-search {
     mask-repeat: no-repeat;
     -webkit-mask-size: contain;
     mask-size: contain;
+}
+
+/* FAQ accordion cards */
+.sl-markdown-content details {
+    border: 1px solid var(--sl-color-hairline);
+    border-radius: 0.5rem;
+    margin-block: 0.5rem;
+    overflow: hidden;
+    background: var(--sl-color-bg-sidebar);
+    padding-inline-start: 0;
+}
+
+.sl-markdown-content details + details {
+    margin-block-start: 0.375rem;
+}
+
+.sl-markdown-content details summary {
+    cursor: pointer;
+    padding: 0.875rem 1rem;
+    font-weight: 600;
+    font-size: var(--sl-text-sm);
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    user-select: none;
+    color: var(--sl-color-text);
+    transition: background 0.15s ease;
+}
+
+.sl-markdown-content details summary:hover {
+    background: var(--sl-color-bg-inline-code);
+}
+
+.sl-markdown-content details summary::-webkit-details-marker {
+    display: none;
+}
+
+.sl-markdown-content details summary::marker {
+    display: none;
+    content: '';
+}
+
+.sl-markdown-content details summary::before {
+    display: none;
+}
+
+.sl-markdown-content details summary::after {
+    content: '';
+    flex-shrink: 0;
+    width: 1rem;
+    height: 1rem;
+    opacity: 0.6;
+    background-color: currentColor;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    transition: transform 0.2s ease;
+}
+
+.sl-markdown-content details[open] > summary::after {
+    transform: rotate(180deg);
+}
+
+.sl-markdown-content details[open] > summary {
+    border-bottom: 1px solid var(--sl-color-hairline);
+}
+
+.sl-markdown-content details > :not(summary) {
+    padding-inline: 1rem;
+    margin-inline: 0;
+    border-inline-start: none;
+}
+
+.sl-markdown-content details > :not(summary):first-of-type {
+    margin-block-start: 0.75rem;
+}
+
+.sl-markdown-content details > :not(summary):last-child {
+    margin-block-end: 0.75rem;
 }
 
 /* Normalize header icon sizes */

@@ -10,6 +10,9 @@ export default defineConfig({
 	output: 'static',
 	integrations: [
 		starlight({
+			editLink: {
+				baseUrl: 'https://github.com/CascadingLabs/Yosoi-Docs/edit/main/',
+			},
 			components: {
 				SiteTitle: './src/components/SiteTitle.astro',
 				Head: './src/components/Head.astro',
@@ -32,16 +35,30 @@ export default defineConfig({
 						{ label: 'Overview', slug: 'yosoi' },
 						{ label: 'Installation', slug: 'yosoi/installation' },
 						{ label: 'Quick Start', slug: 'yosoi/quickstart' },
+						{ label: 'Roadmap', slug: 'roadmap' },
 					],
 				},
 				{
 					label: 'Guides',
 					items: [
+						{
+							label: 'Understanding the Web',
+							slug: 'guides/understanding-the-web',
+						},
+						{ label: 'Selectors', slug: 'guides/selectors' },
 						{ label: 'Multi-Item Extraction', slug: 'guides/multi-item' },
 						{ label: 'List Fields', slug: 'guides/list-fields' },
 						{ label: 'Validators', slug: 'guides/validators' },
 						{ label: 'Custom Types', slug: 'guides/custom-types' },
 						{ label: 'Concurrent Scraping', slug: 'guides/concurrent' },
+						{ label: 'Proxying', slug: 'guides/proxying' },
+						{ label: 'Scaling', slug: 'guides/scaling' },
+						{
+							label: 'A3Nodes',
+							slug: 'guides/a3nodes',
+							badge: { text: 'Beta', variant: 'caution' },
+						},
+						{ label: 'Examples', slug: 'guides/examples' },
 					],
 				},
 				{
