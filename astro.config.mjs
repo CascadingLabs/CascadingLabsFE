@@ -1,5 +1,6 @@
 // @ts-check
 
+import solidJs from '@astrojs/solid-js';
 import starlight from '@astrojs/starlight';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
@@ -9,6 +10,7 @@ export default defineConfig({
 	site: 'https://cascadinglabs.com',
 	output: 'static',
 	integrations: [
+		solidJs(),
 		starlight({
 			editLink: {
 				baseUrl: 'https://github.com/CascadingLabs/Yosoi-Docs/edit/main/',
@@ -20,6 +22,7 @@ export default defineConfig({
 				PageFrame: './src/components/PageFrame.astro',
 				ThemeSelect: './src/components/ThemeSelect.astro',
 			},
+			favicon: '/yosoi-favicon.svg',
 			title: 'Yosoi',
 			description: 'AI-powered CSS selector discovery for web scraping.',
 			social: [
@@ -42,6 +45,7 @@ export default defineConfig({
 				},
 				{
 					label: 'Guides',
+					collapsed: true,
 					items: [
 						{
 							label: 'Understanding the Web',
@@ -57,6 +61,7 @@ export default defineConfig({
 						{ label: 'Scaling', slug: 'guides/scaling' },
 						{
 							label: 'Examples',
+							collapsed: true,
 							items: [
 								{ label: 'Overview', slug: 'guides/examples' },
 								{ label: 'News Portal', slug: 'guides/examples/news-portal' },
@@ -83,6 +88,7 @@ export default defineConfig({
 				},
 				{
 					label: 'Reference',
+					collapsed: true,
 					items: [
 						{ label: 'Configuration', slug: 'yosoi/configuration' },
 						{
@@ -92,6 +98,10 @@ export default defineConfig({
 								{ label: 'Functions', slug: 'reference/functions' },
 								{ label: 'Types', slug: 'reference/types' },
 								{ label: 'Provider Helpers', slug: 'reference/helpers' },
+								{
+									label: 'Selector Cache Types',
+									slug: 'reference/selector-cache',
+								},
 							],
 						},
 					],

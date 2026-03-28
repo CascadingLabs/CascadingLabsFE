@@ -34,3 +34,9 @@ jobs:
 
       - name: Astro build
         run: pnpm build
+
+      - name: Lighthouse CI (desktop)
+        run: pnpm lhci autorun --config=lighthouserc.desktop.json
+
+      - name: Lighthouse CI (mobile)
+        run: pnpm lhci autorun --config=lighthouserc.mobile.json

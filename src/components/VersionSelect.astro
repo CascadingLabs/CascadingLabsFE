@@ -103,19 +103,37 @@ import { currentLabel, versions } from '../versions';
 	.sl-version__option:hover,
 	.sl-version__option[aria-selected='true'] {
 		background: var(--sl-color-text-accent);
-		color: var(--sl-color-white);
+		color: var(--sl-color-text-invert);
+	}
+
+	/* Open upward inside mobile sidebar */
+	.mobile-preferences .sl-version__dropdown {
+		bottom: calc(100% + 0.375rem);
+		top: auto;
 	}
 </style>
 
 <script is:inline>
-	function initVersionPicker() {
-		const ui = document.getElementById('sl-version-select');
-		if (!ui) return;
+	var versionMQ = window.matchMedia('(min-width: 50rem)');
 
-		const headerRight = document.querySelector('.right-group');
-		if (headerRight && ui.parentElement !== headerRight) {
-			headerRight.append(ui);
+	function mountVersionUI() {
+		var ui = document.getElementById('sl-version-select');
+		if (!ui) return;
+		var target = versionMQ.matches
+			? document.querySelector('.right-group')
+			: document.querySelector('.mobile-preferences');
+		if (target && ui.parentElement !== target) {
+			target.append(ui);
 		}
+	}
+
+	versionMQ.addEventListener('change', mountVersionUI);
+
+	// Mount immediately (synchronous, before first paint) to prevent layout shift
+	mountVersionUI();
+
+	function initVersionPicker() {
+		mountVersionUI();
 
 		const btn = document.getElementById('sl-version-btn');
 		const dropdown = document.getElementById('sl-version-dropdown');
@@ -164,4 +182,5 @@ import { currentLabel, versions } from '../versions';
 
 	document.addEventListener('DOMContentLoaded', initVersionPicker);
 	document.addEventListener('astro:page-load', initVersionPicker);
+	document.addEventListener('astro:after-swap', mountVersionUI);
 </script>

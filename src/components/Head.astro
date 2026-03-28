@@ -1,8 +1,75 @@
 ---
 import Default from '@astrojs/starlight/components/Head.astro';
+import JsonLd from './JsonLd.astro';
+
+const site = 'https://cascadinglabs.com';
+const pathname = Astro.url.pathname;
+const segments = pathname.split('/').filter(Boolean);
+const pageTitle = (Astro.props as any).entry?.data?.title || '';
+
+const segmentLabels: Record<string, string> = {
+	yosoi: 'Yosoi',
+	guides: 'Guides',
+	reference: 'Reference',
+	qscrape: 'QScrape',
+	examples: 'Examples',
+};
+
+const breadcrumbItems = [{ name: 'Home', url: site + '/' }];
+let currentPath = '';
+for (let i = 0; i < segments.length; i++) {
+	currentPath += '/' + segments[i];
+	const isLast = i === segments.length - 1;
+	const name =
+		isLast && pageTitle
+			? pageTitle
+			: segmentLabels[segments[i]] ||
+				segments[i]
+					.replace(/-/g, ' ')
+					.replace(/\b\w/g, (c: string) => c.toUpperCase());
+	breadcrumbItems.push({ name, url: site + currentPath + '/' });
+}
 ---
 
 <Default {...Astro.props}><slot /></Default>
+
+<JsonLd
+	schema={{
+		"@context": "https://schema.org",
+		"@type": "Organization",
+		name: "Cascading Labs",
+		url: site,
+		logo: site + "/favicon.svg",
+		sameAs: ["https://github.com/CascadingLabs"],
+	}}
+/>
+
+<JsonLd
+	schema={{
+		"@context": "https://schema.org",
+		"@type": "WebSite",
+		name: "Yosoi",
+		url: site,
+		description: "AI-powered CSS selector discovery for web scraping.",
+		publisher: {
+			"@type": "Organization",
+			name: "Cascading Labs",
+		},
+	}}
+/>
+
+<JsonLd
+	schema={{
+		"@context": "https://schema.org",
+		"@type": "BreadcrumbList",
+		itemListElement: breadcrumbItems.map((item, i) => ({
+			"@type": "ListItem",
+			position: i + 1,
+			name: item.name,
+			item: item.url,
+		})),
+	}}
+/>
 
 <!-- Prevent browser's built-in translate from triggering (we handle translation ourselves) -->
 <meta name="google" content="notranslate" />
@@ -18,11 +85,23 @@ import Default from '@astrojs/starlight/components/Head.astro';
 			'google_translate_element',
 		);
 	}
+	function loadGoogleTranslate() {
+		if (document.querySelector('script[src*="translate.google.com"]')) return;
+		var s = document.createElement('script');
+		s.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+		s.async = true;
+		document.head.appendChild(s);
+	}
+	if (typeof requestIdleCallback === 'function') {
+		requestIdleCallback(loadGoogleTranslate);
+	} else {
+		window.addEventListener('load', function () { setTimeout(loadGoogleTranslate, 100); });
+	}
 </script>
-<script
-	is:inline
-	src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
-></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=optional" />
 
 <style is:global>
 	.anchor-copy-btn {
@@ -123,52 +202,127 @@ import Default from '@astrojs/starlight/components/Head.astro';
 		});
 	}
 
+	function initRefBackNav() {
+		document.querySelectorAll('.sl-markdown-content a[id^="ref-"]').forEach(anchor => {
+			const refId = anchor.id;
+			const p = anchor.closest('p');
+			if (!p) return;
+
+			// Only create a back-link if something in the text references this anchor
+			const inlineRef = document.querySelector(
+				'.sl-markdown-content a[href="#' + refId + '"]'
+			);
+			if (!inlineRef) return;
+
+			// The symbol is in the text node right after the anchor
+			const nextNode = anchor.nextSibling;
+			if (!nextNode || nextNode.nodeType !== Node.TEXT_NODE) return;
+
+			const text = nextNode.textContent;
+			const match = text.match(/^(\s*?)(\S)/);
+			if (!match) return;
+
+			const [, leading, symbol] = match;
+			const rest = text.slice(match[0].length);
+
+			// Wrap the symbol in a clickable link
+			const link = document.createElement('a');
+			link.textContent = symbol;
+			link.className = 'ref-back-link';
+			link.setAttribute('role', 'link');
+			link.title = 'Jump back to reference';
+
+			const restNode = document.createTextNode(rest);
+			if (leading) {
+				nextNode.textContent = leading;
+				nextNode.after(link, restNode);
+			} else {
+				nextNode.replaceWith(link, restNode);
+			}
+
+			link.addEventListener('click', (e) => {
+				e.preventDefault();
+
+				// Remove any existing highlight
+				document.querySelectorAll('.ref-highlight').forEach(el => {
+					el.classList.remove('ref-highlight');
+				});
+
+				// Open any parent <details> elements before scrolling
+				var details = inlineRef.closest('details');
+				while (details) {
+					details.open = true;
+					details = details.parentElement ? details.parentElement.closest('details') : null;
+				}
+
+				// Scroll to the inline reference
+				inlineRef.scrollIntoView({ behavior: 'smooth' });
+
+				// Highlight the containing block
+				const target = inlineRef.closest('p, li, td, th, dd');
+				if (!target) return;
+
+				setTimeout(() => {
+					target.classList.add('ref-highlight');
+					target.addEventListener('animationend', () => {
+						target.classList.remove('ref-highlight');
+					}, { once: true });
+				}, 400);
+			});
+		});
+	}
+
 	document.addEventListener('DOMContentLoaded', initRefHighlight);
 	document.addEventListener('astro:page-load', initRefHighlight);
+	document.addEventListener('DOMContentLoaded', initRefBackNav);
+	document.addEventListener('astro:page-load', initRefBackNav);
 </script>
 
 <script is:inline>
-	// Capture the search query when a search result link is clicked
+	// Capture the hash fragment when a search result link is clicked
 	document.addEventListener('click', function (e) {
 		var link = e.target.closest('a');
 		if (!link) return;
-		var dialog = link.closest('dialog');
-		if (!dialog) return;
-		var input = dialog.querySelector('input');
-		if (input && input.value.trim()) {
-			sessionStorage.setItem('sl-search-query', input.value.trim());
-		}
+		if (!link.closest('dialog')) return;
+		var href = link.getAttribute('href') || '';
+		var hashIdx = href.indexOf('#');
+		var fragment = hashIdx !== -1 ? href.slice(hashIdx + 1) : '';
+		sessionStorage.setItem('sl-search-result', fragment);
 	}, true);
 
-	function openDetailsFromSearch() {
-		var query = sessionStorage.getItem('sl-search-query');
-		if (!query) return;
-		sessionStorage.removeItem('sl-search-query');
+	function highlightSearchResult() {
+		var fragment = sessionStorage.getItem('sl-search-result');
+		if (fragment === null) return;
+		sessionStorage.removeItem('sl-search-result');
+		if (!fragment) return;
 
-		var lowerQuery = query.toLowerCase();
-		var allDetails = document.querySelectorAll('.sl-markdown-content details');
-		var best = null;
-		var bestScore = 0;
+		var target = document.getElementById(fragment);
+		if (!target) return;
 
-		allDetails.forEach(function (d) {
-			var text = d.textContent.toLowerCase();
-			if (text.indexOf(lowerQuery) === -1) return;
+		// Open any parent <details>
+		var details = target.closest('details');
+		while (details) {
+			details.open = true;
+			details = details.parentElement ? details.parentElement.closest('details') : null;
+		}
 
-			// Prefer matches in the <summary> over matches only in the body
-			var summary = d.querySelector('summary');
-			var score = summary && summary.textContent.toLowerCase().indexOf(lowerQuery) !== -1 ? 2 : 1;
-			if (score > bestScore) {
-				bestScore = score;
-				best = d;
-			}
+		// Clear previous highlights
+		document.querySelectorAll('.search-result-highlight').forEach(function (el) {
+			el.classList.remove('search-result-highlight', 'ref-highlight');
 		});
 
-		if (best) {
-			best.open = true;
-			setTimeout(function () {
-				best.scrollIntoView({ behavior: 'smooth', block: 'center' });
-			}, 100);
-		}
+		// Instant scroll (override global scroll-behavior: smooth)
+		var html = document.documentElement;
+		var prev = html.style.scrollBehavior;
+		html.style.scrollBehavior = 'auto';
+		target.scrollIntoView({ behavior: 'instant', block: 'center' });
+		requestAnimationFrame(function () { html.style.scrollBehavior = prev; });
+
+		// Flash highlight
+		target.classList.add('search-result-highlight', 'ref-highlight');
+		target.addEventListener('animationend', function () {
+			target.classList.remove('search-result-highlight', 'ref-highlight');
+		}, { once: true });
 	}
 
 	// If the hash targets something inside a <details>, open that specific block
@@ -187,11 +341,94 @@ import Default from '@astrojs/starlight/components/Head.astro';
 
 	document.addEventListener('DOMContentLoaded', function () {
 		openDetailsForHash();
-		openDetailsFromSearch();
+		highlightSearchResult();
 	});
 	document.addEventListener('astro:page-load', function () {
 		openDetailsForHash();
-		openDetailsFromSearch();
+		highlightSearchResult();
 	});
 	window.addEventListener('hashchange', openDetailsForHash);
+</script>
+
+<script is:inline>
+	function setSidebarGradient() {
+		document.querySelectorAll('.sidebar-content [aria-current="page"]').forEach(function (link) {
+			var span = link.querySelector('span');
+			if (!span) return;
+			var textW = span.offsetWidth;
+			var padL = parseFloat(getComputedStyle(link).paddingLeft) || 0;
+			var linkW = link.offsetWidth;
+			if (linkW > 0) {
+				var pct = Math.min(((textW + padL + 8) / linkW) * 100, 100);
+				link.style.setProperty('--text-end', pct + '%');
+			}
+		});
+	}
+	document.addEventListener('DOMContentLoaded', setSidebarGradient);
+	document.addEventListener('astro:page-load', setSidebarGradient);
+	window.addEventListener('resize', setSidebarGradient);
+</script>
+
+<script is:inline>
+	function initScrollSpy() {
+		var headings = document.querySelectorAll('.sl-markdown-content h2[id], .sl-markdown-content h3[id], .sl-markdown-content h4[id]');
+		if (!headings.length) return;
+
+		var current = null;
+		var ticking = false;
+
+		function update() {
+			if (ticking) return;
+			ticking = true;
+			requestAnimationFrame(function () {
+				ticking = false;
+				var scrollY = window.scrollY || document.documentElement.scrollTop;
+				var docHeight = document.documentElement.scrollHeight;
+				var winHeight = window.innerHeight;
+				var atBottom = scrollY + winHeight >= docHeight - 30;
+
+				// When at the bottom of the page, pick the last heading
+				if (atBottom) {
+					var last = headings[headings.length - 1];
+					if (last && last.id !== current) {
+						current = last.id;
+						history.replaceState(null, '', '#' + current);
+					}
+					return;
+				}
+
+				// Otherwise find the last heading that has scrolled past the trigger line
+				var best = null;
+				for (var j = headings.length - 1; j >= 0; j--) {
+					if (headings[j].getBoundingClientRect().top <= 100) {
+						best = headings[j];
+						break;
+					}
+				}
+
+				if (best && best.id !== current) {
+					current = best.id;
+					history.replaceState(null, '', '#' + current);
+				}
+
+				// Clear hash when scrolled to the very top
+				if (!best && current && scrollY < 50) {
+					current = null;
+					history.replaceState(null, '', location.pathname + location.search);
+				}
+			});
+		}
+
+		window.addEventListener('scroll', update, { passive: true });
+		update();
+
+		// Cleanup on Astro page transitions
+		document.addEventListener('astro:before-swap', function cleanup() {
+			window.removeEventListener('scroll', update);
+			document.removeEventListener('astro:before-swap', cleanup);
+		}, { once: true });
+	}
+
+	document.addEventListener('DOMContentLoaded', initScrollSpy);
+	document.addEventListener('astro:page-load', initScrollSpy);
 </script>

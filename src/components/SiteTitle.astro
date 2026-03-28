@@ -1,36 +1,14 @@
 ---
-import config from 'virtual:starlight/user-config';
-import { logos } from 'virtual:starlight/user-images';
-
 const { siteTitle } = Astro.locals.starlightRoute;
 ---
 
+<a href="/" class="cl-home" title="Cascading Labs home">
+	<img src="/favicon.svg" alt="Cascading Labs" class="cl-mark" />
+</a>
 <a href="/yosoi" class="site-title sl-flex">
-	{
-		config.logo && logos.dark && (
-			<>
-				<img
-					class:list={{ 'light:sl-hidden print:hidden': !('src' in config.logo) }}
-					alt={config.logo.alt}
-					src={logos.dark.src}
-					width={logos.dark.width}
-					height={logos.dark.height}
-				/>
-				{!('src' in config.logo) && (
-					<img
-						class="dark:sl-hidden print:block"
-						alt={config.logo.alt}
-						src={logos.light?.src}
-						width={logos.light?.width}
-						height={logos.light?.height}
-					/>
-				)}
-			</>
-		)
-	}
-	<span class:list={{ 'sr-only': config.logo?.replacesTitle }} translate="no">
-		{siteTitle}
-	</span>
+	<img src="/yosoi-favicon.svg" alt="" class="yosoi-mark" aria-hidden="true" />
+
+	<span class="sr-only" translate="no">{siteTitle}</span>
 	<span class="alpha-badge" title="Yosoi is in Alpha. The API will change significantly — we do not expect a stable API until we are out of Beta.">Alpha — API will change</span>
 </a>
 
@@ -46,27 +24,43 @@ const { siteTitle } = Astro.locals.starlightRoute;
 			white-space: nowrap;
 			min-width: 0;
 		}
-		span {
-			overflow: hidden;
-		}
-		img {
-			height: calc(var(--sl-nav-height) - 2 * var(--sl-nav-pad-y));
-			width: auto;
-			max-width: 100%;
-			object-fit: contain;
-			object-position: 0 50%;
-		}
 		.alpha-badge {
-			background: #854d0e;
-			color: #fef9c3;
+			background: #1e3a5f;
+			color: #90b8e0;
 			font-size: 0.625rem;
 			font-weight: 600;
 			padding: 0.125rem 0.4rem;
-			border-radius: 9999px;
+			border-radius: 0;
 			line-height: 1.3;
 			text-transform: uppercase;
 			letter-spacing: 0.03em;
 			flex-shrink: 0;
 		}
 	}
+
+	.yosoi-mark {
+		width: 26px;
+		height: 26px;
+		flex-shrink: 0;
+	}
+
+	.cl-home {
+		display: flex;
+		align-items: center;
+		flex-shrink: 0;
+		margin-inline-end: 0.25rem;
+	}
+
+	.cl-mark {
+		width: 26px;
+		height: 26px;
+		border-radius: 4px;
+		opacity: 0.7;
+		transition: opacity 0.15s ease;
+	}
+
+	.cl-home:hover .cl-mark {
+		opacity: 1;
+	}
+
 </style>
