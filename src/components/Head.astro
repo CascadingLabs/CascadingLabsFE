@@ -33,6 +33,8 @@ import Default from '@astrojs/starlight/components/Head.astro';
 		padding: 0 0.3em;
 		margin-left: 0.25em;
 		color: var(--sl-color-text-accent);
+		display: inline-flex;
+		align-items: center;
 		vertical-align: middle;
 		transition: opacity 0.15s ease;
 		line-height: 1;
@@ -40,8 +42,7 @@ import Default from '@astrojs/starlight/components/Head.astro';
 	}
 
 	.anchor-copy-btn svg {
-		display: inline-block;
-		vertical-align: middle;
+		display: block;
 		width: 0.75em;
 		height: 0.75em;
 	}
@@ -79,6 +80,8 @@ import Default from '@astrojs/starlight/components/Head.astro';
 					btn.classList.add('copied');
 					setTimeout(() => btn.classList.remove('copied'), 1500);
 				});
+				history.pushState(null, '', '#' + heading.id);
+				heading.scrollIntoView({ behavior: 'smooth' });
 			});
 
 			heading.appendChild(btn);
@@ -87,4 +90,39 @@ import Default from '@astrojs/starlight/components/Head.astro';
 
 	document.addEventListener('DOMContentLoaded', initAnchorCopyButtons);
 	document.addEventListener('astro:page-load', initAnchorCopyButtons);
+</script>
+
+<script is:inline>
+	function initRefHighlight() {
+		document.querySelectorAll('.sl-markdown-content a[href^="#ref-"]').forEach(link => {
+			link.addEventListener('click', (e) => {
+				e.preventDefault();
+				const id = link.getAttribute('href').slice(1);
+				const anchor = document.getElementById(id);
+				if (!anchor) return;
+				const p = anchor.closest('p');
+				if (!p) return;
+
+				// Remove any existing highlight
+				document.querySelectorAll('.ref-highlight').forEach(el => {
+					el.classList.remove('ref-highlight');
+				});
+
+				// Scroll to the anchor
+				anchor.scrollIntoView({ behavior: 'smooth' });
+
+				// Apply highlight after scroll settles
+				setTimeout(() => {
+					p.classList.add('ref-highlight');
+					// Clean up class after animation completes
+					p.addEventListener('animationend', () => {
+						p.classList.remove('ref-highlight');
+					}, { once: true });
+				}, 400);
+			});
+		});
+	}
+
+	document.addEventListener('DOMContentLoaded', initRefHighlight);
+	document.addEventListener('astro:page-load', initRefHighlight);
 </script>

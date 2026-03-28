@@ -1,6 +1,10 @@
 @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Outfit:wght@100..900&display=swap");
 @import "tailwindcss";
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     font-family: "Outfit", sans-serif;
 }
@@ -12,6 +16,7 @@ code, pre, kbd, samp {
 :root {
     --sl-content-width: 75rem;
 }
+
 
 site-search {
     flex: 1;
@@ -144,6 +149,42 @@ site-search {
     fill: currentColor;
     color: var(--sl-color-text-accent);
     vertical-align: middle;
+}
+
+/* Inline reference symbol links */
+.sl-markdown-content a[href^="#ref-"] {
+    font-size: 1.15em;
+    padding: 0.1em 0.25em;
+    margin-inline: 0.1em;
+    text-decoration: none;
+    border-radius: 0.25em;
+    line-height: 1;
+    display: inline-block;
+    vertical-align: baseline;
+}
+
+.sl-markdown-content a[href^="#ref-"]:hover {
+    background: var(--sl-color-bg-inline-code);
+}
+
+/* Highlight the targeted reference when scrolled to */
+.sl-markdown-content a[id^="ref-"] {
+    scroll-margin-top: 5rem;
+}
+
+.sl-markdown-content p.ref-highlight {
+    background: color-mix(in srgb, var(--sl-color-text-accent) 15%, transparent);
+    outline: 2px solid var(--sl-color-text-accent);
+    outline-offset: 0.15em;
+    border-radius: 0.25em;
+    animation: ref-highlight-fade 2s ease 0.5s forwards;
+}
+
+@keyframes ref-highlight-fade {
+    to {
+        outline-color: transparent;
+        background: transparent;
+    }
 }
 
 /* GitHub mark icon for GitHub sidebar item */

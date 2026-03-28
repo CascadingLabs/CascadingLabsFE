@@ -31,6 +31,7 @@ const { siteTitle } = Astro.locals.starlightRoute;
 	<span class:list={{ 'sr-only': config.logo?.replacesTitle }} translate="no">
 		{siteTitle}
 	</span>
+	<span class="alpha-badge" title="Yosoi is in Alpha. The API will change significantly — we do not expect a stable API until we are out of Beta.">Alpha — API will change</span>
 </a>
 
 <style>
@@ -54,6 +55,18 @@ const { siteTitle } = Astro.locals.starlightRoute;
 			max-width: 100%;
 			object-fit: contain;
 			object-position: 0 50%;
+		}
+		.alpha-badge {
+			background: #854d0e;
+			color: #fef9c3;
+			font-size: 0.625rem;
+			font-weight: 600;
+			padding: 0.125rem 0.4rem;
+			border-radius: 9999px;
+			line-height: 1.3;
+			text-transform: uppercase;
+			letter-spacing: 0.03em;
+			flex-shrink: 0;
 		}
 	}
 </style>

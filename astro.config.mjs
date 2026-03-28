@@ -16,6 +16,7 @@ export default defineConfig({
 			components: {
 				SiteTitle: './src/components/SiteTitle.astro',
 				Head: './src/components/Head.astro',
+				Header: './src/components/Header.astro',
 				PageFrame: './src/components/PageFrame.astro',
 				ThemeSelect: './src/components/ThemeSelect.astro',
 			},
@@ -36,6 +37,7 @@ export default defineConfig({
 						{ label: 'Installation', slug: 'yosoi/installation' },
 						{ label: 'Quick Start', slug: 'yosoi/quickstart' },
 						{ label: 'Roadmap', slug: 'roadmap' },
+						{ label: 'Contributing', slug: 'contributing' },
 					],
 				},
 				{
@@ -54,11 +56,25 @@ export default defineConfig({
 						{ label: 'Proxying', slug: 'guides/proxying' },
 						{ label: 'Scaling', slug: 'guides/scaling' },
 						{
-							label: 'A3Nodes',
-							slug: 'guides/a3nodes',
-							badge: { text: 'Beta', variant: 'caution' },
+							label: 'Examples',
+							items: [
+								{ label: 'Overview', slug: 'guides/examples' },
+								{ label: 'News Portal', slug: 'guides/examples/news-portal' },
+								{
+									label: 'E-Commerce Catalogue',
+									slug: 'guides/examples/e-commerce',
+								},
+								{
+									label: 'Sports Scores',
+									slug: 'guides/examples/sports-scores',
+								},
+								{
+									label: 'Concurrent Scraping',
+									slug: 'guides/examples/concurrent',
+								},
+								{ label: 'JSON Output', slug: 'guides/examples/json-output' },
+							],
 						},
-						{ label: 'Examples', slug: 'guides/examples' },
 					],
 				},
 				{
