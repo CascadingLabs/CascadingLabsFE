@@ -2,7 +2,7 @@
 
 > AI-powered CSS selector discovery for web scraping. Discover selectors once with an LLM, cache them locally, and scrape forever at zero cost.
 
-Yosoi stands for "You Only Scrape Once (iteratively)." It uses an LLM to identify stable CSS selectors for any site, validates them, and caches the result. Future scrapes reuse the cached selectors with no LLM call. When selectors go stale, Yosoi re-discovers only the broken fields — not the whole contract.
+Yosoi stands for "You Only Scrape Once (iteratively)." It uses an LLM to identify stable CSS selectors for any site, validates them, and caches the result. Future scrapes reuse the cached selectors with no LLM call. When selectors go stale, Yosoi re-discovers only the broken fields -- not the whole contract.
 
 - Python 3.10+, async-native, Pydantic contracts
 - 25+ LLM providers supported (Groq, Gemini, OpenAI, Anthropic, Ollama, and more)

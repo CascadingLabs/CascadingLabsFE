@@ -72,6 +72,10 @@ export default defineConfig({
 									label: 'Concurrent Scraping',
 									slug: 'guides/examples/concurrent',
 								},
+								{
+									label: 'Manual Selectors',
+									slug: 'guides/examples/manual-selectors',
+								},
 								{ label: 'JSON Output', slug: 'guides/examples/json-output' },
 							],
 						},
