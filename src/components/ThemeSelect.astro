@@ -1,0 +1,181 @@
+---
+---
+
+<starlight-theme-select>
+	<button
+		class="theme-toggle"
+		type="button"
+		aria-label={Astro.locals.t('themeSelect.accessibleLabel')}
+	>
+		<svg
+			class="theme-icon sun-icon"
+			xmlns="http://www.w3.org/2000/svg"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			aria-hidden="true"
+		>
+			<circle cx="12" cy="12" r="4" />
+			<path d="M12 2v2" />
+			<path d="M12 20v2" />
+			<path d="m4.93 4.93 1.41 1.41" />
+			<path d="m17.66 17.66 1.41 1.41" />
+			<path d="M2 12h2" />
+			<path d="M20 12h2" />
+			<path d="m6.34 17.66-1.41 1.41" />
+			<path d="m19.07 4.93-1.41 1.41" />
+		</svg>
+		<svg
+			class="theme-icon moon-icon"
+			xmlns="http://www.w3.org/2000/svg"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			aria-hidden="true"
+		>
+			<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+		</svg>
+		<svg
+			class="theme-icon auto-icon"
+			xmlns="http://www.w3.org/2000/svg"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			aria-hidden="true"
+		>
+			<rect x="2" y="3" width="20" height="14" rx="2" />
+			<path d="M8 21h8" />
+			<path d="M12 17v4" />
+		</svg>
+	</button>
+</starlight-theme-select>
+
+{/* Inlined to avoid FOUC. Uses global scope from ThemeProvider.astro */}
+<script is:inline>
+	StarlightThemeProvider.updatePickers();
+</script>
+
+<style>
+	.theme-toggle {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: transparent;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 999px;
+		padding: 0.4rem;
+		color: var(--sl-color-text);
+		cursor: pointer;
+		position: relative;
+		width: 2rem;
+		height: 2rem;
+		overflow: hidden;
+		transition: border-color 0.2s ease, background 0.2s ease;
+	}
+
+	.theme-toggle:hover {
+		border-color: var(--sl-color-gray-3);
+		background: var(--sl-color-gray-6);
+	}
+
+	.theme-icon {
+		position: absolute;
+		width: 1rem;
+		height: 1rem;
+		transition:
+			transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+			opacity 0.25s ease;
+		opacity: 0;
+		transform: scale(0.5) rotate(-90deg);
+	}
+
+	.theme-icon.active {
+		opacity: 1;
+		transform: scale(1) rotate(0deg);
+	}
+
+	.theme-icon.exit {
+		opacity: 0;
+		transform: scale(0.5) rotate(90deg);
+	}
+</style>
+
+<script>
+	type Theme = 'auto' | 'dark' | 'light';
+
+	const storageKey = 'starlight-theme';
+	const themeOrder: Theme[] = ['dark', 'light', 'auto'];
+
+	const parseTheme = (theme: unknown): Theme =>
+		theme === 'auto' || theme === 'dark' || theme === 'light' ? theme : 'auto';
+
+	const loadTheme = (): Theme =>
+		parseTheme(typeof localStorage !== 'undefined' && localStorage.getItem(storageKey));
+
+	function storeTheme(theme: Theme): void {
+		if (typeof localStorage !== 'undefined') {
+			localStorage.setItem(storageKey, theme === 'light' || theme === 'dark' ? theme : '');
+		}
+	}
+
+	const getPreferredColorScheme = (): Theme =>
+		matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+
+	function updateIcons(picker: Element, theme: Theme): void {
+		const icons = picker.querySelectorAll('.theme-icon');
+		icons.forEach((icon) => {
+			const isTarget =
+				(theme === 'dark' && icon.classList.contains('moon-icon')) ||
+				(theme === 'light' && icon.classList.contains('sun-icon')) ||
+				(theme === 'auto' && icon.classList.contains('auto-icon'));
+
+			if (isTarget) {
+				icon.classList.remove('exit');
+				icon.classList.add('active');
+			} else {
+				icon.classList.remove('active');
+				icon.classList.add('exit');
+				// Clean up exit class after animation
+				setTimeout(() => icon.classList.remove('exit'), 400);
+			}
+		});
+	}
+
+	function onThemeChange(theme: Theme): void {
+		document.documentElement.dataset.theme = theme === 'auto' ? getPreferredColorScheme() : theme;
+		storeTheme(theme);
+		document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+			updateIcons(picker, theme);
+		});
+	}
+
+	matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
+		if (loadTheme() === 'auto') onThemeChange('auto');
+	});
+
+	class StarlightThemeSelect extends HTMLElement {
+		constructor() {
+			super();
+			const current = loadTheme();
+			updateIcons(this, current);
+			onThemeChange(current);
+
+			this.querySelector('.theme-toggle')?.addEventListener('click', () => {
+				const current = loadTheme();
+				const idx = themeOrder.indexOf(current);
+				const next = themeOrder[(idx + 1) % themeOrder.length];
+				onThemeChange(next);
+			});
+		}
+	}
+	customElements.define('starlight-theme-select', StarlightThemeSelect);
+</script>

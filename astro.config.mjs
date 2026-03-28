@@ -14,6 +14,7 @@ export default defineConfig({
 				SiteTitle: './src/components/SiteTitle.astro',
 				Head: './src/components/Head.astro',
 				PageFrame: './src/components/PageFrame.astro',
+				ThemeSelect: './src/components/ThemeSelect.astro',
 			},
 			title: 'Yosoi',
 			description: 'AI-powered CSS selector discovery for web scraping.',
@@ -38,6 +39,22 @@ export default defineConfig({
 					items: [
 						{ label: 'Configuration', slug: 'yosoi/configuration' },
 						{ label: 'API Reference', slug: 'api-reference' },
+					],
+				},
+				{
+					label: 'QScrape',
+					items: [
+						{ label: 'Overview', slug: 'qscrape' },
+						{
+							label: 'qscrape.dev',
+							link: 'https://qscrape.dev',
+							attrs: { target: '_blank' },
+						},
+						{
+							label: 'GitHub',
+							link: 'https://github.com/CascadingLabs/QScrape',
+							attrs: { target: '_blank' },
+						},
 					],
 				},
 			],

@@ -1,7 +1,13 @@
 @import "tailwindcss";
 
 :root {
-    --sl-content-width: 85rem;
+    --sl-content-width: 75rem;
+}
+
+site-search {
+    flex: 1;
+    display: flex;
+    justify-content: center;
 }
 
 .sl-markdown-content .sl-anchor-link {
