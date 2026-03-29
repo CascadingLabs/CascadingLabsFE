@@ -44,7 +44,7 @@ code, pre, kbd, samp {
     --cl-accent-text: #5b8cc7;
     --cl-accent-pale: #90b8e0;
     --cl-link-hover-bg: color-mix(in srgb, #1e3a5f 15%, transparent);
-    --cl-edge-shadow: inset 0 0 150px 60px rgba(0, 0, 0, 0.35);
+    --cl-edge-shadow: none;
 }
 
 /* Light mode — Starlight pages + landing page */
