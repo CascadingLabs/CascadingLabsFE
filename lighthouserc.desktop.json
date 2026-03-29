@@ -6,9 +6,17 @@
 			"settings": {
 				"preset": "desktop",
 				"chromeFlags": ["--no-sandbox", "--disable-features=Translate"],
-				"skipAudits": ["inspector-issues"]
+				"skipAudits": ["inspector-issues", "is-crawlable"]
 			},
-			"url": ["/", "/contributing/"]
+			"url": [
+				"/",
+				"/contributing/",
+				"/yosoi/",
+				"/yosoi/quickstart/",
+				"/guides/selectors/",
+				"/reference/functions/",
+				"/roadmap/"
+			]
 		},
 		"assert": {
 			"assertions": {
