@@ -1,0 +1,249 @@
+---
+import Default from '@astrojs/starlight/components/PageFrame.astro';
+import VersionSelect from './VersionSelect.astro';
+---
+
+<Default {...Astro.props}>
+	<slot name="header" slot="header" />
+	<slot name="sidebar" slot="sidebar" />
+	<slot />
+</Default>
+
+<VersionSelect />
+
+<!-- Hidden Google Translate initialisation target -->
+<div id="google_translate_element" style="display:none"></div>
+
+<!-- Custom language picker -->
+<div class="sl-translate notranslate" id="sl-translate" style="display:none">
+	<button
+		class="sl-translate__btn"
+		id="sl-translate-btn"
+		type="button"
+		aria-expanded="false"
+		aria-controls="sl-translate-dropdown"
+		aria-haspopup="listbox"
+	>
+		<!-- Languages icon (Lucide) -->
+		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+			<path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/>
+			<path d="m22 22-5-10-5 10"/><path d="M14 18h6"/>
+		</svg>
+		<span id="sl-translate-label">Auto</span>
+		<!-- Chevron icon -->
+		<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="sl-translate__chevron" aria-hidden="true">
+			<path d="m6 9 6 6 6-6"/>
+		</svg>
+	</button>
+	<ul
+		class="sl-translate__dropdown"
+		id="sl-translate-dropdown"
+		role="listbox"
+		aria-label="Select language"
+		hidden
+	>
+		<li class="sl-translate__option" role="option" data-value="en">English</li>
+		<li class="sl-translate__option" role="option" data-value="de">Deutsch</li>
+		<li class="sl-translate__option" role="option" data-value="pt">Português do Brasil</li>
+		<li class="sl-translate__option" role="option" data-value="es">Español</li>
+		<li class="sl-translate__option" role="option" data-value="zh-CN">简体中文</li>
+		<li class="sl-translate__option" role="option" data-value="zh-TW">正體中文</li>
+		<li class="sl-translate__option" role="option" data-value="fr">Français</li>
+		<li class="sl-translate__option" role="option" data-value="hi">हिन्दी</li>
+		<li class="sl-translate__option" role="option" data-value="ar">العربية</li>
+		<li class="sl-translate__option" role="option" data-value="ja">日本語</li>
+		<li class="sl-translate__option" role="option" data-value="ko">한국어</li>
+		<li class="sl-translate__option" role="option" data-value="pl">Polski</li>
+		<li class="sl-translate__option" role="option" data-value="ru">Русский</li>
+		<li class="sl-translate__option" role="option" data-value="it">Italiano</li>
+	</ul>
+</div>
+
+<style is:global>
+	/* ── Custom language picker ─────────────────────────────────── */
+	.sl-translate {
+		position: relative;
+	}
+
+	.sl-translate__btn {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		background: var(--sl-color-bg-nav);
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.375rem;
+		padding: 0.3125rem 0.625rem;
+		color: var(--sl-color-text);
+		font-size: var(--sl-text-sm);
+		cursor: pointer;
+		white-space: nowrap;
+		line-height: 1;
+		height: 2rem;
+	}
+
+	.sl-translate__btn:hover {
+		border-color: var(--sl-color-gray-3);
+		color: var(--sl-color-white);
+		background: var(--sl-color-gray-6);
+	}
+
+	.sl-translate__chevron {
+		opacity: 0.7;
+		transition: transform 0.15s ease;
+	}
+
+	.sl-translate__btn[aria-expanded='true'] .sl-translate__chevron {
+		transform: rotate(180deg);
+	}
+
+	.sl-translate__dropdown {
+		position: absolute;
+		top: calc(100% + 0.375rem);
+		right: 0;
+		min-width: 11rem;
+		background: var(--sl-color-bg);
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.5rem;
+		list-style: none;
+		margin: 0;
+		padding: 0.25rem;
+		z-index: 9999;
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+		max-height: 20rem;
+		overflow-y: auto;
+	}
+
+	.sl-translate__option {
+		padding: 0.4375rem 0.75rem;
+		border-radius: 0.3125rem;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-text);
+		cursor: pointer;
+		line-height: 1.4;
+	}
+
+	.sl-translate__option:hover,
+	.sl-translate__option[aria-selected='true'] {
+		background: var(--sl-color-text-accent);
+		color: var(--sl-color-text-invert);
+	}
+
+	/* Open upward inside mobile sidebar */
+	.mobile-preferences .sl-translate__dropdown {
+		bottom: calc(100% + 0.375rem);
+		top: auto;
+	}
+
+	/* ── Suppress Google Translate banner ─────────────────────────── */
+	.skiptranslate {
+		display: none !important;
+	}
+
+	body {
+		top: 0 !important;
+	}
+</style>
+
+<script is:inline>
+	const LANGS = {
+		en: 'English',
+		de: 'Deutsch',
+		pt: 'Português do Brasil',
+		es: 'Español',
+		'zh-CN': '简体中文',
+		'zh-TW': '正體中文',
+		fr: 'Français',
+		hi: 'हिन्दी',
+		ar: 'العربية',
+		ja: '日本語',
+		ko: '한국어',
+		pl: 'Polski',
+		ru: 'Русский',
+		it: 'Italiano',
+	};
+
+	var translateMQ = window.matchMedia('(min-width: 50rem)');
+
+	function mountTranslate() {
+		var ui = document.getElementById('sl-translate');
+		if (!ui) return;
+		var target = translateMQ.matches
+			? document.querySelector('.right-group')
+			: document.querySelector('.mobile-preferences');
+		if (target && ui.parentElement !== target) {
+			ui.style.display = '';
+			target.append(ui);
+		}
+	}
+
+	translateMQ.addEventListener('change', mountTranslate);
+
+	// Mount immediately (synchronous, before first paint) to prevent layout shift
+	mountTranslate();
+
+	function waitForCombo(cb, tries = 30) {
+		const combo = document.querySelector('select.goog-te-combo');
+		if (combo) { cb(combo); return; }
+		if (tries > 0) setTimeout(() => waitForCombo(cb, tries - 1), 150);
+	}
+
+	function initTranslatePicker() {
+		mountTranslate();
+
+		const btn = document.getElementById('sl-translate-btn');
+		const dropdown = document.getElementById('sl-translate-dropdown');
+		const label = document.getElementById('sl-translate-label');
+		if (!btn || !dropdown || !label) return;
+
+		// Toggle open/close
+		btn.addEventListener('click', (e) => {
+			e.stopPropagation();
+			const open = btn.getAttribute('aria-expanded') === 'true';
+			btn.setAttribute('aria-expanded', String(!open));
+			dropdown.hidden = open;
+		});
+
+		// Close on outside click or Escape
+		document.addEventListener('click', () => {
+			btn.setAttribute('aria-expanded', 'false');
+			dropdown.hidden = true;
+		});
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape') {
+				btn.setAttribute('aria-expanded', 'false');
+				dropdown.hidden = true;
+			}
+		});
+
+		// Language selection
+		waitForCombo((combo) => {
+			dropdown.querySelectorAll('.sl-translate__option').forEach((opt) => {
+				opt.addEventListener('click', () => {
+					const lang = opt.dataset.value;
+
+					// Update UI
+					label.textContent = lang === 'en' ? 'Auto' : LANGS[lang] ?? lang;
+					dropdown.querySelectorAll('.sl-translate__option').forEach((o) =>
+						o.removeAttribute('aria-selected'),
+					);
+					opt.setAttribute('aria-selected', 'true');
+
+					// Close
+					btn.setAttribute('aria-expanded', 'false');
+					dropdown.hidden = true;
+
+					// Update <html lang> so the browser doesn't offer its own translation
+					document.documentElement.lang = lang === 'en' ? 'en' : lang;
+
+					// Trigger Google Translate
+					combo.value = lang;
+					combo.dispatchEvent(new Event('change'));
+				});
+			});
+		});
+	}
+
+	document.addEventListener('DOMContentLoaded', initTranslatePicker);
+	document.addEventListener('astro:page-load', initTranslatePicker);
+	document.addEventListener('astro:after-swap', mountTranslate);
+</script>

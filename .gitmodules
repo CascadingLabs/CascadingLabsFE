@@ -1,0 +1,3 @@
+[submodule "docs/yosoi-docs"]
+	path = docs/yosoi-docs
+	url = https://github.com/CascadingLabs/Yosoi-Docs.git

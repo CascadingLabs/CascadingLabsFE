@@ -25,3 +25,8 @@ pnpm-debug.log*
 
 # unlighthouse
 .unlighthouse/
+.cilighthouse
+lighthouse-results/
+lighthouse-report.html
+lighthouserc.json
+.lighthouseci

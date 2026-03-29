@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main, staging]
+
+jobs:
+  ci:
+    name: Lint & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Biome check
+        run: pnpm check
+
+      - name: Astro build
+        run: pnpm build
+
+      - name: Lighthouse CI (desktop)
+        run: pnpm lhci autorun --config=lighthouserc.desktop.json
+
+      - name: Lighthouse CI (mobile)
+        run: pnpm lhci autorun --config=lighthouserc.mobile.json

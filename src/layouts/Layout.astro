@@ -1,16 +1,17 @@
 ---
-import "../styles/global.css";
+import '../styles/global.css';
+import JsonLd from '../components/JsonLd.astro';
 
 const {
-    title = "Cascading Labs",
-    description = "We are building the future of data and algorithms.",
-    image = "/favicon.svg",
+	title = 'Cascading Labs',
+	description = 'We are building the future of data and algorithms.',
+	image = '/favicon.svg',
 } = Astro.props;
 
 // Create the canonical URL
 const canonicalURL = new URL(
-    Astro.url.pathname,
-    Astro.site || "https://cascadinglabs.com",
+	Astro.url.pathname,
+	Astro.site || 'https://cascadinglabs.com',
 );
 ---
 
@@ -20,6 +21,10 @@ const canonicalURL = new URL(
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=optional" media="print" onload="this.media='all'" />
+        <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=optional" /></noscript>
         <meta name="generator" content={Astro.generator} />
 
         <title>{title}</title>
@@ -28,7 +33,7 @@ const canonicalURL = new URL(
 
         <meta
             http-equiv="Content-Security-Policy"
-            content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; img-src 'self' data:; font-src 'self'; base-uri 'self'; form-action 'self';"
+            content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; img-src 'self' data:; font-src 'self' https://fonts.gstatic.com; base-uri 'self'; form-action 'self';"
         />
 
         <meta property="og:type" content="website" />
@@ -36,19 +41,122 @@ const canonicalURL = new URL(
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
         <meta property="og:image" content={new URL(image, Astro.url)} />
+
+        <JsonLd
+            schema={{
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                name: "Cascading Labs",
+                url: "https://cascadinglabs.com",
+                logo: "https://cascadinglabs.com/favicon.svg",
+                sameAs: ["https://github.com/CascadingLabs"],
+            }}
+        />
+        <JsonLd
+            schema={{
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                name: "Cascading Labs",
+                url: "https://cascadinglabs.com",
+                description: "We are building the future of data and algorithms.",
+            }}
+        />
+
+        {/* Sync theme before first paint — shares localStorage key with Starlight */}
+        <script is:inline>
+            (function () {
+                var s = localStorage.getItem('starlight-theme');
+                var pref = s === 'light' || s === 'dark' ? s : 'auto';
+                var resolved = pref === 'auto'
+                    ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+                    : pref;
+                document.documentElement.dataset.theme = resolved;
+                document.documentElement.dataset.themePreference = pref;
+            })();
+        </script>
     </head>
     <body
-        class="bg-[#0b0c0d] text-[#e5e7eb] antialiased flex justify-center min-h-screen py-20 px-5"
+        class="antialiased flex justify-center min-h-screen py-20 px-5"
+        style="background-color: var(--cl-bg); color: var(--cl-text);"
     >
-        <div class="w-full max-w-[720px] border-x border-[#3f3f46] px-10">
-            <slot />
+        <div class="w-full max-w-180 border-x px-10" style="border-color: var(--cl-border);">
+            <button
+                class="cl-theme-toggle"
+                type="button"
+                aria-label="Toggle theme"
+                id="cl-theme-toggle"
+            >
+                <svg class="cl-theme-icon cl-icon-sun" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+                </svg>
+                <svg class="cl-theme-icon cl-icon-moon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+                </svg>
+                <svg class="cl-theme-icon cl-icon-auto" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>
+                </svg>
+            </button>
+            <main>
+                <slot />
+            </main>
         </div>
     </body>
 </html>
 
-<style is:global>
-    ::selection {
-        background: #64748b;
-        color: #fff;
+<style>
+    .cl-theme-toggle {
+        float: right;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+        background: transparent;
+        border: 1px solid var(--cl-border);
+        color: var(--cl-text-dim);
+        cursor: pointer;
+        transition: border-color 0.2s, color 0.2s;
     }
+
+    .cl-theme-toggle:hover {
+        border-color: var(--cl-accent-text);
+        color: var(--cl-accent-text);
+    }
+
+    /* Show icon matching stored preference (dark=moon, light=sun, auto=monitor) */
+    .cl-theme-icon { display: none; }
+
+    :global([data-theme-preference='dark']) .cl-icon-moon { display: block; }
+    :global([data-theme-preference='light']) .cl-icon-sun { display: block; }
+    :global([data-theme-preference='auto']) .cl-icon-auto { display: block; }
 </style>
+
+<script is:inline>
+    (function () {
+        var order = ['dark', 'light', 'auto'];
+
+        function getStored() {
+            var s = localStorage.getItem('starlight-theme');
+            return s === 'light' || s === 'dark' ? s : 'auto';
+        }
+
+        function apply(pref) {
+            var resolved = pref === 'auto'
+                ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+                : pref;
+            document.documentElement.dataset.theme = resolved;
+            document.documentElement.dataset.themePreference = pref;
+            localStorage.setItem('starlight-theme', pref === 'light' || pref === 'dark' ? pref : '');
+        }
+
+        document.getElementById('cl-theme-toggle').addEventListener('click', function () {
+            var current = getStored();
+            var next = order[(order.indexOf(current) + 1) % order.length];
+            apply(next);
+        });
+
+        window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function () {
+            if (getStored() === 'auto') apply('auto');
+        });
+    })();
+</script>

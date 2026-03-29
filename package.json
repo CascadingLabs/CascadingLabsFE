@@ -2,6 +2,7 @@
 	"name": "cl-fe",
 	"type": "module",
 	"version": "0.0.1",
+	"packageManager": "pnpm@10.32.1",
 	"scripts": {
 		"dev": "astro dev",
 		"build": "astro build",
@@ -11,21 +12,28 @@
 		"format": "biome format . --write",
 		"check": "biome check --write --no-errors-on-unmatched .",
 		"seo": "start-server-and-test 'astro dev --port 4245' http://localhost:4245 'npx unlighthouse --site http://localhost:4245'",
+		"lighthouse": "astro build && lhci autorun --config=lighthouserc.desktop.json && lhci autorun --config=lighthouserc.mobile.json",
 		"prepare": "husky"
 	},
 	"lint-staged": {
-		"*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}": [
+		"*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc,astro}": [
 			"biome check --write --no-errors-on-unmatched"
 		]
 	},
 	"dependencies": {
+		"@astrojs/compiler-rs": "^0.1.6",
 		"@astrojs/sitemap": "^3.7.0",
+		"@astrojs/solid-js": "^6.0.1",
+		"@astrojs/starlight": "^0.38.2",
 		"@tailwindcss/vite": "^4.1.18",
-		"astro": "^5.17.1",
-		"tailwindcss": "^4.1.18"
+		"astro": "^6.1.1",
+		"solid-js": "^1.9.12",
+		"tailwindcss": "^4.1.18",
+		"unist-util-visit": "^5.1.0"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.3.14",
+		"@lhci/cli": "^0.14.0",
 		"husky": "^9.1.7",
 		"lint-staged": "^16.2.7",
 		"start-server-and-test": "^2.1.3"
