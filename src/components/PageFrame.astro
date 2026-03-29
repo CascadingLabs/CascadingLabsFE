@@ -201,6 +201,14 @@ import VersionSelect from './VersionSelect.astro';
 			const open = btn.getAttribute('aria-expanded') === 'true';
 			btn.setAttribute('aria-expanded', String(!open));
 			dropdown.hidden = open;
+
+			// Close the version dropdown if it's open
+			if (!open) {
+				var vBtn = document.getElementById('sl-version-btn');
+				var vDd = document.getElementById('sl-version-dropdown');
+				if (vBtn) vBtn.setAttribute('aria-expanded', 'false');
+				if (vDd) vDd.hidden = true;
+			}
 		});
 
 		// Close on outside click or Escape

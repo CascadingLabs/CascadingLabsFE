@@ -27,6 +27,7 @@ import { currentLabel, versions } from '../versions';
 		id="sl-version-dropdown"
 		role="listbox"
 		aria-label="Select version"
+		data-slugs={JSON.stringify(versions.map(v => v.slug))}
 		hidden
 	>
 		<li class="sl-version__option sl-version__option--current" role="option" aria-selected="true" data-slug="">
@@ -145,6 +146,14 @@ import { currentLabel, versions } from '../versions';
 			const open = btn.getAttribute('aria-expanded') === 'true';
 			btn.setAttribute('aria-expanded', String(!open));
 			dropdown.hidden = open;
+
+			// Close the language dropdown if it's open
+			if (!open) {
+				var tBtn = document.getElementById('sl-translate-btn');
+				var tDd = document.getElementById('sl-translate-dropdown');
+				if (tBtn) tBtn.setAttribute('aria-expanded', 'false');
+				if (tDd) tDd.hidden = true;
+			}
 		});
 
 		document.addEventListener('click', () => {
@@ -163,12 +172,16 @@ import { currentLabel, versions } from '../versions';
 			opt.addEventListener('click', () => {
 				const slug = opt.dataset.slug;
 				const currentPath = window.location.pathname;
+				const slugs = JSON.parse(dropdown.dataset.slugs || '[]');
 
-				// Strip any existing version prefix from the path
-				const versionedPattern = /^\/([^/]+)(\/.*)?$/;
-				const stripped = currentPath.replace(/^\/[^/]+/, '') || '/';
+				// Check if the first path segment is a known version slug
+				const firstSeg = currentPath.split('/').filter(Boolean)[0];
+				const isVersioned = slugs.includes(firstSeg);
+				const barePath = isVersioned
+					? currentPath.replace(/^\/[^/]+/, '') || '/'
+					: currentPath;
 
-				const target = slug ? `/${slug}${stripped}` : stripped;
+				const target = slug ? `/${slug}${barePath}` : barePath;
 
 				btn.setAttribute('aria-expanded', 'false');
 				dropdown.hidden = true;

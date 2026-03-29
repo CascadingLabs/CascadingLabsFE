@@ -18,6 +18,67 @@ jobs:
           submodules: recursive
           token: ${{ secrets.DOCS_DEPLOY_TOKEN }}
 
+      - name: Determine previous version from submodule
+        id: prev
+        run: |
+          cd docs/yosoi-docs
+          git fetch --tags origin
+          PREV_TAG=$(git describe --tags --exact-match HEAD 2>/dev/null || echo "")
+          echo "tag=${PREV_TAG}" >> "$GITHUB_OUTPUT"
+          if [ -n "${PREV_TAG}" ]; then
+            echo "slug=${PREV_TAG#v}" >> "$GITHUB_OUTPUT"
+            echo "Found previous version: ${PREV_TAG}"
+          else
+            echo "No previous version tag found — skipping snapshot"
+          fi
+
+      - name: Setup pnpm
+        if: steps.prev.outputs.tag != ''
+        uses: pnpm/action-setup@v5
+
+      - name: Setup Node
+        if: steps.prev.outputs.tag != ''
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        if: steps.prev.outputs.tag != ''
+        run: pnpm install --frozen-lockfile
+
+      - name: Build current site
+        if: steps.prev.outputs.tag != ''
+        run: pnpm build
+
+      - name: Snapshot current docs as archived version
+        if: steps.prev.outputs.tag != ''
+        env:
+          SLUG: ${{ steps.prev.outputs.slug }}
+        run: |
+          DOC_DIRS="yosoi guides reference contributing qscrape roadmap"
+          mkdir -p "public/${SLUG}"
+          for dir in $DOC_DIRS; do
+            if [ -d "dist/${dir}" ]; then
+              cp -r "dist/${dir}" "public/${SLUG}/${dir}"
+            fi
+          done
+
+          # Preserve hashed assets so archived pages render correctly
+          mkdir -p public/_astro
+          cp -rn dist/_astro/* public/_astro/ 2>/dev/null || true
+
+          # Inject noindex meta tag into archived pages
+          find "public/${SLUG}" -name "index.html" \
+            -exec sed -i 's/<head>/<head><meta name="robots" content="noindex,follow">/' {} +
+
+          # Update robots.txt
+          if ! grep -q "Disallow: /${SLUG}/" public/robots.txt; then
+            echo "Disallow: /${SLUG}/" >> public/robots.txt
+          fi
+
+          echo "Archived docs snapshot at public/${SLUG}/"
+
       - name: Pull latest Yosoi-Docs
         run: |
           git config --global user.name  "github-actions[bot]"
@@ -29,14 +90,11 @@ jobs:
           git pull origin main
 
       - name: Add version entry to src/versions.ts
-        if: ${{ github.event.client_payload.tag != '' }}
+        if: steps.prev.outputs.tag != ''
         env:
-          TAG: ${{ github.event.client_payload.tag }}
+          SLUG: ${{ steps.prev.outputs.slug }}
+          LABEL: ${{ steps.prev.outputs.slug }}
         run: |
-          # Strip leading 'v' for the label; use same string as URL slug
-          LABEL="${TAG#v}"
-          SLUG="${LABEL}"
-
           echo "Archiving version: slug=${SLUG} label=${LABEL}"
 
           node -e "
@@ -56,13 +114,17 @@ jobs:
       - name: Commit updates
         env:
           TAG: ${{ github.event.client_payload.tag }}
+          PREV_SLUG: ${{ steps.prev.outputs.slug }}
         run: |
-          git add docs/yosoi-docs src/versions.ts
+          git add docs/yosoi-docs src/versions.ts public/
 
           if git diff --cached --quiet; then
             echo "Nothing changed — already up to date"
           else
-            MSG="chore: update yosoi-docs submodule${TAG:+ to ${TAG}}"
+            MSG="chore: update yosoi-docs to ${TAG}"
+            if [ -n "${PREV_SLUG}" ]; then
+              MSG="${MSG} (archived ${PREV_SLUG})"
+            fi
             git commit -m "$MSG"
             git push
             echo "Pushed update"

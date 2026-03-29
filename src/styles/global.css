@@ -186,6 +186,22 @@ body::after {
     padding-top: 0;
 }
 
+/* ── Right sidebar zoom / narrow-viewport fix ──────── */
+/* Starlight's .right-sidebar is position:fixed with width:100% (= viewport width).
+   When --sl-content-width is wide (75rem) and the viewport shrinks (zoom, browser
+   sidebar, etc.) the right sidebar container gets very little space but the fixed
+   child still spans the viewport, causing the TOC to overflow and get clipped.
+   Fix: inherit the container's calculated width so the sidebar shrinks with it. */
+@media (min-width: 72rem) {
+    .right-sidebar {
+        width: inherit !important;
+        overflow-x: hidden !important;
+    }
+    .right-sidebar-panel .sl-container {
+        max-width: 100% !important;
+    }
+}
+
 /* ── Starlight overrides ─────────────────────────────── */
 
 site-search {
