@@ -111,6 +111,36 @@ jobs:
             console.log('Inserted version entry for ${SLUG}');
           "
 
+      - name: Sync versions.json and update archived HTML
+        if: steps.prev.outputs.tag != ''
+        run: |
+          # Generate versions.json from versions.ts
+          node -e "
+            const fs = require('fs');
+            const content = fs.readFileSync('src/versions.ts', 'utf8');
+            const matches = [...content.matchAll(/\{\s*slug:\s*'([^']+)',\s*label:\s*'([^']+)'\s*\}/g)];
+            const versions = matches.map(m => ({ slug: m[1], label: m[2] }));
+            fs.writeFileSync('public/versions.json', JSON.stringify(versions, null, '\t') + '\n');
+            console.log('Generated versions.json with', versions.length, 'entries');
+          "
+
+          # Build the HTML-escaped data-slugs value from versions.json
+          SLUGS_ATTR=$(node -e "
+            const vs = require('./public/versions.json');
+            const inner = vs.map(v => '\&quot;' + v.slug + '\&quot;').join(',');
+            process.stdout.write('[' + inner + ']');
+          ")
+
+          # Update data-slugs in ALL archived HTML
+          for dir in public/0.0.1a*/; do
+            [ -d "$dir" ] || continue
+            find "$dir" -name "index.html" -exec sed -i \
+              -e "s/data-slugs=\"[^\"]*\"/data-slugs=\"${SLUGS_ATTR}\"/" \
+              {} +
+          done
+
+          echo "Synced versions.json and updated archived HTML"
+
       - name: Commit updates
         env:
           TAG: ${{ github.event.client_payload.tag }}

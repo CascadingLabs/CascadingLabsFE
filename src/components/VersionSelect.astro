@@ -116,6 +116,8 @@ import { currentLabel, versions } from '../versions';
 
 <script is:inline>
 	var versionMQ = window.matchMedia('(min-width: 50rem)');
+	// Regex to detect version-like path segments (e.g. 0.0.1a14, 1.2.3beta4)
+	var VERSION_RE = /^\d+\.\d+\.\d+[a-zA-Z]*\d*$/;
 
 	function mountVersionUI() {
 		var ui = document.getElementById('sl-version-select');
@@ -129,25 +131,73 @@ import { currentLabel, versions } from '../versions';
 	}
 
 	versionMQ.addEventListener('change', mountVersionUI);
-
-	// Mount immediately (synchronous, before first paint) to prevent layout shift
 	mountVersionUI();
+
+	function getVersionInfo() {
+		var segs = window.location.pathname.split('/').filter(Boolean);
+		var first = segs[0] || '';
+		var isVersioned = VERSION_RE.test(first);
+		return {
+			isVersioned: isVersioned,
+			currentSlug: isVersioned ? first : '',
+			barePath: isVersioned
+				? window.location.pathname.replace(/^\/[^/]+/, '') || '/'
+				: window.location.pathname
+		};
+	}
+
+	function rebuildDropdown(dropdown, versions, currentSlug) {
+		dropdown.innerHTML = '';
+
+		var latestLi = document.createElement('li');
+		latestLi.className = 'sl-version__option' + (!currentSlug ? ' sl-version__option--current' : '');
+		latestLi.setAttribute('role', 'option');
+		latestLi.setAttribute('aria-selected', String(!currentSlug));
+		latestLi.dataset.slug = '';
+		latestLi.textContent = 'Latest';
+		dropdown.appendChild(latestLi);
+
+		versions.forEach(function (v) {
+			var li = document.createElement('li');
+			li.className = 'sl-version__option' + (v.slug === currentSlug ? ' sl-version__option--current' : '');
+			li.setAttribute('role', 'option');
+			li.setAttribute('aria-selected', String(v.slug === currentSlug));
+			li.dataset.slug = v.slug;
+			li.textContent = v.label;
+			dropdown.appendChild(li);
+		});
+	}
 
 	function initVersionPicker() {
 		mountVersionUI();
 
-		const btn = document.getElementById('sl-version-btn');
-		const dropdown = document.getElementById('sl-version-dropdown');
-		const label = document.getElementById('sl-version-label');
+		var btn = document.getElementById('sl-version-btn');
+		var dropdown = document.getElementById('sl-version-dropdown');
+		var label = document.getElementById('sl-version-label');
 		if (!btn || !dropdown || !label) return;
 
-		btn.addEventListener('click', (e) => {
+		var info = getVersionInfo();
+
+		// Show current version in button label
+		if (info.isVersioned) {
+			label.textContent = info.currentSlug;
+		}
+
+		// Fetch latest version list and rebuild dropdown so archived pages stay current
+		fetch('/versions.json')
+			.then(function (r) { return r.json(); })
+			.then(function (versions) {
+				rebuildDropdown(dropdown, versions, info.currentSlug);
+			})
+			.catch(function () { /* use static HTML fallback */ });
+
+		// Toggle dropdown
+		btn.addEventListener('click', function (e) {
 			e.stopPropagation();
-			const open = btn.getAttribute('aria-expanded') === 'true';
+			var open = btn.getAttribute('aria-expanded') === 'true';
 			btn.setAttribute('aria-expanded', String(!open));
 			dropdown.hidden = open;
 
-			// Close the language dropdown if it's open
 			if (!open) {
 				var tBtn = document.getElementById('sl-translate-btn');
 				var tDd = document.getElementById('sl-translate-dropdown');
@@ -156,41 +206,34 @@ import { currentLabel, versions } from '../versions';
 			}
 		});
 
-		document.addEventListener('click', () => {
+		document.addEventListener('click', function () {
 			btn.setAttribute('aria-expanded', 'false');
 			dropdown.hidden = true;
 		});
 
-		document.addEventListener('keydown', (e) => {
+		document.addEventListener('keydown', function (e) {
 			if (e.key === 'Escape') {
 				btn.setAttribute('aria-expanded', 'false');
 				dropdown.hidden = true;
 			}
 		});
 
-		dropdown.querySelectorAll('.sl-version__option').forEach((opt) => {
-			opt.addEventListener('click', () => {
-				const slug = opt.dataset.slug;
-				const currentPath = window.location.pathname;
-				const slugs = JSON.parse(dropdown.dataset.slugs || '[]');
+		// Use event delegation so dynamically rebuilt options work
+		dropdown.onclick = function (e) {
+			var opt = e.target.closest('.sl-version__option');
+			if (!opt) return;
 
-				// Check if the first path segment is a known version slug
-				const firstSeg = currentPath.split('/').filter(Boolean)[0];
-				const isVersioned = slugs.includes(firstSeg);
-				const barePath = isVersioned
-					? currentPath.replace(/^\/[^/]+/, '') || '/'
-					: currentPath;
+			var slug = opt.dataset.slug;
+			var vi = getVersionInfo();
+			var target = slug ? '/' + slug + vi.barePath : vi.barePath;
 
-				const target = slug ? `/${slug}${barePath}` : barePath;
+			btn.setAttribute('aria-expanded', 'false');
+			dropdown.hidden = true;
 
-				btn.setAttribute('aria-expanded', 'false');
-				dropdown.hidden = true;
-
-				if (target !== currentPath) {
-					window.location.href = target;
-				}
-			});
-		});
+			if (target !== window.location.pathname) {
+				window.location.href = target;
+			}
+		};
 	}
 
 	document.addEventListener('DOMContentLoaded', initVersionPicker);
