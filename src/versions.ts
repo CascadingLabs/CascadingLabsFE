@@ -11,6 +11,7 @@ export interface Version {
  * Convention: archived docs live at docs/yosoi-docs/<slug>/
  */
 export const versions: Version[] = [
+	{ slug: '0.0.1a15', label: '0.0.1a15' },
 	{ slug: '0.0.1a14', label: '0.0.1a14' },
 	{ slug: '0.0.1a13', label: '0.0.1a13' },
 	// { slug: 'a11', label: '0.0.1-alpha.11' },
