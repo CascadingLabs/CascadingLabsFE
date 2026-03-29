@@ -28,6 +28,11 @@ export default defineConfig({
 			description: 'AI-powered CSS selector discovery for web scraping.',
 			social: [
 				{
+					icon: 'discord',
+					label: 'Discord',
+					href: 'https://discord.gg/7jgEzfbTWY',
+				},
+				{
 					icon: 'github',
 					label: 'GitHub',
 					href: 'https://github.com/CascadingLabs/Yosoi',
@@ -58,8 +63,7 @@ export default defineConfig({
 						{ label: 'Validators', slug: 'guides/validators' },
 						{ label: 'Custom Types', slug: 'guides/custom-types' },
 						{ label: 'Concurrent Scraping', slug: 'guides/concurrent' },
-						{ label: 'Proxying', slug: 'guides/proxying' },
-						{ label: 'Scaling', slug: 'guides/scaling' },
+						{ label: 'Debugging', slug: 'guides/debugging' },
 						{
 							label: 'Examples',
 							collapsed: true,
@@ -83,6 +87,10 @@ export default defineConfig({
 									slug: 'guides/examples/manual-selectors',
 								},
 								{ label: 'JSON Output', slug: 'guides/examples/json-output' },
+								{
+									label: 'Nested Contracts',
+									slug: 'guides/examples/nested-contracts',
+								},
 							],
 						},
 					],
