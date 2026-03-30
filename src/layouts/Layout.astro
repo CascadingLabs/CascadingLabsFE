@@ -33,8 +33,11 @@ const canonicalURL = new URL(
 
         <meta
             http-equiv="Content-Security-Policy"
-            content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; img-src 'self' data:; font-src 'self' https://fonts.gstatic.com; base-uri 'self'; form-action 'self';"
+            content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.googleapis.com; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://*.google.com https://*.googleapis.com https://*.gstatic.com; connect-src 'self' https://cloudflareinsights.com https://*.googleapis.com https://*.google.com; img-src 'self' data: https://*.gstatic.com https://*.googleapis.com; font-src 'self' https://fonts.gstatic.com https://*.gstatic.com; frame-src 'self' https://*.google.com https://translate.googleusercontent.com; base-uri 'self'; form-action 'self';"
         />
+
+        <!-- Prevent browser's built-in translate from triggering (we handle translation ourselves) -->
+        <meta name="google" content="notranslate" />
 
         <meta property="og:type" content="website" />
         <meta property="og:url" content={Astro.url} />
@@ -65,7 +68,12 @@ const canonicalURL = new URL(
         {/* Sync theme before first paint — shares localStorage key with Starlight */}
         <script is:inline>
             (function () {
-                var s = localStorage.getItem('starlight-theme');
+                function getCookie(name) {
+                    var m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+                    return m ? decodeURIComponent(m[1]) : null;
+                }
+                var c = getCookie('cl-theme');
+                var s = c || localStorage.getItem('starlight-theme');
                 var pref = s === 'light' || s === 'dark' ? s : 'auto';
                 var resolved = pref === 'auto'
                     ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
@@ -74,28 +82,117 @@ const canonicalURL = new URL(
                 document.documentElement.dataset.themePreference = pref;
             })();
         </script>
+
+        <script is:inline>
+            function googleTranslateElementInit() {
+                new google.translate.TranslateElement(
+                    {
+                        pageLanguage: 'en',
+                        layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL,
+                        autoDisplay: false,
+                    },
+                    'google_translate_element',
+                );
+            }
+            function loadGoogleTranslate() {
+                if (document.querySelector('script[src*="translate.google.com"]')) return;
+                var s = document.createElement('script');
+                s.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+                s.async = true;
+                document.head.appendChild(s);
+            }
+            if (typeof requestIdleCallback === 'function') {
+                requestIdleCallback(loadGoogleTranslate);
+            } else {
+                window.addEventListener('load', function () { setTimeout(loadGoogleTranslate, 100); });
+            }
+        </script>
     </head>
     <body
         class="antialiased flex justify-center min-h-screen py-20 px-5"
         style="background-color: var(--cl-bg); color: var(--cl-text);"
     >
-        <div class="w-full max-w-180 border-x px-10" style="border-color: var(--cl-border);">
-            <button
-                class="cl-theme-toggle"
-                type="button"
-                aria-label="Toggle theme"
-                id="cl-theme-toggle"
-            >
-                <svg class="cl-theme-icon cl-icon-sun" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
-                </svg>
-                <svg class="cl-theme-icon cl-icon-moon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
-                </svg>
-                <svg class="cl-theme-icon cl-icon-auto" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>
-                </svg>
-            </button>
+        <!-- Hidden Google Translate initialisation target -->
+        <div id="google_translate_element" style="display:none"></div>
+
+        <div id="cl-content" class="w-full max-w-180 border-x px-10" style="border-color: var(--cl-border); position: relative; z-index: 1; background-color: var(--cl-bg);">
+            <div class="cl-header-actions">
+                <!-- Theme toggle -->
+                <button
+                    class="cl-theme-toggle"
+                    type="button"
+                    aria-label="Toggle theme"
+                    id="cl-theme-toggle"
+                >
+                    <svg class="cl-theme-icon cl-icon-sun" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+                    </svg>
+                    <svg class="cl-theme-icon cl-icon-moon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+                    </svg>
+                    <svg class="cl-theme-icon cl-icon-auto" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>
+                    </svg>
+                </button>
+
+                <!-- GitHub link -->
+                <a
+                    class="cl-github-link"
+                    href="https://github.com/CascadingLabs"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Cascading Labs on GitHub"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+                    </svg>
+                </a>
+
+                <!-- Language picker -->
+                <div class="cl-translate notranslate" id="cl-translate">
+                    <button
+                        class="cl-translate__btn"
+                        id="cl-translate-btn"
+                        type="button"
+                        aria-expanded="false"
+                        aria-controls="cl-translate-dropdown"
+                        aria-haspopup="listbox"
+                    >
+                        <!-- Languages icon (Lucide) -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/>
+                            <path d="m22 22-5-10-5 10"/><path d="M14 18h6"/>
+                        </svg>
+                        <span id="cl-translate-label">Auto</span>
+                        <!-- Chevron icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="cl-translate__chevron" aria-hidden="true">
+                            <path d="m6 9 6 6 6-6"/>
+                        </svg>
+                    </button>
+                    <ul
+                        class="cl-translate__dropdown"
+                        id="cl-translate-dropdown"
+                        role="listbox"
+                        aria-label="Select language"
+                        hidden
+                    >
+                        <li class="cl-translate__option" role="option" data-value="en">English</li>
+                        <li class="cl-translate__option" role="option" data-value="de">Deutsch</li>
+                        <li class="cl-translate__option" role="option" data-value="pt">Português do Brasil</li>
+                        <li class="cl-translate__option" role="option" data-value="es">Español</li>
+                        <li class="cl-translate__option" role="option" data-value="zh-CN">简体中文</li>
+                        <li class="cl-translate__option" role="option" data-value="zh-TW">正體中文</li>
+                        <li class="cl-translate__option" role="option" data-value="fr">Français</li>
+                        <li class="cl-translate__option" role="option" data-value="hi">हिन्दी</li>
+                        <li class="cl-translate__option" role="option" data-value="ar">العربية</li>
+                        <li class="cl-translate__option" role="option" data-value="ja">日本語</li>
+                        <li class="cl-translate__option" role="option" data-value="ko">한국어</li>
+                        <li class="cl-translate__option" role="option" data-value="pl">Polski</li>
+                        <li class="cl-translate__option" role="option" data-value="ru">Русский</li>
+                        <li class="cl-translate__option" role="option" data-value="it">Italiano</li>
+                    </ul>
+                </div>
+            </div>
             <main>
                 <slot />
             </main>
@@ -104,8 +201,16 @@ const canonicalURL = new URL(
 </html>
 
 <style>
-    .cl-theme-toggle {
+    /* ── Header action bar ───────────────────────────── */
+    .cl-header-actions {
         float: right;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* ── Theme toggle ────────────────────────────────── */
+    .cl-theme-toggle {
         display: flex;
         align-items: center;
         justify-content: center;
@@ -129,14 +234,114 @@ const canonicalURL = new URL(
     :global([data-theme-preference='dark']) .cl-icon-moon { display: block; }
     :global([data-theme-preference='light']) .cl-icon-sun { display: block; }
     :global([data-theme-preference='auto']) .cl-icon-auto { display: block; }
+
+    /* ── GitHub link ─────────────────────────────────── */
+    .cl-github-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+        color: var(--cl-text-dim);
+        border: 1px solid var(--cl-border);
+        text-decoration: none;
+        transition: border-color 0.2s, color 0.2s;
+    }
+
+    .cl-github-link:hover {
+        border-color: var(--cl-accent-text);
+        color: var(--cl-accent-text);
+    }
+
+    /* ── Language picker ─────────────────────────────── */
+    .cl-translate {
+        position: relative;
+    }
+
+    .cl-translate__btn {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        background: transparent;
+        border: 1px solid var(--cl-border);
+        padding: 0.3125rem 0.625rem;
+        color: var(--cl-text-dim);
+        font-family: "DM Mono", monospace;
+        font-size: 0.8rem;
+        cursor: pointer;
+        white-space: nowrap;
+        line-height: 1;
+        height: 2rem;
+        transition: border-color 0.2s, color 0.2s;
+    }
+
+    .cl-translate__btn:hover {
+        border-color: var(--cl-accent-text);
+        color: var(--cl-accent-text);
+    }
+
+    .cl-translate__chevron {
+        opacity: 0.7;
+        transition: transform 0.15s ease;
+    }
+
+    .cl-translate__btn[aria-expanded='true'] .cl-translate__chevron {
+        transform: rotate(180deg);
+    }
+
+    .cl-translate__dropdown {
+        position: absolute;
+        top: calc(100% + 0.375rem);
+        right: 0;
+        min-width: 11rem;
+        background: var(--cl-bg);
+        border: 1px solid var(--cl-border);
+        list-style: none;
+        margin: 0;
+        padding: 0.25rem;
+        z-index: 9999;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        max-height: 20rem;
+        overflow-y: auto;
+    }
+
+    .cl-translate__option {
+        padding: 0.4375rem 0.75rem;
+        font-family: "DM Mono", monospace;
+        font-size: 0.8rem;
+        color: var(--cl-text-muted);
+        cursor: pointer;
+        line-height: 1.4;
+    }
+
+    .cl-translate__option:hover,
+    .cl-translate__option[aria-selected='true'] {
+        background: var(--cl-accent);
+        color: var(--cl-accent-pale);
+    }
+
+    /* ── Suppress Google Translate banner ────────────── */
+    :global(.skiptranslate) {
+        display: none !important;
+    }
+
+    :global(body) {
+        top: 0 !important;
+    }
 </style>
 
 <script is:inline>
     (function () {
         var order = ['dark', 'light', 'auto'];
 
+        function getCookie(name) {
+            var m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+            return m ? decodeURIComponent(m[1]) : null;
+        }
+
         function getStored() {
-            var s = localStorage.getItem('starlight-theme');
+            var c = getCookie('cl-theme');
+            var s = c || localStorage.getItem('starlight-theme');
             return s === 'light' || s === 'dark' ? s : 'auto';
         }
 
@@ -146,6 +351,8 @@ const canonicalURL = new URL(
                 : pref;
             document.documentElement.dataset.theme = resolved;
             document.documentElement.dataset.themePreference = pref;
+            var val = pref === 'light' || pref === 'dark' ? pref : 'auto';
+            document.cookie = 'cl-theme=' + val + '; path=/; max-age=31536000; SameSite=Lax';
             localStorage.setItem('starlight-theme', pref === 'light' || pref === 'dark' ? pref : '');
         }
 
@@ -158,5 +365,101 @@ const canonicalURL = new URL(
         window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function () {
             if (getStored() === 'auto') apply('auto');
         });
+
+        window.addEventListener('storage', function (e) {
+            if (e.key === 'starlight-theme') apply(getStored());
+        });
+    })();
+</script>
+
+<script is:inline>
+    (function () {
+        var LANGS = {
+            en: 'English',
+            de: 'Deutsch',
+            pt: 'Português do Brasil',
+            es: 'Español',
+            'zh-CN': '简体中文',
+            'zh-TW': '正體中文',
+            fr: 'Français',
+            hi: 'हिन्दी',
+            ar: 'العربية',
+            ja: '日本語',
+            ko: '한국어',
+            pl: 'Polski',
+            ru: 'Русский',
+            it: 'Italiano',
+        };
+
+        function getCookie(name) {
+            var m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+            return m ? decodeURIComponent(m[1]) : null;
+        }
+
+        function waitForCombo(cb, tries) {
+            tries = tries === undefined ? 30 : tries;
+            var combo = document.querySelector('select.goog-te-combo');
+            if (combo) { cb(combo); return; }
+            if (tries > 0) setTimeout(function () { waitForCombo(cb, tries - 1); }, 150);
+        }
+
+        function initTranslatePicker() {
+            var btn = document.getElementById('cl-translate-btn');
+            var dropdown = document.getElementById('cl-translate-dropdown');
+            var label = document.getElementById('cl-translate-label');
+            if (!btn || !dropdown || !label) return;
+
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var open = btn.getAttribute('aria-expanded') === 'true';
+                btn.setAttribute('aria-expanded', String(!open));
+                dropdown.hidden = open;
+            });
+
+            document.addEventListener('click', function () {
+                btn.setAttribute('aria-expanded', 'false');
+                dropdown.hidden = true;
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    btn.setAttribute('aria-expanded', 'false');
+                    dropdown.hidden = true;
+                }
+            });
+
+            waitForCombo(function (combo) {
+                var saved = getCookie('cl-lang');
+                if (saved && saved !== 'en' && Object.prototype.hasOwnProperty.call(LANGS, saved)) {
+                    var savedOpt = dropdown.querySelector('[data-value="' + saved.replace(/"/g, '') + '"]');
+                    if (savedOpt) {
+                        label.textContent = LANGS[saved];
+                        savedOpt.setAttribute('aria-selected', 'true');
+                        document.documentElement.lang = saved;
+                        combo.value = saved;
+                        combo.dispatchEvent(new Event('change'));
+                    }
+                }
+
+                dropdown.querySelectorAll('.cl-translate__option').forEach(function (opt) {
+                    opt.addEventListener('click', function () {
+                        var lang = opt.dataset.value;
+                        label.textContent = lang === 'en' ? 'Auto' : (LANGS[lang] || lang);
+                        dropdown.querySelectorAll('.cl-translate__option').forEach(function (o) {
+                            o.removeAttribute('aria-selected');
+                        });
+                        opt.setAttribute('aria-selected', 'true');
+                        btn.setAttribute('aria-expanded', 'false');
+                        dropdown.hidden = true;
+                        document.documentElement.lang = lang === 'en' ? 'en' : lang;
+                        document.cookie = 'cl-lang=' + lang + '; path=/; max-age=31536000; SameSite=Lax';
+                        combo.value = lang;
+                        combo.dispatchEvent(new Event('change'));
+                    });
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initTranslatePicker);
     })();
 </script>
