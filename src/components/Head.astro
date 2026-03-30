@@ -75,6 +75,47 @@ for (let i = 0; i < segments.length; i++) {
 <meta name="google" content="notranslate" />
 
 <script is:inline>
+	// Cross-site sync: read cl-theme and cl-lang from inbound links
+	(function () {
+		var params = new URLSearchParams(window.location.search);
+		var dirty = false;
+
+		var inbound = params.get('cl-theme');
+		if (inbound === 'light' || inbound === 'dark' || inbound === 'auto') {
+			var storeVal = inbound === 'light' || inbound === 'dark' ? inbound : 'auto';
+			document.cookie = 'cl-theme=' + storeVal + '; path=/; max-age=31536000; SameSite=Lax';
+			localStorage.setItem('starlight-theme', inbound === 'auto' ? '' : inbound);
+			var resolved = inbound === 'auto'
+				? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+				: inbound;
+			document.documentElement.dataset.theme = resolved;
+			params.delete('cl-theme');
+			dirty = true;
+		}
+
+		var inboundLang = params.get('cl-lang');
+		if (inboundLang && /^[a-z]{2}(-[A-Za-z]{2,})?$/.test(inboundLang)) {
+			document.cookie = 'cl-lang=' + inboundLang + '; path=/; max-age=31536000; SameSite=Lax';
+			params.delete('cl-lang');
+			dirty = true;
+		}
+
+		if (dirty) {
+			var clean = params.toString();
+			history.replaceState(null, '', window.location.pathname + (clean ? '?' + clean : '') + window.location.hash);
+		}
+
+		// Always ensure cl-theme cookie exists (handles cleared/missing state, fallback to auto)
+		var existing = document.cookie.match(/(?:^|; )cl-theme=([^;]*)/);
+		if (!existing) {
+			var ls = localStorage.getItem('starlight-theme');
+			var val = ls === 'light' || ls === 'dark' ? ls : 'auto';
+			document.cookie = 'cl-theme=' + val + '; path=/; max-age=31536000; SameSite=Lax';
+		}
+	})();
+</script>
+
+<script is:inline>
 	// Set data-brand on <html> based on URL path for per-section accent colors
 	function setBrand() {
 		var p = location.pathname;
@@ -85,6 +126,26 @@ for (let i = 0; i < segments.length; i++) {
 	}
 	setBrand();
 	document.addEventListener('astro:page-load', setBrand);
+</script>
+
+<script is:inline>
+	// Cross-site sync: decorate outbound links to qscrape.dev with theme, lang, utm
+	document.addEventListener('click', function (e) {
+		var link = e.target.closest('a[href*="qscrape.dev"]');
+		if (!link) return;
+		var s = document.cookie.match(/(?:^|; )cl-theme=([^;]*)/);
+		var pref = s ? decodeURIComponent(s[1]) : (localStorage.getItem('starlight-theme') || 'auto');
+		if (pref !== 'light' && pref !== 'dark') pref = 'auto';
+		var langMatch = document.cookie.match(/(?:^|; )cl-lang=([^;]*)/);
+		var lang = langMatch ? decodeURIComponent(langMatch[1]) : null;
+		try {
+			var u = new URL(link.href);
+			u.searchParams.set('cl-theme', pref);
+			if (lang) u.searchParams.set('cl-lang', lang);
+			if (!u.searchParams.has('utm_source')) u.searchParams.set('utm_source', 'cascadinglabs');
+			link.href = u.toString();
+		} catch (_) {}
+	}, true);
 </script>
 
 <script is:inline>

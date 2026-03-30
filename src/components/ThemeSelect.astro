@@ -125,6 +125,8 @@
 		if (typeof localStorage !== 'undefined') {
 			localStorage.setItem(storageKey, theme === 'light' || theme === 'dark' ? theme : '');
 		}
+		var val = theme === 'light' || theme === 'dark' ? theme : 'auto';
+		document.cookie = 'cl-theme=' + val + '; path=/; max-age=31536000; SameSite=Lax';
 	}
 
 	const getPreferredColorScheme = (): Theme =>

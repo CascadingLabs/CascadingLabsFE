@@ -73,6 +73,33 @@ const canonicalURL = new URL(
                     var m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
                     return m ? decodeURIComponent(m[1]) : null;
                 }
+
+                // Cross-site sync: read cl-theme and cl-lang from inbound links
+                var params = new URLSearchParams(window.location.search);
+                var dirty = false;
+
+                var inbound = params.get('cl-theme');
+                if (inbound === 'light' || inbound === 'dark' || inbound === 'auto') {
+                    var storeVal = inbound === 'light' || inbound === 'dark' ? inbound : 'auto';
+                    document.cookie = 'cl-theme=' + storeVal + '; path=/; max-age=31536000; SameSite=Lax';
+                    localStorage.setItem('starlight-theme', inbound === 'auto' ? '' : inbound);
+                    params.delete('cl-theme');
+                    dirty = true;
+                }
+
+                var inboundLang = params.get('cl-lang');
+                if (inboundLang && /^[a-z]{2}(-[A-Za-z]{2,})?$/.test(inboundLang)) {
+                    document.cookie = 'cl-lang=' + inboundLang + '; path=/; max-age=31536000; SameSite=Lax';
+                    params.delete('cl-lang');
+                    dirty = true;
+                }
+
+                // Strip consumed CL params but preserve utm_source and others
+                if (dirty) {
+                    var clean = params.toString();
+                    history.replaceState(null, '', window.location.pathname + (clean ? '?' + clean : '') + window.location.hash);
+                }
+
                 var c = getCookie('cl-theme');
                 var s = c || localStorage.getItem('starlight-theme');
                 var pref = s === 'light' || s === 'dark' ? s : 'auto';
@@ -81,6 +108,11 @@ const canonicalURL = new URL(
                     : pref;
                 document.documentElement.dataset.theme = resolved;
                 document.documentElement.dataset.themePreference = pref;
+
+                // Always ensure cookie + localStorage exist (handles cleared/missing state)
+                var cookieVal = pref === 'light' || pref === 'dark' ? pref : 'auto';
+                document.cookie = 'cl-theme=' + cookieVal + '; path=/; max-age=31536000; SameSite=Lax';
+                localStorage.setItem('starlight-theme', pref === 'auto' ? '' : pref);
             })();
         </script>
 
@@ -428,6 +460,20 @@ const canonicalURL = new URL(
 
         // Sync images on initial load (data-theme already set by head script)
         syncThemedImages(document.documentElement.dataset.theme || 'dark');
+
+        // Cross-site sync: decorate outbound links to qscrape.dev with theme, lang, utm
+        document.addEventListener('click', function (e) {
+            var link = e.target.closest('a[href*="qscrape.dev"]');
+            if (!link) return;
+            try {
+                var u = new URL(link.href);
+                u.searchParams.set('cl-theme', getStored());
+                var lang = getCookie('cl-lang');
+                if (lang) u.searchParams.set('cl-lang', lang);
+                if (!u.searchParams.has('utm_source')) u.searchParams.set('utm_source', 'cascadinglabs');
+                link.href = u.toString();
+            } catch (_) {}
+        }, true);
     })();
 </script>
 
