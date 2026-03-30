@@ -15,6 +15,19 @@ samp {
 	font-family: "DM Mono", monospace;
 }
 
+/* ── Theme transition ───────────────────────────────── */
+*,
+*::before,
+*::after {
+	transition:
+		background-color 0.4s ease,
+		color 0.4s ease,
+		border-color 0.4s ease,
+		box-shadow 0.4s ease,
+		fill 0.4s ease,
+		stroke 0.4s ease;
+}
+
 /* ── Theme tokens ────────────────────────────────────── */
 :root {
 	--sl-content-width: 75rem;
@@ -410,7 +423,7 @@ site-search {
 	mask-repeat: no-repeat;
 	-webkit-mask-size: contain;
 	mask-size: contain;
-	transition: transform 0.2s ease;
+	transition: transform 0.4s ease;
 }
 
 .sl-markdown-content details[open] > summary::after {
