@@ -23,19 +23,19 @@ export default defineConfig({
 				PageFrame: './src/components/PageFrame.astro',
 				ThemeSelect: './src/components/ThemeSelect.astro',
 			},
-			favicon: '/yosoi-favicon.svg',
+			favicon: '/yosoi-icon.svg',
 			title: 'Yosoi',
 			description: 'AI-powered CSS selector discovery for web scraping.',
 			social: [
 				{
-					icon: 'discord',
-					label: 'Discord',
-					href: 'https://discord.gg/7jgEzfbTWY',
-				},
-				{
 					icon: 'github',
 					label: 'GitHub',
 					href: 'https://github.com/CascadingLabs/Yosoi',
+				},
+				{
+					icon: 'discord',
+					label: 'Discord',
+					href: 'https://discord.gg/YreV3CzxsE',
 				},
 			],
 			sidebar: [

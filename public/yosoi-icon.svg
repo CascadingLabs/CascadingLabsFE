@@ -9,12 +9,6 @@
 
   <!-- Background -->
   <rect x="0" y="0" width="500" height="500" fill="#2e3742"/>
-
-  <!-- Outer border -->
-  <rect x="22" y="22" width="456" height="456" rx="28" fill="none" stroke="#8fa3b3" stroke-width="3.5"/>
-  <!-- Inner border inset -->
-  <rect x="34" y="34" width="432" height="432" rx="20" fill="none" stroke="#8fa3b3" stroke-width="1" opacity="0.35"/>
-
   <!-- Atomic number top-left -->
   <text x="58" y="82"
     font-family="Inter, system-ui, sans-serif"

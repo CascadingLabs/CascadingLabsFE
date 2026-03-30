@@ -3,26 +3,28 @@ const { siteTitle } = Astro.locals.starlightRoute;
 ---
 
 <a href="/" class="cl-home" title="Cascading Labs home">
-    <img src="/favicon.svg" alt="Cascading Labs" class="cl-mark" width="26" height="26" />
+    <img data-src-dark="/favicon.svg" data-src-light="/favicon-light.svg" alt="Cascading Labs" class="cl-mark themed-img" width="26" height="26" />
 </a>
 <a href="https://qscrape.dev" class="qs-home" title="QScrape" target="_blank" rel="noopener noreferrer">
-    <img src="/qscrape_favicon.svg" alt="QScrape" class="qs-mark" width="26" height="26" />
+    <img data-src-dark="/qscrape_favicon.svg" data-src-light="/qscrape_favicon-light.svg" alt="QScrape" class="qs-mark themed-img" width="26" height="26" />
 </a>
 <a href="/yosoi" class="site-title sl-flex">
-    <img
-        src="/yosoi-favicon.svg"
-        alt=""
-        class="yosoi-mark"
-        width="26"
-        height="26"
-        aria-hidden="true"
-    />
+    <img data-src-dark="/yosoi-favicon.svg" data-src-light="/yosoi-favicon-light.svg" alt="" class="yosoi-mark themed-img" width="26" height="26" aria-hidden="true" />
 
     <span class="sr-only" translate="no">{siteTitle}</span>
     <span class="alpha-badge"
         >We're in Alpha. The API will not be stable untill v0.1.0</span
     >
 </a>
+<script is:inline>
+    (function() {
+        var t = document.documentElement.dataset.theme || 'dark';
+        var k = t === 'light' ? 'srcLight' : 'srcDark';
+        document.querySelectorAll('.themed-img').forEach(function(img) {
+            if (!img.src && img.dataset[k]) img.src = img.dataset[k];
+        });
+    })();
+</script>
 
 <style>
     @layer starlight.core {

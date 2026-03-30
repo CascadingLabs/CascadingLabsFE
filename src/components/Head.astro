@@ -39,7 +39,7 @@ for (let i = 0; i < segments.length; i++) {
 		"@type": "Organization",
 		name: "Cascading Labs",
 		url: site,
-		logo: site + "/favicon.svg",
+		logo: site + "/icon.svg",
 		sameAs: ["https://github.com/CascadingLabs"],
 	}}
 />
@@ -73,6 +73,19 @@ for (let i = 0; i < segments.length; i++) {
 
 <!-- Prevent browser's built-in translate from triggering (we handle translation ourselves) -->
 <meta name="google" content="notranslate" />
+
+<script is:inline>
+	// Set data-brand on <html> based on URL path for per-section accent colors
+	function setBrand() {
+		var p = location.pathname;
+		var brand = 'yosoi'; // default
+		if (p.startsWith('/qscrape')) brand = 'qscrape';
+		else if (p.startsWith('/voidcrawl')) brand = 'voidcrawl';
+		document.documentElement.dataset.brand = brand;
+	}
+	setBrand();
+	document.addEventListener('astro:page-load', setBrand);
+</script>
 
 <script is:inline>
 	function googleTranslateElementInit() {

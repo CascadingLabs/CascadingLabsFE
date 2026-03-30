@@ -70,21 +70,21 @@
 		align-items: center;
 		justify-content: center;
 		background: transparent;
-		border: 1px solid var(--sl-color-gray-5);
-		border-radius: 999px;
+		border: 1px solid var(--cl-border);
 		padding: 0.4rem;
-		color: var(--sl-color-text);
+		color: var(--cl-text-dim);
 		cursor: pointer;
 		position: relative;
 		width: 2rem;
 		height: 2rem;
 		overflow: hidden;
-		transition: border-color 0.2s ease, background 0.2s ease;
+		transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
 	}
 
 	.theme-toggle:hover {
-		border-color: var(--sl-color-gray-3);
-		background: var(--sl-color-gray-6);
+		border-color: var(--cl-accent-text);
+		background: var(--cl-link-hover-bg);
+		color: var(--cl-accent-text);
 	}
 
 	.theme-icon {

@@ -35,6 +35,11 @@ samp {
 	--sl-color-accent: #1e3a5f;
 	--sl-color-accent-high: #90b8e0;
 
+	/* Starlight text tokens — normalized to cl palette */
+	--sl-color-text: #e0e0e0;
+	--sl-color-text-accent: #5ba4cf;
+	--sl-color-text-invert: #0a0a0a;
+
 	/* Site-wide tokens — dark default */
 	--cl-bg: #0a0a0a;
 	--cl-bg-subtle: #0f0f0f;
@@ -44,7 +49,7 @@ samp {
 	--cl-text-marker: #555555;
 	--cl-border: #2a2a2a;
 	--cl-accent: #1e3a5f;
-	--cl-accent-text: #5b8cc7;
+	--cl-accent-text: #5ba4cf;
 	--cl-accent-pale: #90b8e0;
 	--cl-link-hover-bg: color-mix(in srgb, #1e3a5f 15%, transparent);
 	--cl-edge-shadow: none;
@@ -75,6 +80,11 @@ samp {
 	--sl-color-accent-low: #d4e5f7;
 	--sl-color-accent: #1e3a5f;
 	--sl-color-accent-high: #0d1b2a;
+
+	/* Starlight text tokens — normalized to cl palette */
+	--sl-color-text: #0a0a0a;
+	--sl-color-text-accent: #2c5282;
+	--sl-color-text-invert: #ffffff;
 
 	/* Site-wide tokens */
 	--cl-bg: #ffffff;
@@ -113,6 +123,11 @@ samp {
 		--sl-color-accent: #1e3a5f;
 		--sl-color-accent-high: #0d1b2a;
 
+		/* Starlight text tokens — normalized to cl palette */
+		--sl-color-text: #0a0a0a;
+		--sl-color-text-accent: #2c5282;
+		--sl-color-text-invert: #ffffff;
+
 		--cl-bg: #ffffff;
 		--cl-bg-subtle: #f5f5f5;
 		--cl-text: #0a0a0a;
@@ -131,6 +146,78 @@ samp {
 		--qs-accent-text: #c23232;
 		--qs-accent-pale: #f7e0e0;
 		--qs-link-hover-bg: color-mix(in srgb, #3d1414 10%, transparent);
+	}
+}
+
+/* ── QScrape brand — red accent ──────────────────────── */
+[data-brand="qscrape"] {
+	--sl-color-accent-low: #1a0808;
+	--sl-color-accent: #3d1414;
+	--sl-color-accent-high: #e8b4b4;
+	--sl-color-text-accent: #ef6464;
+	--cl-accent: #3d1414;
+	--cl-accent-text: #ef6464;
+	--cl-accent-pale: #e8b4b4;
+	--cl-link-hover-bg: color-mix(in srgb, #3d1414 15%, transparent);
+}
+
+[data-theme="light"][data-brand="qscrape"] {
+	--sl-color-accent-low: #f7e0e0;
+	--sl-color-accent: #3d1414;
+	--sl-color-accent-high: #1a0808;
+	--sl-color-text-accent: #c23232;
+	--cl-accent: #3d1414;
+	--cl-accent-text: #c23232;
+	--cl-accent-pale: #f7e0e0;
+	--cl-link-hover-bg: color-mix(in srgb, #3d1414 10%, transparent);
+}
+
+@media (prefers-color-scheme: light) {
+	:root:not([data-theme])[data-brand="qscrape"] {
+		--sl-color-accent-low: #f7e0e0;
+		--sl-color-accent: #3d1414;
+		--sl-color-accent-high: #1a0808;
+		--sl-color-text-accent: #c23232;
+		--cl-accent: #3d1414;
+		--cl-accent-text: #c23232;
+		--cl-accent-pale: #f7e0e0;
+		--cl-link-hover-bg: color-mix(in srgb, #3d1414 10%, transparent);
+	}
+}
+
+/* ── VoidCrawl brand — purple accent ────────────────── */
+[data-brand="voidcrawl"] {
+	--sl-color-accent-low: #120a24;
+	--sl-color-accent: #2d1a4e;
+	--sl-color-accent-high: #d4bfef;
+	--sl-color-text-accent: #b07adf;
+	--cl-accent: #2d1a4e;
+	--cl-accent-text: #b07adf;
+	--cl-accent-pale: #d4bfef;
+	--cl-link-hover-bg: color-mix(in srgb, #2d1a4e 15%, transparent);
+}
+
+[data-theme="light"][data-brand="voidcrawl"] {
+	--sl-color-accent-low: #e2d5f0;
+	--sl-color-accent: #2d1a4e;
+	--sl-color-accent-high: #120a24;
+	--sl-color-text-accent: #5a2d91;
+	--cl-accent: #2d1a4e;
+	--cl-accent-text: #5a2d91;
+	--cl-accent-pale: #e2d5f0;
+	--cl-link-hover-bg: color-mix(in srgb, #2d1a4e 10%, transparent);
+}
+
+@media (prefers-color-scheme: light) {
+	:root:not([data-theme])[data-brand="voidcrawl"] {
+		--sl-color-accent-low: #e2d5f0;
+		--sl-color-accent: #2d1a4e;
+		--sl-color-accent-high: #120a24;
+		--sl-color-text-accent: #5a2d91;
+		--cl-accent: #2d1a4e;
+		--cl-accent-text: #5a2d91;
+		--cl-accent-pale: #e2d5f0;
+		--cl-link-hover-bg: color-mix(in srgb, #2d1a4e 10%, transparent);
 	}
 }
 
@@ -348,11 +435,53 @@ site-search {
 	margin-block-end: 0.75rem;
 }
 
-/* Normalize header icon sizes */
+/* ── Header right-group normalization ────────────────── */
+
+/* Remove Starlight's vertical bar separator after social icons */
+.social-icons::after {
+	display: none !important;
+}
+
+/* Normalize right-group spacing — even gap across all items */
+.right-group {
+	gap: 0.75rem !important;
+}
+
+.social-icons {
+	gap: 0.75rem !important;
+}
+
+/* Social icons */
+.social-icons a {
+	color: var(--cl-text-dim);
+	padding: 0.25rem;
+	transition:
+		color 0.15s ease,
+		background 0.15s ease;
+	margin: -0.25rem;
+}
+
+.social-icons a:hover {
+	color: var(--cl-accent-text);
+	background: var(--cl-link-hover-bg);
+}
+
+/* Consistent icon sizes across social, theme toggle, language select */
 .social-icons svg,
 .theme-icon {
 	width: 1rem;
 	height: 1rem;
+}
+
+/* Language select — font and color to match other controls */
+starlight-lang-select label {
+	font-family: "DM Mono", monospace;
+	font-size: var(--sl-text-sm);
+	color: var(--cl-text-dim);
+}
+
+starlight-lang-select label:hover {
+	color: var(--cl-accent-text);
 }
 
 /* Inline content GitHub icons — match nav bar size and color */
@@ -529,4 +658,14 @@ site-search {
 .cl-link:hover {
 	color: var(--cl-accent-text);
 	background: var(--cl-link-hover-bg);
+}
+
+/* Hero page links — monochrome inverted hover */
+.cl-link.hero-link {
+	color: var(--hero-fg-dim);
+}
+
+.cl-link.hero-link:hover {
+	color: var(--hero-hover-fg);
+	background: var(--hero-hover-bg);
 }

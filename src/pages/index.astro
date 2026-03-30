@@ -6,20 +6,26 @@ import Layout from '../layouts/Layout.astro';
     title="Home | Cascading Labs"
     description="Cascading Labs is building the future of data and algorithms, starting with web data and finance."
 >
-    <h1 class="text-xl font-medium mb-10 tracking-tight" style="color: var(--cl-text);">
+    <h1
+        class="text-xl font-medium mb-10 tracking-tight"
+        style="color: var(--hero-fg);"
+    >
         Cascading Labs
     </h1>
 
-    <p class="mb-6 font-light" style="color: var(--cl-text-muted);">
+    <p class="mb-6 font-light" style="color: var(--hero-fg-muted);">
         We are building the future of data and algorithms.
     </p>
 
-    <p class="mb-6 font-light" style="color: var(--cl-text-muted);">
+    <p class="mb-6 font-light" style="color: var(--hero-fg-muted);">
         We aren't fully sure what that means yet, but we have the following
         assumptions:
     </p>
 
-    <ul class="mb-6 pl-5 list-disc" style="color: var(--cl-text-muted); --tw-marker-color: var(--cl-text-marker);">
+    <ul
+        class="mb-6 pl-5 list-disc"
+        style="color: var(--hero-fg-muted); --tw-marker-color: var(--hero-fg-dim);"
+    >
         <li class="mb-2 pl-2 font-light">Black-box AI is universally dumb.</li>
         <li class="mb-2 pl-2 font-light">
             Knowledge is the impetus of action.
@@ -34,22 +40,10 @@ import Layout from '../layouts/Layout.astro';
     </ul>
 
     <div class="mt-14 flex gap-2 -ml-2">
-        <a
-            href="https://github.com/CascadingLabs"
-            class="cl-link"
-            aria-label="Visit Cascading Labs on GitHub"
-        >
-            GitHub
-        </a>
-        <a
-            href="/yosoi"
-            class="cl-link"
-        >
-            Yosoi
-        </a>
+        <a href="/yosoi" class="cl-link hero-link"> Yosoi </a>
         <a
             href="https://qscrape.dev"
-            class="cl-link"
+            class="cl-link hero-link"
             target="_blank"
             rel="noopener noreferrer"
         >
@@ -57,4 +51,3 @@ import Layout from '../layouts/Layout.astro';
         </a>
     </div>
 </Layout>
-

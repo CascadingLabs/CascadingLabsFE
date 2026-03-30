@@ -17,26 +17,22 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v5
-
-      - name: Setup Node
-        uses: actions/setup-node@v6
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: 24
-          cache: pnpm
+          bun-version: latest
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
 
       - name: Biome check
-        run: pnpm check
+        run: bun run check
 
       - name: Astro build
-        run: pnpm build
+        run: bun run build
 
       - name: Lighthouse CI (desktop)
-        run: pnpm lhci autorun --config=lighthouserc.desktop.json
+        run: bun run lhci autorun --config=lighthouserc.desktop.json
 
       - name: Lighthouse CI (mobile)
-        run: pnpm lhci autorun --config=lighthouserc.mobile.json
+        run: bun run lhci autorun --config=lighthouserc.mobile.json

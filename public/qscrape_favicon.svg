@@ -1,8 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500" viewBox="0 0 500 500">
-  <rect width="500" height="500" rx="24" fill="#1a0808"/>
-  <rect x="14" y="14" width="472" height="472" rx="18" fill="none" stroke="#ef6464" stroke-width="4" opacity="0.5"/>
-  <text x="50" y="70" font-family="Futura, 'Century Gothic', 'Avant Garde', sans-serif" font-size="48" font-weight="300" fill="#ef6464" opacity="0.7">404</text>
-  <text x="250" y="245" font-family="Futura, 'Century Gothic', 'Avant Garde', sans-serif" font-size="220" font-weight="700" fill="#ef6464" text-anchor="middle" dominant-baseline="central" letter-spacing="-5">Qs</text>
-  <text x="250" y="410" font-family="Futura, 'Century Gothic', 'Avant Garde', sans-serif" font-size="56" font-weight="300" fill="#ef6464" text-anchor="middle" opacity="0.8">QScrape</text>
-  <text x="250" y="460" font-family="Futura, 'Century Gothic', 'Avant Garde', sans-serif" font-size="32" font-weight="300" fill="#ef6464" text-anchor="middle" opacity="0.45">404</text>
+<svg width="100%" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="logo-title logo-desc">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&amp;display=swap');
+    </style>
+  </defs>
+  <title id="logo-title">QScrape Logo</title>
+  <desc id="logo-desc">QScrape logo — periodic table tile with symbol Qs on a dark red background</desc>
+
+  <!-- Background -->
+  <rect x="0" y="0" width="500" height="500" fill="#1a0808"/>
+
+  <!-- Outer border -->
+  <rect x="22" y="22" width="456" height="456" rx="28" fill="none" stroke="#c94040" stroke-width="3.5"/>
+  <!-- Inner border inset -->
+  <rect x="34" y="34" width="432" height="432" rx="20" fill="none" stroke="#c94040" stroke-width="1" opacity="0.35"/>
+
+  <!-- Atomic number top-left -->
+  <text x="58" y="82"
+    font-family="Inter, system-ui, sans-serif"
+    font-size="26" font-weight="700"
+    fill="#ef6464" opacity="0.8"
+  >404</text>
+
+  <!-- Float top-right -->
+  <text x="442" y="82"
+    font-family="Inter, system-ui, sans-serif"
+    font-size="26" font-weight="700"
+    fill="#ef6464" opacity="0.8"
+    text-anchor="end"
+  >310.26</text>
+
+  <!-- Symbol -->
+  <text x="250" y="310"
+    font-family="Inter, system-ui, sans-serif"
+    font-size="200" font-weight="800"
+    fill="#ef6464" opacity="0.95"
+    text-anchor="middle"
+  >Qs</text>
+
+  <!-- Element name -->
+  <text x="250" y="382"
+    font-family="Inter, system-ui, sans-serif"
+    font-size="28" font-weight="400"
+    fill="#ef6464" opacity="0.75"
+    text-anchor="middle" letter-spacing="3"
+  >QScrape</text>
 </svg>
