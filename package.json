@@ -13,13 +13,7 @@
 		"format": "biome format . --write",
 		"check": "biome check --write --no-errors-on-unmatched .",
 		"seo": "start-server-and-test 'astro dev --port 4245' http://localhost:4245 'npx unlighthouse --site http://localhost:4245'",
-		"lighthouse": "astro build && lhci autorun --config=lighthouserc.desktop.json && lhci autorun --config=lighthouserc.mobile.json",
-		"prepare": "husky"
-	},
-	"lint-staged": {
-		"*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc,astro}": [
-			"biome check --write --no-errors-on-unmatched"
-		]
+		"lighthouse": "astro build && lhci autorun --config=lighthouserc.desktop.json && lhci autorun --config=lighthouserc.mobile.json"
 	},
 	"dependencies": {
 		"@astrojs/compiler-rs": "^0.1.6",
@@ -35,8 +29,6 @@
 	"devDependencies": {
 		"@biomejs/biome": "2.4.9",
 		"@lhci/cli": "^0.15.1",
-		"husky": "^9.1.7",
-		"lint-staged": "^16.2.7",
 		"start-server-and-test": "^3.0.0"
 	}
 }
