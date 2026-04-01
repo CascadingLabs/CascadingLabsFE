@@ -9,9 +9,36 @@ CascadingLabsFE is the public-facing Astro site for Cascading Labs. Contribution
 ## Clone & Setup
 
 ```bash
-git clone https://github.com/CascadingLabs/CascadingLabsFE.git
+git clone --recurse-submodules https://github.com/CascadingLabs/CascadingLabsFE.git
 cd CascadingLabsFE
 bun install
+```
+
+> **Already cloned without `--recurse-submodules`?** Run:
+>
+> ```bash
+> git submodule update --init --recursive
+> ```
+
+### Documentation Submodules
+
+Product documentation lives in the `docs/` directory as git submodules:
+
+| Submodule | Path | Repository |
+|-----------|------|------------|
+| YosoiDocs | `docs/yosoi-docs` | [CascadingLabs/YosoiDocs](https://github.com/CascadingLabs/YosoiDocs) |
+| VoidCrawlDocs | `docs/voidcrawl-docs` | [CascadingLabs/VoidCrawlDocs](https://github.com/CascadingLabs/VoidCrawlDocs) |
+
+To add a new documentation submodule:
+
+```bash
+git submodule add https://github.com/CascadingLabs/<RepoName>.git docs/<submodule-name>
+```
+
+To pull the latest changes for all submodules:
+
+```bash
+git submodule update --remote --merge
 ```
 
 **Prerequisites:**

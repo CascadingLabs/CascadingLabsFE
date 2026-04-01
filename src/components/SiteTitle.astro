@@ -18,11 +18,21 @@ const { siteTitle } = Astro.locals.starlightRoute;
 </a>
 <script is:inline>
     (function() {
-        var t = document.documentElement.dataset.theme || 'dark';
-        var k = t === 'light' ? 'srcLight' : 'srcDark';
-        document.querySelectorAll('.themed-img').forEach(function(img) {
-            if (!img.src && img.dataset[k]) img.src = img.dataset[k];
-        });
+        function syncLogos(theme) {
+            var k = theme === 'light' ? 'srcLight' : 'srcDark';
+            document.querySelectorAll('.themed-img').forEach(function(img) {
+                if (img.dataset[k]) img.src = img.dataset[k];
+            });
+        }
+        syncLogos(document.documentElement.dataset.theme || 'dark');
+        new MutationObserver(function(mutations) {
+            for (var i = 0; i < mutations.length; i++) {
+                if (mutations[i].attributeName === 'data-theme') {
+                    syncLogos(document.documentElement.dataset.theme || 'dark');
+                    break;
+                }
+            }
+        }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     })();
 </script>
 

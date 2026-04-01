@@ -1,3 +1,6 @@
 [submodule "docs/yosoi-docs"]
 	path = docs/yosoi-docs
-	url = https://github.com/CascadingLabs/Yosoi-Docs.git
+	url = https://github.com/CascadingLabs/YosoiDocs.git
+[submodule "docs/voidcrawl-docs"]
+	path = docs/voidcrawl-docs
+	url = https://github.com/CascadingLabs/VoidCrawlDocs.git

@@ -5,22 +5,22 @@
     </style>
   </defs>
   <title id="logo-title">Cascading Labs Logo</title>
-  <desc id="logo-desc">Cascading Labs logo — periodic table tile with symbol Cl on a dark blue background</desc>
+  <desc id="logo-desc">Cascading Labs logo — monochrome periodic table tile on a dark background</desc>
 
   <!-- Background -->
-  <rect x="0" y="0" width="500" height="500" fill="#0c2340"/>
+  <rect x="0" y="0" width="500" height="500" fill="#141414"/>
   <!-- Atomic number top-left -->
   <text x="58" y="82"
     font-family="Inter, system-ui, sans-serif"
     font-size="26" font-weight="700"
-    fill="#5ba4cf" opacity="0.8"
+    fill="#ffffff" opacity="0.7"
   >0</text>
 
   <!-- Float top-right -->
   <text x="442" y="82"
     font-family="Inter, system-ui, sans-serif"
     font-size="26" font-weight="700"
-    fill="#5ba4cf" opacity="0.8"
+    fill="#ffffff" opacity="0.7"
     text-anchor="end"
   >24.26</text>
 
@@ -28,7 +28,7 @@
   <text x="250" y="310"
     font-family="Inter, system-ui, sans-serif"
     font-size="200" font-weight="800"
-    fill="#5ba4cf" opacity="0.95"
+    fill="#ffffff" opacity="0.95"
     text-anchor="middle"
   >Cl</text>
 
@@ -36,7 +36,7 @@
   <text x="250" y="382"
     font-family="Inter, system-ui, sans-serif"
     font-size="28" font-weight="400"
-    fill="#5ba4cf" opacity="0.75"
+    fill="#ffffff" opacity="0.65"
     text-anchor="middle" letter-spacing="3"
   >Cascading Labs</text>
 </svg>
