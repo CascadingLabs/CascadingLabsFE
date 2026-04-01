@@ -1,4 +1,8 @@
-name: CI
+# Cascading Labs — Biome Lint CI
+# Note: Astro file support in Biome is best-effort.
+# The base biome.json relaxes rules for *.astro via overrides.
+
+name: Lint (Biome)
 
 on:
   push:
@@ -7,10 +11,9 @@ on:
     branches: [main, staging]
 
 jobs:
-  ci:
-    name: Build & Lighthouse
+  biome:
+    name: Biome check
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout (with submodules)
         uses: actions/checkout@v6
@@ -25,11 +28,5 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Astro build
-        run: bun run build
-
-      - name: Lighthouse CI (desktop)
-        run: bun run lhci autorun --config=lighthouserc.desktop.json
-
-      - name: Lighthouse CI (mobile)
-        run: bun run lhci autorun --config=lighthouserc.mobile.json
+      - name: Biome lint & format check
+        run: bun run check

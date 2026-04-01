@@ -14,17 +14,25 @@ export default function remarkCallouts() {
 	return (tree) => {
 		visit(tree, 'blockquote', (node, index, parent) => {
 			const first = node.children?.[0];
-			if (!first || first.type !== 'paragraph') return;
+			if (!first || first.type !== 'paragraph') {
+				return;
+			}
 
 			const firstInline = first.children?.[0];
-			if (!firstInline || firstInline.type !== 'text') return;
+			if (!firstInline || firstInline.type !== 'text') {
+				return;
+			}
 
 			const match = firstInline.value.match(CALLOUT_RE);
-			if (!match) return;
+			if (!match) {
+				return;
+			}
 
 			const type = match[1].toLowerCase();
 			const config = CALLOUT_TYPES[type];
-			if (!config) return;
+			if (!config) {
+				return;
+			}
 
 			// Strip the [!Note] prefix from the first text node
 			firstInline.value = firstInline.value.slice(match[0].length);
@@ -43,18 +51,24 @@ export default function remarkCallouts() {
 	};
 }
 
-function toCalloutHtml(type, label, node, firstParagraph) {
+function toCalloutHtml(type, label, _node, firstParagraph) {
 	// Collect all text content from the paragraph children
 	const textParts = firstParagraph.children.map((child) => {
-		if (child.type === 'text') return escapeHtml(child.value);
-		if (child.type === 'inlineCode')
+		if (child.type === 'text') {
+			return escapeHtml(child.value);
+		}
+		if (child.type === 'inlineCode') {
 			return `<code>${escapeHtml(child.value)}</code>`;
-		if (child.type === 'strong')
+		}
+		if (child.type === 'strong') {
 			return `<strong>${child.children.map((c) => escapeHtml(c.value)).join('')}</strong>`;
-		if (child.type === 'emphasis')
+		}
+		if (child.type === 'emphasis') {
 			return `<em>${child.children.map((c) => escapeHtml(c.value)).join('')}</em>`;
-		if (child.type === 'link')
+		}
+		if (child.type === 'link') {
 			return `<a href="${escapeHtml(child.url)}">${child.children.map((c) => escapeHtml(c.value)).join('')}</a>`;
+		}
 		return '';
 	});
 

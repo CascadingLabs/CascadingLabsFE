@@ -5,7 +5,9 @@ import JsonLd from './JsonLd.astro';
 const site = 'https://cascadinglabs.com';
 const pathname = Astro.url.pathname;
 const segments = pathname.split('/').filter(Boolean);
-const pageTitle = (Astro.props as any).entry?.data?.title || '';
+const pageTitle =
+	// biome-ignore lint/suspicious/noExplicitAny: Astro.props type varies by Starlight slot; entry shape is not exported
+	(Astro.props as any).entry?.data?.title || '';
 
 const segmentLabels: Record<string, string> = {
 	yosoi: 'Yosoi',
@@ -15,10 +17,10 @@ const segmentLabels: Record<string, string> = {
 	examples: 'Examples',
 };
 
-const breadcrumbItems = [{ name: 'Home', url: site + '/' }];
+const breadcrumbItems = [{ name: 'Home', url: `${site}/` }];
 let currentPath = '';
 for (let i = 0; i < segments.length; i++) {
-	currentPath += '/' + segments[i];
+	currentPath += `/${segments[i]}`;
 	const isLast = i === segments.length - 1;
 	const name =
 		isLast && pageTitle
@@ -27,7 +29,7 @@ for (let i = 0; i < segments.length; i++) {
 				segments[i]
 					.replace(/-/g, ' ')
 					.replace(/\b\w/g, (c: string) => c.toUpperCase());
-	breadcrumbItems.push({ name, url: site + currentPath + '/' });
+	breadcrumbItems.push({ name, url: `${site + currentPath}/` });
 }
 ---
 

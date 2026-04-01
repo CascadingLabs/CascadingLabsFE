@@ -40,9 +40,13 @@ const CostEffortChart: Component = () => {
 
 	onMount(() => {
 		const ro = new ResizeObserver((entries) => {
-			for (const e of entries) setScale(e.contentRect.width / VW);
+			for (const e of entries) {
+				setScale(e.contentRect.width / VW);
+			}
 		});
-		if (containerRef) ro.observe(containerRef);
+		if (containerRef) {
+			ro.observe(containerRef);
+		}
 		onCleanup(() => ro.disconnect());
 	});
 

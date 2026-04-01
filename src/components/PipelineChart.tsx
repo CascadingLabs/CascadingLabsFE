@@ -89,9 +89,13 @@ const PipelineChart: Component = () => {
 
 	onMount(() => {
 		const ro = new ResizeObserver((entries) => {
-			for (const e of entries) setScale(e.contentRect.width / VW);
+			for (const e of entries) {
+				setScale(e.contentRect.width / VW);
+			}
 		});
-		if (containerRef) ro.observe(containerRef);
+		if (containerRef) {
+			ro.observe(containerRef);
+		}
 		onCleanup(() => ro.disconnect());
 	});
 
@@ -203,7 +207,9 @@ const PipelineChart: Component = () => {
 
 					{/* Right column boxes (row 2 skipped) */}
 					{rightSteps.map((step, i) => {
-						if (!step) return null;
+						if (!step) {
+							return null;
+						}
 						return (
 							<g transform={`translate(${RX - BW / 2}, ${rowY(i)})`}>
 								<rect
@@ -353,7 +359,9 @@ const PipelineChart: Component = () => {
 
 						{/* Right step labels */}
 						{rightSteps.map((step, i) => {
-							if (!step) return null;
+							if (!step) {
+								return null;
+							}
 							return (
 								<span
 									style={{
