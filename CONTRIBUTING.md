@@ -18,7 +18,10 @@ bun install
 
 | Tool | Version | Install |
 |------|---------|---------|
+| Node.js | >= 24 (LTS) | [nodejs.org](https://nodejs.org) |
 | Bun | >= 1.3.11 | [bun.sh](https://bun.sh) |
+
+> **Why Node.js?** Astro's build toolchain requires Node.js internally even when Bun is the package manager and script runner. The system Node must meet Astro's minimum version requirement.
 
 ### Install pre-commit hooks
 
