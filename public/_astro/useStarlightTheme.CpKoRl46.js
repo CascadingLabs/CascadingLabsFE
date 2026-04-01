@@ -1,1 +1,0 @@
-import{c as o,o as a,b as s}from"./web.C3jDY8Ou.js";function c(){const[n,r]=o(!0);return a(()=>{const t=()=>r(document.documentElement.getAttribute("data-theme")!=="light");t();const e=new MutationObserver(t);e.observe(document.documentElement,{attributes:!0,attributeFilter:["data-theme"]}),s(()=>e.disconnect())}),n}export{c as u};
