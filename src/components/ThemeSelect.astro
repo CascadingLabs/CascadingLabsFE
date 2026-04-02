@@ -152,7 +152,11 @@
 		});
 	}
 
-	function onThemeChange(theme: Theme): void {
+	function onThemeChange(theme: Theme, animate = true): void {
+		if (animate) {
+			document.documentElement.classList.add('theme-transitioning');
+			setTimeout(() => document.documentElement.classList.remove('theme-transitioning'), 450);
+		}
 		document.documentElement.dataset.theme = theme === 'auto' ? getPreferredColorScheme() : theme;
 		storeTheme(theme);
 		document.querySelectorAll('starlight-theme-select').forEach((picker) => {
