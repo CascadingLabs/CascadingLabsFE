@@ -165,7 +165,7 @@
 	}
 
 	matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
-		if (loadTheme() === 'auto') onThemeChange('auto');
+		if (loadTheme() === 'auto') onThemeChange('auto', false);
 	});
 
 	class StarlightThemeSelect extends HTMLElement {
@@ -173,13 +173,13 @@
 			super();
 			const current = loadTheme();
 			updateIcons(this, current);
-			onThemeChange(current);
+			onThemeChange(current, false);
 
 			this.querySelector('.theme-toggle')?.addEventListener('click', () => {
 				const current = loadTheme();
 				const idx = themeOrder.indexOf(current);
 				const next = themeOrder[(idx + 1) % themeOrder.length];
-				onThemeChange(next);
+				onThemeChange(next, true);
 			});
 		}
 	}
