@@ -32,24 +32,17 @@ jobs:
             echo "No previous version tag found — skipping snapshot"
           fi
 
-      - name: Setup pnpm
+      - name: Setup bun
         if: steps.prev.outputs.tag != ''
-        uses: pnpm/action-setup@v5
-
-      - name: Setup Node
-        if: steps.prev.outputs.tag != ''
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: pnpm
+        uses: oven-sh/setup-bun@v2
 
       - name: Install dependencies
         if: steps.prev.outputs.tag != ''
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
 
       - name: Build current site
         if: steps.prev.outputs.tag != ''
-        run: pnpm build
+        run: bun run build
 
       - name: Snapshot current docs as archived version
         if: steps.prev.outputs.tag != ''
