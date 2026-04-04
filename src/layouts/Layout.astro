@@ -293,8 +293,9 @@ const canonicalURL = new URL(
         display: flex;
         align-items: center;
         justify-content: center;
+        width: 2rem;
+        height: 2rem;
         color: var(--hero-fg-dim);
-        padding: 0.375rem;
         text-decoration: none;
         transition: color 0.15s ease, background 0.15s ease;
     }
@@ -432,7 +433,11 @@ const canonicalURL = new URL(
             });
         }
 
-        function apply(pref) {
+        function apply(pref, animate) {
+            if (animate) {
+                document.documentElement.classList.add('theme-transitioning');
+                setTimeout(function () { document.documentElement.classList.remove('theme-transitioning'); }, 450);
+            }
             var resolved = pref === 'auto'
                 ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
                 : pref;
@@ -447,7 +452,7 @@ const canonicalURL = new URL(
         document.getElementById('cl-theme-toggle').addEventListener('click', function () {
             var current = getStored();
             var next = order[(order.indexOf(current) + 1) % order.length];
-            apply(next);
+            apply(next, true);
         });
 
         window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function () {

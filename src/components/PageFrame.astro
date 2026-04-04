@@ -69,22 +69,23 @@ import VersionSelect from './VersionSelect.astro';
 		display: flex;
 		align-items: center;
 		gap: 0.375rem;
-		background: var(--sl-color-bg-nav);
-		border: 1px solid var(--sl-color-gray-5);
-		border-radius: 0.375rem;
+		background: transparent;
+		border: 1px solid var(--cl-border);
 		padding: 0.3125rem 0.625rem;
-		color: var(--sl-color-text);
+		color: var(--cl-text-dim);
+		font-family: "DM Mono", monospace;
 		font-size: var(--sl-text-sm);
 		cursor: pointer;
 		white-space: nowrap;
 		line-height: 1;
 		height: 2rem;
+		transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
 	}
 
 	.sl-translate__btn:hover {
-		border-color: var(--sl-color-gray-3);
-		color: var(--sl-color-white);
-		background: var(--sl-color-gray-6);
+		border-color: var(--cl-accent-text);
+		color: var(--cl-accent-text);
+		background: var(--cl-link-hover-bg);
 	}
 
 	.sl-translate__chevron {
@@ -101,9 +102,8 @@ import VersionSelect from './VersionSelect.astro';
 		top: calc(100% + 0.375rem);
 		right: 0;
 		min-width: 11rem;
-		background: var(--sl-color-bg);
-		border: 1px solid var(--sl-color-gray-5);
-		border-radius: 0.5rem;
+		background: var(--cl-bg-subtle);
+		border: 1px solid var(--cl-border);
 		list-style: none;
 		margin: 0;
 		padding: 0.25rem;
@@ -115,17 +115,17 @@ import VersionSelect from './VersionSelect.astro';
 
 	.sl-translate__option {
 		padding: 0.4375rem 0.75rem;
-		border-radius: 0.3125rem;
+		font-family: "DM Mono", monospace;
 		font-size: var(--sl-text-sm);
-		color: var(--sl-color-text);
+		color: var(--cl-text-muted);
 		cursor: pointer;
 		line-height: 1.4;
 	}
 
 	.sl-translate__option:hover,
 	.sl-translate__option[aria-selected='true'] {
-		background: var(--sl-color-text-accent);
-		color: var(--sl-color-text-invert);
+		background: var(--cl-accent);
+		color: #ffffff;
 	}
 
 	/* Open upward inside mobile sidebar */

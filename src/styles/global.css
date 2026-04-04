@@ -332,6 +332,14 @@ body::after {
 	}
 }
 
+/* TOC links — truncate long headings with ellipsis */
+.right-sidebar-panel a {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow-wrap: normal;
+}
+
 /* ── Starlight overrides ─────────────────────────────── */
 
 site-search {
@@ -468,12 +476,15 @@ site-search {
 
 /* Social icons */
 .social-icons a {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 2rem;
+	height: 2rem;
 	color: var(--cl-text-dim);
-	padding: 0.25rem;
 	transition:
 		color 0.15s ease,
 		background 0.15s ease;
-	margin: -0.25rem;
 }
 
 .social-icons a:hover {
@@ -486,17 +497,6 @@ site-search {
 .theme-icon {
 	width: 1rem;
 	height: 1rem;
-}
-
-/* Language select — font and color to match other controls */
-starlight-lang-select label {
-	font-family: "DM Mono", monospace;
-	font-size: var(--sl-text-sm);
-	color: var(--cl-text-dim);
-}
-
-starlight-lang-select label:hover {
-	color: var(--cl-accent-text);
 }
 
 /* Inline content GitHub icons — match nav bar size and color */
@@ -683,4 +683,14 @@ starlight-lang-select label:hover {
 .cl-link.hero-link:hover {
 	color: var(--hero-hover-fg);
 	background: var(--hero-hover-bg);
+}
+
+.cl-link.hero-link[data-brand="yosoi"]:hover {
+	color: var(--cl-accent-text);
+	background: var(--cl-link-hover-bg);
+}
+
+.cl-link.hero-link[data-brand="qscrape"]:hover {
+	color: var(--qs-accent-text);
+	background: var(--qs-link-hover-bg);
 }
