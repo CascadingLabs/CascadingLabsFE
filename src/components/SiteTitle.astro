@@ -1,5 +1,7 @@
 ---
-const { siteTitle } = Astro.locals.starlightRoute;
+const { siteTitle, id } = Astro.locals.starlightRoute;
+const isVoidCrawl = id.startsWith('voidcrawl');
+const isYosoi = !isVoidCrawl;
 ---
 
 <a href="/" class="cl-home" title="Cascading Labs home">
@@ -8,13 +10,18 @@ const { siteTitle } = Astro.locals.starlightRoute;
 <a href="https://qscrape.dev" class="qs-home" title="QScrape" target="_blank" rel="noopener noreferrer">
     <img data-src-dark="/qscrape_favicon.svg" data-src-light="/qscrape_favicon-light.svg" alt="QScrape" class="qs-mark themed-img" width="26" height="26" />
 </a>
-<a href="/yosoi" class="site-title sl-flex">
+<a href="/voidcrawl" class:list={["vc-home", { active: isVoidCrawl }]} title="VoidCrawl">
+    <img data-src-dark="/vc_favicon.svg" data-src-light="/vc_favicon-light.svg" alt="VoidCrawl" class="vc-mark themed-img" width="26" height="26" />
+</a>
+<a href="/yosoi" class:list={["site-title", "sl-flex", { active: isYosoi }]}>
     <img data-src-dark="/yosoi-favicon.svg" data-src-light="/yosoi-favicon-light.svg" alt="" class="yosoi-mark themed-img" width="26" height="26" aria-hidden="true" />
 
     <span class="sr-only" translate="no">{siteTitle}</span>
-    <span class="alpha-badge"
-        >We're in Alpha. The API will not be stable untill v0.1.0</span
-    >
+    {isYosoi && (
+        <span class="alpha-badge"
+            >We're in Alpha. The API will not be stable untill v0.1.0</span
+        >
+    )}
 </a>
 <script is:inline>
     (function() {
@@ -66,6 +73,17 @@ const { siteTitle } = Astro.locals.starlightRoute;
         width: 26px;
         height: 26px;
         flex-shrink: 0;
+        border-radius: 4px;
+        filter: grayscale(1);
+        opacity: 0.5;
+        transition: filter 0.15s ease, opacity 0.15s ease;
+        will-change: filter, opacity;
+    }
+
+    .site-title:hover .yosoi-mark,
+    .site-title.active .yosoi-mark {
+        filter: grayscale(0);
+        opacity: 1;
     }
 
     .cl-home {
@@ -108,6 +126,29 @@ const { siteTitle } = Astro.locals.starlightRoute;
     }
 
     .qs-home:hover .qs-mark {
+        filter: grayscale(0);
+        opacity: 1;
+    }
+
+    .vc-home {
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+        margin-inline-end: 0.25rem;
+    }
+
+    .vc-mark {
+        width: 26px;
+        height: 26px;
+        border-radius: 4px;
+        filter: grayscale(1);
+        opacity: 0.5;
+        transition: filter 0.15s ease, opacity 0.15s ease;
+        will-change: filter, opacity;
+    }
+
+    .vc-home:hover .vc-mark,
+    .vc-home.active .vc-mark {
         filter: grayscale(0);
         opacity: 1;
     }

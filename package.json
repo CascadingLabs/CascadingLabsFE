@@ -20,6 +20,7 @@
 		"@astrojs/sitemap": "^3.7.0",
 		"@astrojs/solid-js": "^6.0.1",
 		"@astrojs/starlight": "^0.38.2",
+		"@chenglou/pretext": "^0.0.4",
 		"@tailwindcss/vite": "^4.1.18",
 		"astro": "^6.1.1",
 		"solid-js": "^1.9.12",
@@ -29,6 +30,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "2.4.9",
 		"@lhci/cli": "^0.15.1",
-		"start-server-and-test": "^3.0.0"
+		"start-server-and-test": "^3.0.0",
+		"vitest": "^4.1.2"
 	}
 }

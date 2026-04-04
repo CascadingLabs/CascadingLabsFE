@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import JsonLd from '../components/JsonLd.astro';
+import { generateWaves } from '../wave-bg';
 
 const {
 	title = 'Cascading Labs',
@@ -13,6 +14,10 @@ const canonicalURL = new URL(
 	Astro.url.pathname,
 	Astro.site || 'https://cascadinglabs.com',
 );
+
+const waveLines = generateWaves()
+	.split('\n')
+	.map((line) => line + line);
 ---
 
 <!doctype html>
@@ -148,7 +153,15 @@ const canonicalURL = new URL(
         <!-- Hidden Google Translate initialisation target -->
         <div id="google_translate_element" style="display:none"></div>
 
-        <div id="cl-content" class="w-full max-w-180 border-x px-10" style="border-color: var(--hero-border); position: relative; z-index: 1; background-color: var(--hero-bg);">
+        <div class="hero-bg-waves" aria-hidden="true">
+            <div class="wave-inner">
+                {waveLines.map((line, i) => (
+                    <div class="wave-row" style={`--i:${i}`}>{line}</div>
+                ))}
+            </div>
+        </div>
+
+        <div id="cl-content" class="w-full max-w-180 px-10" style="position: relative; z-index: 1;">
             <div class="cl-header-actions">
                 <!-- GitHub link -->
                 <a
@@ -247,6 +260,44 @@ const canonicalURL = new URL(
 </html>
 
 <style>
+    /* ── Static ASCII wave background ──────────────────── */
+    .hero-bg-waves {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
+        color: var(--hero-fg);
+        opacity: var(--wave-opacity, 0.05);
+    }
+
+    :global([data-theme="light"]) {
+        --wave-opacity: 0.12;
+    }
+
+    .wave-inner {
+        animation: wave-drift 180s linear infinite;
+    }
+
+    .wave-row {
+        font-size: 9px;
+        line-height: 12px;
+        white-space: pre;
+        font-family: 'DM Mono', monospace;
+        will-change: transform;
+    }
+
+    @keyframes wave-drift {
+        from { transform: translateX(0); }
+        to { transform: translateX(-50%); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .wave-inner {
+            animation: none;
+        }
+    }
+
     /* ── Hero monochrome tokens — dark default ───────── */
     :global(:root) {
         --hero-bg: #0a0a0a;
@@ -409,6 +460,11 @@ const canonicalURL = new URL(
         top: 0 !important;
     }
 </style>
+
+<script>
+    import { initWaveAnimation } from '../wave-animate';
+    initWaveAnimation();
+</script>
 
 <script is:inline>
     (function () {

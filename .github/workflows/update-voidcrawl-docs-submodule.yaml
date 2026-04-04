@@ -1,0 +1,43 @@
+name: Update VoidCrawl-Docs Submodule
+
+on:
+  repository_dispatch:
+    types: [update-voidcrawl-docs]
+
+jobs:
+  update-submodule:
+    name: Bump docs/voidcrawl-docs to latest
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout CascadingLabsFE (with submodules)
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          token: ${{ secrets.DOCS_DEPLOY_TOKEN }}
+
+      - name: Pull latest VoidCrawl-Docs
+        run: |
+          git config --global user.name  "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          cd docs/voidcrawl-docs
+          git fetch origin
+          git checkout main
+          git pull origin main
+
+      - name: Commit updates
+        env:
+          TAG: ${{ github.event.client_payload.tag }}
+        run: |
+          git add docs/voidcrawl-docs
+
+          if git diff --cached --quiet; then
+            echo "Nothing changed — already up to date"
+          else
+            git commit -m "chore: update voidcrawl-docs to ${TAG}"
+            git push
+            echo "Pushed update"
+          fi

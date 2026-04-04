@@ -125,6 +125,12 @@ for (let i = 0; i < segments.length; i++) {
 		if (p.startsWith('/qscrape')) brand = 'qscrape';
 		else if (p.startsWith('/voidcrawl')) brand = 'voidcrawl';
 		document.documentElement.dataset.brand = brand;
+
+		// Swap favicon per section
+		var link = document.querySelector('link[rel="icon"]') || document.querySelector('link[rel="shortcut icon"]');
+		if (link) {
+			link.href = brand === 'voidcrawl' ? '/vc_favicon.svg' : '/yosoi-icon.svg';
+		}
 	}
 	setBrand();
 	document.addEventListener('astro:page-load', setBrand);

@@ -59,6 +59,12 @@ samp {
 	--qs-accent-text: #ef6464;
 	--qs-accent-pale: #e8b4b4;
 	--qs-link-hover-bg: color-mix(in srgb, #3d1414 15%, transparent);
+
+	/* VoidCrawl accent — purple */
+	--vc-accent: #2d1a4e;
+	--vc-accent-text: #b07adf;
+	--vc-accent-pale: #d4bfef;
+	--vc-link-hover-bg: color-mix(in srgb, #2d1a4e 15%, transparent);
 }
 
 /* Light mode — Starlight pages + landing page */
@@ -105,6 +111,12 @@ samp {
 	--qs-accent-text: #c23232;
 	--qs-accent-pale: #f7e0e0;
 	--qs-link-hover-bg: color-mix(in srgb, #3d1414 10%, transparent);
+
+	/* VoidCrawl accent — purple */
+	--vc-accent: #2d1a4e;
+	--vc-accent-text: #5a2d91;
+	--vc-accent-pale: #e2d5f0;
+	--vc-link-hover-bg: color-mix(in srgb, #2d1a4e 10%, transparent);
 }
 
 /* Light mode — no-JS fallback (landing page without data-theme) */
@@ -146,6 +158,12 @@ samp {
 		--qs-accent-text: #c23232;
 		--qs-accent-pale: #f7e0e0;
 		--qs-link-hover-bg: color-mix(in srgb, #3d1414 10%, transparent);
+
+		/* VoidCrawl accent — purple */
+		--vc-accent: #2d1a4e;
+		--vc-accent-text: #5a2d91;
+		--vc-accent-pale: #e2d5f0;
+		--vc-link-hover-bg: color-mix(in srgb, #2d1a4e 10%, transparent);
 	}
 }
 
@@ -693,4 +711,9 @@ site-search {
 .cl-link.hero-link[data-brand="qscrape"]:hover {
 	color: var(--qs-accent-text);
 	background: var(--qs-link-hover-bg);
+}
+
+.cl-link.hero-link[data-brand="voidcrawl"]:hover {
+	color: var(--vc-accent-text);
+	background: var(--vc-link-hover-bg);
 }

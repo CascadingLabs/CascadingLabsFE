@@ -10,6 +10,9 @@ import remarkCallouts from './src/plugins/remark-callouts.mjs';
 export default defineConfig({
 	site: 'https://cascadinglabs.com',
 	output: 'static',
+	redirects: {
+		'/void': '/voidcrawl/',
+	},
 	integrations: [
 		solidJs(),
 		starlight({
@@ -22,6 +25,7 @@ export default defineConfig({
 				Header: './src/components/Header.astro',
 				PageFrame: './src/components/PageFrame.astro',
 				ThemeSelect: './src/components/ThemeSelect.astro',
+				Sidebar: './src/components/Sidebar.astro',
 			},
 			favicon: '/yosoi-icon.svg',
 			title: 'Yosoi',
@@ -128,6 +132,134 @@ export default defineConfig({
 							label: 'GitHub',
 							link: 'https://github.com/CascadingLabs/QScrape',
 							attrs: { target: '_blank', class: 'sl-github-link' },
+						},
+					],
+				},
+				{
+					label: 'VoidCrawl',
+					items: [
+						{
+							label: 'Getting Started',
+							items: [
+								{
+									label: 'Overview',
+									slug: 'voidcrawl',
+								},
+								{
+									label: 'Installation',
+									slug: 'voidcrawl/installation',
+								},
+								{
+									label: 'Quick Start',
+									slug: 'voidcrawl/quickstart',
+								},
+								{
+									label: 'Contributing',
+									slug: 'voidcrawl/contributing',
+								},
+							],
+						},
+						{
+							label: 'Guides',
+							collapsed: true,
+							items: [
+								{
+									label: 'Understanding the DOM',
+									slug: 'voidcrawl/guides/understanding-the-dom',
+								},
+								{
+									label: 'Browser Pool',
+									slug: 'voidcrawl/guides/browser-pool',
+								},
+								{
+									label: 'Async Native',
+									slug: 'voidcrawl/guides/async-native',
+								},
+								{
+									label: 'Docker & VNC',
+									slug: 'voidcrawl/guides/docker',
+								},
+								{
+									label: 'Built-in Actions',
+									slug: 'voidcrawl/guides/builtin-actions',
+								},
+								{
+									label: 'Custom JS Actions',
+									slug: 'voidcrawl/guides/custom-js-actions',
+								},
+								{
+									label: 'Stealth Mode',
+									slug: 'voidcrawl/guides/stealth',
+								},
+								{
+									label: 'Examples',
+									collapsed: true,
+									items: [
+										{
+											label: 'Overview',
+											slug: 'voidcrawl/guides/examples',
+										},
+										{
+											label: 'Basic Navigation',
+											slug: 'voidcrawl/guides/examples/basic-navigation',
+										},
+										{
+											label: 'DOM Interaction',
+											slug: 'voidcrawl/guides/examples/dom-interaction',
+										},
+										{
+											label: 'JavaScript Eval',
+											slug: 'voidcrawl/guides/examples/javascript-eval',
+										},
+										{
+											label: 'Screenshots',
+											slug: 'voidcrawl/guides/examples/screenshots',
+										},
+										{
+											label: 'Stealth Mode',
+											slug: 'voidcrawl/guides/examples/stealth-mode',
+										},
+										{
+											label: 'Actions Demo',
+											slug: 'voidcrawl/guides/examples/actions-demo',
+										},
+										{
+											label: 'Docker Headful',
+											slug: 'voidcrawl/guides/examples/docker-headful',
+										},
+										{
+											label: 'Multi-Page',
+											slug: 'voidcrawl/guides/examples/multi-page',
+										},
+									],
+								},
+							],
+						},
+						{
+							label: 'Reference',
+							collapsed: true,
+							items: [
+								{
+									label: 'API Reference',
+									slug: 'voidcrawl/reference/api-reference',
+								},
+							],
+						},
+						{
+							label: 'GitHub',
+							link: 'https://github.com/CascadingLabs/VoidCrawl',
+							attrs: {
+								target: '_blank',
+								class: 'sl-github-link',
+							},
+						},
+						{
+							label: 'Discord',
+							link: 'https://discord.gg/ftykDhmAQN',
+							attrs: {
+								target: '_blank',
+								class: 'sl-external-link',
+							},
 						},
 					],
 				},

@@ -1,0 +1,27 @@
+---
+import MobileMenuFooter from 'virtual:starlight/components/MobileMenuFooter';
+import SidebarPersister from '@astrojs/starlight/components/SidebarPersister.astro';
+import SidebarSublist from '@astrojs/starlight/components/SidebarSublist.astro';
+
+const { sidebar, id } = Astro.locals.starlightRoute;
+const isVoidCrawl = id.startsWith('voidcrawl');
+
+// Filter sidebar to only show the relevant section.
+// VoidCrawl pages see only the "VoidCrawl" group's children.
+// All other pages see everything except VoidCrawl.
+const filtered = isVoidCrawl
+	? sidebar.filter(
+			(entry) => entry.type === 'group' && entry.label === 'VoidCrawl',
+		)
+	: sidebar.filter(
+			(entry) => entry.type !== 'group' || entry.label !== 'VoidCrawl',
+		);
+---
+
+<SidebarPersister>
+	<SidebarSublist sublist={filtered} />
+</SidebarPersister>
+
+<div class="md:sl-hidden">
+	<MobileMenuFooter />
+</div>
