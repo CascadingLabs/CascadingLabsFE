@@ -180,6 +180,10 @@ export default defineConfig({
 									slug: 'voidcrawl/guides/stealth',
 								},
 								{
+									label: 'Cookbook',
+									slug: 'voidcrawl/guides/cookbook',
+								},
+								{
 									label: 'Examples',
 									collapsed: true,
 									items: [
