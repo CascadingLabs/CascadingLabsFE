@@ -122,7 +122,12 @@ for (let i = 0; i < segments.length; i++) {
 	function setBrand() {
 		var p = location.pathname;
 		var brand = 'yosoi'; // default
-		if (p.startsWith('/qscrape')) brand = 'qscrape';
+		// Cross-reference pages use the target project's brand
+		if (p.startsWith('/yosoi/voidcrawl')) brand = 'voidcrawl';
+		else if (p.startsWith('/yosoi/qscrape')) brand = 'qscrape';
+		else if (p.startsWith('/voidcrawl/yosoi')) brand = 'yosoi';
+		else if (p.startsWith('/voidcrawl/qscrape')) brand = 'qscrape';
+		else if (p.startsWith('/qscrape')) brand = 'qscrape';
 		else if (p.startsWith('/voidcrawl')) brand = 'voidcrawl';
 		document.documentElement.dataset.brand = brand;
 

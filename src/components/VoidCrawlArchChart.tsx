@@ -34,11 +34,11 @@ const light = {
 };
 
 /* Layout constants */
-const VW = 740;
-const VH = 150;
-const BW = 132;
+const VW = 800;
+const VH = 160;
+const BW = 148;
 const BH = 50;
-const BOX_Y = 36;
+const BOX_Y = 44;
 const MARGIN = 14;
 const GAP = (VW - 2 * MARGIN - 4 * BW) / 3;
 
@@ -61,7 +61,7 @@ const boxes: BoxDef[] = [
 	{ label: 'Web Page', sub: 'DOM \u00B7 JS \u00B7 CSS', style: 'output' },
 ];
 
-const arrows = ['async / await', 'CDP', 'renders'];
+const arrows = ['await', 'CDP', 'renders'];
 
 const VoidCrawlArchChart: Component = () => {
 	const [scale, setScale] = createSignal(1);
@@ -236,7 +236,7 @@ const VoidCrawlArchChart: Component = () => {
 								style={{
 									position: 'absolute',
 									left: `${(boxLeft(i) + BW + boxLeft(i + 1)) / 2}px`,
-									top: `${BOX_Y - 4}px`,
+									top: `${BOX_Y - 18}px`,
 									transform: 'translateX(-50%)',
 									color: t().arrowLabel,
 									'font-size': '10px',

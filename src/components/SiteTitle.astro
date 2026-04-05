@@ -17,11 +17,15 @@ const isYosoi = !isVoidCrawl;
     <img data-src-dark="/yosoi-favicon.svg" data-src-light="/yosoi-favicon-light.svg" alt="" class="yosoi-mark themed-img" width="26" height="26" aria-hidden="true" />
 
     <span class="sr-only" translate="no">{siteTitle}</span>
-    {isYosoi && (
+    {/* TODO: revisit version tags at a later date */}
+    {/* {isYosoi && (
         <span class="alpha-badge"
             >We're in Alpha. The API will not be stable untill v0.1.0</span
         >
-    )}
+    )} */}
+    {/* {isVoidCrawl && (
+        <span class="alpha-badge">VoidCrawl version tag</span>
+    )} */}
 </a>
 <script is:inline>
     (function() {

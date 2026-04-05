@@ -6,22 +6,249 @@ import SidebarSublist from '@astrojs/starlight/components/SidebarSublist.astro';
 const { sidebar, id } = Astro.locals.starlightRoute;
 const isVoidCrawl = id.startsWith('voidcrawl');
 
+// Determine which cross-project overview is currently active
+const activeCP = (() => {
+	if (isVoidCrawl) {
+		if (id === 'voidcrawl/yosoi') {
+			return 'yosoi';
+		}
+		if (id === 'voidcrawl/qscrape') {
+			return 'qscrape';
+		}
+	} else {
+		if (id === 'yosoi/voidcrawl') {
+			return 'voidcrawl';
+		}
+		if (id === 'yosoi/qscrape') {
+			return 'qscrape';
+		}
+	}
+	return null;
+})();
+
 // Filter sidebar to only show the relevant section.
 // VoidCrawl pages see only the "VoidCrawl" group's children.
 // All other pages see everything except VoidCrawl.
+// VoidCrawl pages: unwrap the VoidCrawl group to show its children directly.
+// All other pages: show everything except the VoidCrawl group.
 const filtered = isVoidCrawl
-	? sidebar.filter(
+	? (sidebar.find(
 			(entry) => entry.type === 'group' && entry.label === 'VoidCrawl',
-		)
+		)?.entries ?? [])
 	: sidebar.filter(
-			(entry) => entry.type !== 'group' || entry.label !== 'VoidCrawl',
+			(entry) =>
+				entry.type !== 'group' ||
+				(entry.label !== 'VoidCrawl' && entry.label !== 'QScrape'),
 		);
 ---
 
 <SidebarPersister>
 	<SidebarSublist sublist={filtered} />
+
+	<div class="cross-products">
+		<span class="related-label">Related Projects</span>
+		{isVoidCrawl ? (
+			<ul class="cp-list">
+				<li class="cp-yosoi">
+					<details {...(activeCP === 'yosoi' ? { open: true } : {})}>
+						<summary class="cp-summary">
+							<span class="group-label">
+								<span class="large">Yosoi</span>
+							</span>
+							<svg class="caret" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="1.25rem" height="1.25rem">
+								<path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
+							</svg>
+						</summary>
+						<ul>
+							<li><a href="/voidcrawl/yosoi/" {...(activeCP === 'yosoi' ? { 'aria-current': 'page' } : {})}><span>Overview</span></a></li>
+							<li><a href="/yosoi/" class="sl-external-link">Yosoi</a></li>
+							<li><a href="https://github.com/CascadingLabs/Yosoi" target="_blank" class="sl-github-link">GitHub</a></li>
+						</ul>
+					</details>
+				</li>
+				<li class="cp-qscrape">
+					<details {...(activeCP === 'qscrape' ? { open: true } : {})}>
+						<summary class="cp-summary">
+							<span class="group-label">
+								<span class="large">QScrape</span>
+							</span>
+							<svg class="caret" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="1.25rem" height="1.25rem">
+								<path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
+							</svg>
+						</summary>
+						<ul>
+							<li><a href="/voidcrawl/qscrape/" {...(activeCP === 'qscrape' ? { 'aria-current': 'page' } : {})}><span>Overview</span></a></li>
+							<li><a href="https://qscrape.dev" target="_blank" class="sl-external-link">qscrape.dev</a></li>
+							<li><a href="https://github.com/CascadingLabs/QScrape" target="_blank" class="sl-github-link">GitHub</a></li>
+						</ul>
+					</details>
+				</li>
+			</ul>
+		) : (
+			<ul class="cp-list">
+				<li class="cp-voidcrawl">
+					<details {...(activeCP === 'voidcrawl' ? { open: true } : {})}>
+						<summary class="cp-summary">
+							<span class="group-label">
+								<span class="large">VoidCrawl</span>
+							</span>
+							<svg class="caret" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="1.25rem" height="1.25rem">
+								<path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
+							</svg>
+						</summary>
+						<ul>
+							<li><a href="/yosoi/voidcrawl/" {...(activeCP === 'voidcrawl' ? { 'aria-current': 'page' } : {})}><span>Overview</span></a></li>
+							<li><a href="/voidcrawl/" class="sl-external-link">VoidCrawl</a></li>
+							<li><a href="https://github.com/CascadingLabs/VoidCrawl" target="_blank" class="sl-github-link">GitHub</a></li>
+						</ul>
+					</details>
+				</li>
+				<li class="cp-qscrape">
+					<details {...(activeCP === 'qscrape' ? { open: true } : {})}>
+						<summary class="cp-summary">
+							<span class="group-label">
+								<span class="large">QScrape</span>
+							</span>
+							<svg class="caret" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="1.25rem" height="1.25rem">
+								<path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
+							</svg>
+						</summary>
+						<ul>
+							<li><a href="/yosoi/qscrape/" {...(activeCP === 'qscrape' ? { 'aria-current': 'page' } : {})}><span>Overview</span></a></li>
+							<li><a href="https://qscrape.dev" target="_blank" class="sl-external-link">qscrape.dev</a></li>
+							<li><a href="https://github.com/CascadingLabs/QScrape" target="_blank" class="sl-github-link">GitHub</a></li>
+						</ul>
+					</details>
+				</li>
+			</ul>
+		)}
+	</div>
 </SidebarPersister>
 
 <div class="md:sl-hidden">
 	<MobileMenuFooter />
 </div>
+
+<style>
+	/* ── Related section ── */
+	.cross-products {
+		--sl-sidebar-item-padding-inline: 0.5rem;
+		border-top: 1px solid var(--sl-color-hairline);
+		margin-top: 1rem;
+		padding-top: 0.5rem;
+	}
+
+	.related-label {
+		display: block;
+		font-size: var(--sl-text-xs, 0.6875rem);
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.075em;
+		color: var(--sl-color-gray-3);
+		padding: 0.25rem var(--sl-sidebar-item-padding-inline) 0.5rem;
+	}
+
+	.cp-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	.cp-list > li + li {
+		margin-top: 0.5rem;
+	}
+
+	/* ── summary row — mirrors Starlight's summary styles ── */
+	.cp-summary {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0.2em var(--sl-sidebar-item-padding-inline);
+		line-height: 1.4;
+		cursor: pointer;
+		user-select: none;
+		list-style: none;
+	}
+	.cp-summary::marker,
+	.cp-summary::-webkit-details-marker {
+		display: none;
+	}
+
+	/* ── group label ── */
+	.group-label {
+		display: flex;
+		align-items: center;
+	}
+
+	.large {
+		font-size: var(--sl-text-base);
+		font-weight: 600;
+		color: var(--sl-color-white);
+		transition: color 0.15s ease;
+	}
+
+	.cp-yosoi .cp-summary:hover .large {
+		color: var(--ys-accent-text);
+	}
+
+	.cp-qscrape .cp-summary:hover .large {
+		color: var(--qs-accent-text);
+	}
+
+	.cp-voidcrawl .cp-summary:hover .large {
+		color: var(--vc-accent-text);
+	}
+
+	/* ── caret — matches Starlight's [open] rotation ── */
+	.caret {
+		flex-shrink: 0;
+		color: var(--sl-color-gray-3);
+		transition: transform 0.2s ease-in-out;
+	}
+
+	details[open] > .cp-summary .caret {
+		transform: rotateZ(90deg);
+	}
+
+	/* ── nested item list — mirrors Starlight's ul ul li ── */
+	details > ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	details > ul > li {
+		margin-inline-start: var(--sl-sidebar-item-padding-inline);
+		border-inline-start: 1px solid var(--sl-color-hairline-light);
+		padding-inline-start: var(--sl-sidebar-item-padding-inline);
+	}
+
+	/* ── links — matches Starlight's a styles ── */
+	details > ul a {
+		display: block;
+		border-radius: 0.25rem;
+		text-decoration: none;
+		color: var(--sl-color-gray-2);
+		padding: 0.3em var(--sl-sidebar-item-padding-inline);
+		font-size: var(--sl-text-sm);
+		line-height: 1.4;
+	}
+
+	.cp-yosoi details > ul a:hover,
+	.cp-yosoi details > ul a:focus {
+		color: var(--ys-accent-text);
+		background: var(--ys-link-hover-bg);
+	}
+
+	.cp-qscrape details > ul a:hover,
+	.cp-qscrape details > ul a:focus {
+		color: var(--qs-accent-text);
+		background: var(--qs-link-hover-bg);
+	}
+
+	.cp-voidcrawl details > ul a:hover,
+	.cp-voidcrawl details > ul a:focus {
+		color: var(--vc-accent-text);
+		background: var(--vc-link-hover-bg);
+	}
+</style>

@@ -121,19 +121,7 @@ export default defineConfig({
 				},
 				{
 					label: 'QScrape',
-					items: [
-						{ label: 'Overview', slug: 'qscrape' },
-						{
-							label: 'qscrape.dev',
-							link: 'https://qscrape.dev',
-							attrs: { target: '_blank', class: 'sl-external-link' },
-						},
-						{
-							label: 'GitHub',
-							link: 'https://github.com/CascadingLabs/QScrape',
-							attrs: { target: '_blank', class: 'sl-github-link' },
-						},
-					],
+					items: [{ label: 'Overview', slug: 'yosoi/qscrape' }],
 				},
 				{
 					label: 'VoidCrawl',
@@ -244,22 +232,6 @@ export default defineConfig({
 									slug: 'voidcrawl/reference/api-reference',
 								},
 							],
-						},
-						{
-							label: 'GitHub',
-							link: 'https://github.com/CascadingLabs/VoidCrawl',
-							attrs: {
-								target: '_blank',
-								class: 'sl-github-link',
-							},
-						},
-						{
-							label: 'Discord',
-							link: 'https://discord.gg/ftykDhmAQN',
-							attrs: {
-								target: '_blank',
-								class: 'sl-external-link',
-							},
 						},
 					],
 				},
