@@ -5,6 +5,7 @@
 ## Projects
 
 - [Yosoi](/yosoi): AI-powered CSS selector discovery for web scraping. Discover selectors once with an LLM, cache them, and scrape forever at zero cost.
+- [VoidCrawl](/voidcrawl): Rust-native CDP browser automation for Python via PyO3. Replaces Playwright/Selenium with a permissively-licensed stack.
 - [QScrape](https://qscrape.dev): Purpose-built fictional scraping targets for benchmarking and testing web scrapers.
 
 ## Links
@@ -12,3 +13,5 @@
 - [GitHub](https://github.com/CascadingLabs)
 - [Yosoi Docs](/yosoi)
 - [Yosoi llms.txt](/yosoi/llms.txt)
+- [VoidCrawl Docs](/voidcrawl)
+- [VoidCrawl llms.txt](/voidcrawl/llms.txt)

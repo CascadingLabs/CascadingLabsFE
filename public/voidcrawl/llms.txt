@@ -1,0 +1,55 @@
+# VoidCrawl
+
+> Rust-native CDP browser automation for Python via PyO3. Replaces Playwright and Selenium with a permissively-licensed (Apache-2.0) stack.
+
+VoidCrawl is a Chrome DevTools Protocol (CDP) client written in Rust and exposed to Python via PyO3. Built on chromiumoxide with a shared Tokio runtime, it provides async-first browser automation with near-zero overhead tab reuse.
+
+- Rust core, Python ergonomics (Python 3.10+)
+- Tab pooling via BrowserPool for near-instant tab acquisition
+- Stealth by default with clean Chrome flags
+- No AGPL exposure -- MIT/Apache-2.0 licensed throughout
+- Composable two-tier action framework (JS and CDP)
+
+## Getting Started
+
+- [Overview](/voidcrawl): Introduction, architecture, quick example, and FAQs
+- [Installation](/voidcrawl/installation): Install from PyPI or build from source
+- [Quick Start](/voidcrawl/quickstart): Automate a browser in minutes
+- [Contributing](/voidcrawl/contributing): How to contribute to VoidCrawl
+
+## Guides
+
+- [Understanding the DOM](/voidcrawl/guides/understanding-the-dom): HTML vs. the DOM, why it matters for scraping, and how browser automation handles it
+- [Browser Pool](/voidcrawl/guides/browser-pool): Cold start vs. tab reuse, pool configuration, and semaphore-bounded architecture
+- [Async Native](/voidcrawl/guides/async-native): How Tokio and asyncio work together, common async patterns
+- [Docker & VNC](/voidcrawl/guides/docker): Run Chrome headless or headful inside Docker with GPU passthrough and VNC viewing
+- [Built-in Actions](/voidcrawl/guides/builtin-actions): DOM and CDP-level actions for clicking, typing, scrolling, and querying
+- [Custom JS Actions](/voidcrawl/guides/custom-js-actions): Build reusable browser actions with JsActionNode, inline_js, and Flow composition
+- [Stealth Mode](/voidcrawl/guides/stealth): Anti-detection patches and minimal-footprint automation
+
+## Examples
+
+- [Examples Overview](/voidcrawl/guides/examples): Runnable example scripts demonstrating common VoidCrawl patterns
+- [Basic Navigation](/voidcrawl/guides/examples/basic-navigation): Launch a headless browser, visit a page, and read its content
+- [DOM Interaction](/voidcrawl/guides/examples/dom-interaction): Query DOM elements, click buttons, and type into inputs
+- [JavaScript Eval](/voidcrawl/guides/examples/javascript-eval): Evaluate arbitrary JavaScript in the page context
+- [Screenshots](/voidcrawl/guides/examples/screenshots): Capture PNG screenshots of pages
+- [Stealth Mode](/voidcrawl/guides/examples/stealth-mode): Compare browser fingerprints with stealth enabled vs. disabled
+- [Actions Demo](/voidcrawl/guides/examples/actions-demo): Built-in actions, custom JS actions, Flows, and CDP-level actions
+- [Docker Headful](/voidcrawl/guides/examples/docker-headful): Connect to Chrome running headful inside Docker with GPU and VNC
+- [Multi-Page](/voidcrawl/guides/examples/multi-page): Work with multiple pages (tabs) in a single browser session
+
+## API Reference
+
+- [API Reference](/voidcrawl/reference/api-reference): Full API reference for VoidCrawl
+
+## Related Projects
+
+- [Yosoi](/voidcrawl/yosoi): AI-powered CSS selector discovery that uses VoidCrawl for rendering JS-heavy pages
+- [QScrape](/voidcrawl/qscrape): Fictional test websites for benchmarking scrapers
+
+## Links
+
+- [GitHub](https://github.com/CascadingLabs/VoidCrawl)
+- [Yosoi GitHub](https://github.com/CascadingLabs/Yosoi)
+- [QScrape GitHub](https://github.com/CascadingLabs/QScrape)
