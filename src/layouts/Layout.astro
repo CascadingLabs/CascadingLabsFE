@@ -540,19 +540,26 @@ const waveLines = generateWaves()
         }
 
         function apply(pref, animate) {
-            if (animate) {
-                document.documentElement.classList.add('theme-transitioning');
-                setTimeout(function () { document.documentElement.classList.remove('theme-transitioning'); }, 450);
-            }
             var resolved = pref === 'auto'
                 ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
                 : pref;
-            document.documentElement.dataset.theme = resolved;
-            document.documentElement.dataset.themePreference = pref;
-            syncThemedImages(resolved);
+            function commit() {
+                document.documentElement.dataset.theme = resolved;
+                document.documentElement.dataset.themePreference = pref;
+                syncThemedImages(resolved);
+            }
             var val = pref === 'light' || pref === 'dark' ? pref : 'auto';
             document.cookie = 'cl-theme=' + val + '; path=/; max-age=31536000; SameSite=Lax';
             localStorage.setItem('starlight-theme', pref === 'light' || pref === 'dark' ? pref : '');
+            // View Transitions API: GPU-composited crossfade of two page
+            // snapshots, instead of per-element CSS transitions. Far cheaper
+            // on long pages with many elements / SVG figures.
+            var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (animate && !reduced && typeof document.startViewTransition === 'function') {
+                document.startViewTransition(commit);
+            } else {
+                commit();
+            }
         }
 
         document.getElementById('cl-theme-toggle').addEventListener('click', function () {

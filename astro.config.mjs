@@ -20,6 +20,7 @@ export default defineConfig({
 				baseUrl: 'https://github.com/CascadingLabs/Yosoi-Docs/edit/main/',
 			},
 			components: {
+				EditLink: './src/components/EditLink.astro',
 				SiteTitle: './src/components/SiteTitle.astro',
 				Head: './src/components/Head.astro',
 				Header: './src/components/Header.astro',

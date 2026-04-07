@@ -153,15 +153,26 @@
 	}
 
 	function onThemeChange(theme: Theme, animate = true): void {
-		if (animate) {
-			document.documentElement.classList.add('theme-transitioning');
-			setTimeout(() => document.documentElement.classList.remove('theme-transitioning'), 450);
+		const applyTheme = () => {
+			document.documentElement.dataset.theme = theme === 'auto' ? getPreferredColorScheme() : theme;
+			storeTheme(theme);
+			document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+				updateIcons(picker, theme);
+			});
+		};
+
+		const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+		// View Transitions API: GPU-composited crossfade of two page snapshots,
+		// instead of per-element CSS transitions. Far cheaper on long pages
+		// with many elements / SVG figures (e.g. the Docker & VNC docs page).
+		const startVT = (document as Document & {
+			startViewTransition?: (cb: () => void) => unknown;
+		}).startViewTransition;
+		if (animate && !reduced && typeof startVT === 'function') {
+			startVT.call(document, applyTheme);
+		} else {
+			applyTheme();
 		}
-		document.documentElement.dataset.theme = theme === 'auto' ? getPreferredColorScheme() : theme;
-		storeTheme(theme);
-		document.querySelectorAll('starlight-theme-select').forEach((picker) => {
-			updateIcons(picker, theme);
-		});
 	}
 
 	matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
