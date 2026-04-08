@@ -236,6 +236,10 @@ export default defineConfig({
 									label: 'API Reference',
 									slug: 'voidcrawl/reference/api-reference',
 								},
+								{
+									label: 'Docker Config',
+									slug: 'voidcrawl/reference/docker-config',
+								},
 							],
 						},
 					],
