@@ -546,6 +546,7 @@ site-search {
 }
 
 /* Consistent icon sizes across social, theme toggle, language select */
+/* biome-ignore lint/style/noDescendingSpecificity: intentional order */
 .social-icons svg,
 .theme-icon {
 	width: 1rem;
@@ -553,6 +554,7 @@ site-search {
 }
 
 /* Inline content GitHub icons — match nav bar size and color */
+/* biome-ignore lint/style/noDescendingSpecificity: intentional order */
 .sl-markdown-content a svg {
 	width: 1rem;
 	height: 1rem;

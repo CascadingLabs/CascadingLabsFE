@@ -5,7 +5,7 @@
     </style>
   </defs>
   <title id="logo-title">VoidCrawl Logo</title>
-  <desc id="logo-desc">VoidCrawl logo — periodic table tile with symbol Vd on a dark purple background</desc>
+  <desc id="logo-desc">VoidCrawl logo — periodic table tile with symbol Vc on a dark purple background</desc>
 
   <!-- Background -->
   <rect x="0" y="0" width="500" height="500" fill="#120a24"/>
@@ -36,7 +36,7 @@
     font-size="200" font-weight="800"
     fill="#b07adf" opacity="0.95"
     text-anchor="middle"
-  >Vd</text>
+  >Vc</text>
 
   <!-- Element name -->
   <text x="250" y="382"

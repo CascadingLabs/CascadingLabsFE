@@ -26,6 +26,7 @@ VoidCrawl is a Chrome DevTools Protocol (CDP) client written in Rust and exposed
 - [Built-in Actions](/voidcrawl/guides/builtin-actions): DOM and CDP-level actions for clicking, typing, scrolling, and querying
 - [Custom JS Actions](/voidcrawl/guides/custom-js-actions): Build reusable browser actions with JsActionNode, inline_js, and Flow composition
 - [Stealth Mode](/voidcrawl/guides/stealth): Anti-detection patches and minimal-footprint automation
+- [Cookbook](/voidcrawl/guides/cookbook): Task-oriented recipes for common VoidCrawl automation patterns
 
 ## Examples
 
@@ -42,6 +43,7 @@ VoidCrawl is a Chrome DevTools Protocol (CDP) client written in Rust and exposed
 ## API Reference
 
 - [API Reference](/voidcrawl/reference/api-reference): Full API reference for VoidCrawl
+- [Docker Config](/voidcrawl/reference/docker-config): Docker image, Compose, and VNC configuration reference
 
 ## Related Projects
 

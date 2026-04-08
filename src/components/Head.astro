@@ -5,9 +5,20 @@ import JsonLd from './JsonLd.astro';
 const site = 'https://cascadinglabs.com';
 const pathname = Astro.url.pathname;
 const segments = pathname.split('/').filter(Boolean);
-const pageTitle =
-	// biome-ignore lint/suspicious/noExplicitAny: Astro.props type varies by Starlight slot; entry shape is not exported
-	(Astro.props as any).entry?.data?.title || '';
+// biome-ignore lint/suspicious/noExplicitAny: Astro.props type varies by Starlight slot; entry shape is not exported
+const entryData = (Astro.props as any).entry?.data || {};
+const pageTitle = entryData.title || '';
+const pageDescription = entryData.description || '';
+const canonicalUrl = `${site}${pathname}`;
+const isVoidcrawl = pathname.startsWith('/voidcrawl');
+const sectionName = isVoidcrawl
+	? 'VoidCrawl'
+	: pathname.startsWith('/qscrape')
+		? 'QScrape'
+		: 'Yosoi';
+const ogImage = isVoidcrawl
+	? `${site}/favicon-voidcrawl-dark.svg`
+	: `${site}/icon.svg`;
 
 const segmentLabels: Record<string, string> = {
 	yosoi: 'Yosoi',
@@ -73,6 +84,62 @@ for (let i = 0; i < segments.length; i++) {
 	}}
 />
 
+{isVoidcrawl && (
+	<JsonLd
+		schema={{
+			"@context": "https://schema.org",
+			"@type": "TechArticle",
+			headline: pageTitle || "VoidCrawl Documentation",
+			description: pageDescription || "Rust-native CDP browser automation for Python via PyO3.",
+			url: canonicalUrl,
+			inLanguage: "en",
+			isPartOf: {
+				"@type": "WebSite",
+				name: "VoidCrawl Documentation",
+				url: `${site}/voidcrawl/`,
+			},
+			about: {
+				"@type": "SoftwareApplication",
+				name: "VoidCrawl",
+				applicationCategory: "DeveloperApplication",
+				operatingSystem: "Cross-platform",
+			},
+			author: {
+				"@type": "Organization",
+				name: "Cascading Labs",
+				url: site,
+			},
+			publisher: {
+				"@type": "Organization",
+				name: "Cascading Labs",
+				url: site,
+				logo: {
+					"@type": "ImageObject",
+					url: `${site}/icon.svg`,
+				},
+			},
+		}}
+	/>
+)}
+
+{/* Canonical + extra social metadata — complements Starlight defaults */}
+<link rel="canonical" href={canonicalUrl} />
+<meta property="og:site_name" content={`${sectionName} — Cascading Labs`} />
+<meta property="og:locale" content="en_US" />
+{pageDescription && <meta property="og:description" content={pageDescription} />}
+<meta property="og:image" content={ogImage} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:site" content="@CascadingLabs" />
+{pageTitle && <meta name="twitter:title" content={pageTitle} />}
+{pageDescription && <meta name="twitter:description" content={pageDescription} />}
+<meta name="twitter:image" content={ogImage} />
+{isVoidcrawl && (
+	<meta
+		name="keywords"
+		content="voidcrawl, browser automation, chrome devtools protocol, cdp, rust, python, pyo3, web scraping, playwright alternative, selenium alternative, headless chrome, chromiumoxide, async browser, stealth automation"
+	/>
+)}
+
 <!-- Prevent browser's built-in translate from triggering (we handle translation ourselves) -->
 <meta name="google" content="notranslate" />
 
@@ -133,6 +200,19 @@ for (let i = 0; i < segments.length; i++) {
 		else if (p.startsWith('/voidcrawl')) brand = 'voidcrawl';
 		document.documentElement.dataset.brand = brand;
 		renderFavicon(brand);
+		updateTitle(brand);
+	}
+
+	function updateTitle(brand) {
+		var siteName = brand === 'voidcrawl' ? 'VoidCrawl'
+			: brand === 'qscrape' ? 'QScrape'
+			: brand === 'cascading-labs' ? 'Cascading Labs'
+			: 'Yosoi';
+		var t = document.title || '';
+		var stripped = t.replace(/\s*\|\s*(Yosoi|VoidCrawl|QScrape|Cascading Labs)\s*$/, '');
+		document.title = stripped && stripped !== siteName
+			? stripped + ' | ' + siteName
+			: siteName;
 	}
 
 	var _svgCache = {};

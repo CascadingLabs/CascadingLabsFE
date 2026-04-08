@@ -1,5 +1,6 @@
 // @ts-check
 
+import sitemap from '@astrojs/sitemap';
 import solidJs from '@astrojs/solid-js';
 import starlight from '@astrojs/starlight';
 import tailwindcss from '@tailwindcss/vite';
@@ -14,6 +15,11 @@ export default defineConfig({
 		'/void': '/voidcrawl/',
 	},
 	integrations: [
+		sitemap({
+			changefreq: 'weekly',
+			priority: 0.7,
+			lastmod: new Date(),
+		}),
 		solidJs(),
 		starlight({
 			editLink: {
