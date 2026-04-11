@@ -42,6 +42,10 @@ bun run lint      # biome lint only
 bun run format    # biome format
 ```
 
+## Contact
+
+[contact@cascadinglabs.com](mailto:contact@cascadinglabs.com)
+
 ## License
 
 Apache-2.0
