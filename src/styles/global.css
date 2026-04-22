@@ -393,6 +393,18 @@ body::after {
 	overflow-wrap: break-word;
 }
 
+/* ── Medium-viewport layout fix ──────────────────────
+   Between Starlight's TOC breakpoint (72rem) and a comfortable
+   wide-desktop width (96rem), the 75rem content width plus the
+   left sidebar plus the right TOC overflow horizontally and clip
+   the TOC. Shrink the content width in this band so the three
+   columns coexist without clipping. */
+@media (min-width: 72rem) and (max-width: 96rem) {
+	:root {
+		--sl-content-width: 45rem;
+	}
+}
+
 /* ── Starlight overrides ─────────────────────────────── */
 
 site-search {

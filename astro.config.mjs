@@ -33,6 +33,7 @@ export default defineConfig({
 				PageFrame: './src/components/PageFrame.astro',
 				ThemeSelect: './src/components/ThemeSelect.astro',
 				Sidebar: './src/components/Sidebar.astro',
+				SocialIcons: './src/components/SocialIcons.astro',
 			},
 			favicon: '/yosoi-icon.svg',
 			title: 'Yosoi',

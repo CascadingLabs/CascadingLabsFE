@@ -1,0 +1,37 @@
+---
+import config from 'virtual:starlight/user-config';
+import { Icon } from '@astrojs/starlight/components';
+
+const { id } = Astro.locals.starlightRoute;
+const isVoidCrawl = id.startsWith('voidcrawl');
+
+const links = (config.social || []).map((link) =>
+	isVoidCrawl && link.icon === 'github'
+		? { ...link, href: 'https://github.com/CascadingLabs/VoidCrawl' }
+		: link,
+);
+---
+
+{
+	links.length > 0 && (
+		<>
+			{links.map(({ label, href, icon }) => (
+				<a {href} rel="me" class="sl-flex">
+					<span class="sr-only">{label}</span>
+					<Icon name={icon} />
+				</a>
+			))}
+		</>
+	)
+}
+
+<style>
+	a {
+		color: var(--sl-color-text-accent);
+		padding: 0.5em;
+		margin: -0.5em;
+	}
+	a:hover {
+		color: var(--sl-color-white);
+	}
+</style>
