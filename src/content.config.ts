@@ -1,4 +1,4 @@
-import { defineCollection } from 'astro:content';
+import { defineCollection, z } from 'astro:content';
 import { docsSchema } from '@astrojs/starlight/schema';
 import { glob } from 'astro/loaders';
 
@@ -21,6 +21,25 @@ export const collections = {
 				);
 			},
 		}),
-		schema: docsSchema(),
+		schema: docsSchema({
+			extend: z.object({
+				faqs: z
+					.array(
+						z.object({
+							q: z.string(),
+							a: z.string(),
+						}),
+					)
+					.optional(),
+				references: z
+					.array(
+						z.object({
+							title: z.string(),
+							url: z.string().url(),
+						}),
+					)
+					.optional(),
+			}),
+		}),
 	}),
 };

@@ -5,10 +5,20 @@ import JsonLd from './JsonLd.astro';
 const site = 'https://cascadinglabs.com';
 const pathname = Astro.url.pathname;
 const segments = pathname.split('/').filter(Boolean);
-// biome-ignore lint/suspicious/noExplicitAny: Astro.props type varies by Starlight slot; entry shape is not exported
-const entryData = (Astro.props as any).entry?.data || {};
+// biome-ignore lint/suspicious/noExplicitAny: Starlight route typing is not exported
+const starlightRoute = (Astro.locals as any).starlightRoute;
+// biome-ignore lint/suspicious/noExplicitAny: entry data shape follows docsSchema extend
+const entryData = (starlightRoute?.entry?.data as any) || {};
 const pageTitle = entryData.title || '';
 const pageDescription = entryData.description || '';
+const pageFaqs: { q: string; a: string }[] = Array.isArray(entryData.faqs)
+	? entryData.faqs
+	: [];
+const pageReferences: { title: string; url: string }[] = Array.isArray(
+	entryData.references,
+)
+	? entryData.references
+	: [];
 const canonicalUrl = `${site}${pathname}`;
 const isVoidcrawl = pathname.startsWith('/voidcrawl');
 const sectionName = isVoidcrawl
@@ -118,13 +128,38 @@ for (let i = 0; i < segments.length; i++) {
 					url: `${site}/icon.svg`,
 				},
 			},
+			...(pageReferences.length > 0 && {
+				citation: pageReferences.map((r) => ({
+					"@type": "CreativeWork",
+					name: r.title,
+					url: r.url,
+				})),
+			}),
 		}}
 	/>
 )}
 
-{/* Canonical + extra social metadata — complements Starlight defaults */}
+{pageFaqs.length > 0 && (
+	<JsonLd
+		schema={{
+			"@context": "https://schema.org",
+			"@type": "FAQPage",
+			url: canonicalUrl,
+			mainEntity: pageFaqs.map((f) => ({
+				"@type": "Question",
+				name: f.q,
+				acceptedAnswer: {
+					"@type": "Answer",
+					text: f.a,
+				},
+			})),
+		}}
+	/>
+)}
+
+{/* Canonical and extra social metadata; complements Starlight defaults */}
 <link rel="canonical" href={canonicalUrl} />
-<meta property="og:site_name" content={`${sectionName} — Cascading Labs`} />
+<meta property="og:site_name" content={`${sectionName} · Cascading Labs`} />
 <meta property="og:locale" content="en_US" />
 {pageDescription && <meta property="og:description" content={pageDescription} />}
 <meta property="og:image" content={ogImage} />
@@ -223,7 +258,7 @@ for (let i = 0; i < segments.length; i++) {
 	}
 
 	function _sanitizeSvg(text) {
-		// Strip Google Fonts @import — external resources taint the canvas
+		// Strip Google Fonts @import; external resources taint the canvas
 		text = text.replace(/@import\s+url\([^)]*\)\s*;?/g, '');
 		// Replace width="100%" with explicit dims so canvas can size the image
 		text = text.replace(/\bwidth="100%"/, 'width="500" height="500"');

@@ -108,6 +108,29 @@ export default defineConfig({
 					],
 				},
 				{
+					label: 'Observability',
+					collapsed: true,
+					items: [
+						{ label: 'Overview', slug: 'observability' },
+						{
+							label: 'Langfuse Quickstart',
+							slug: 'observability/langfuse-quickstart',
+						},
+						{
+							label: 'Instrumenting Pipelines',
+							slug: 'observability/instrumenting-pipelines',
+						},
+						{
+							label: 'Reading Traces',
+							slug: 'observability/reading-traces',
+						},
+						{
+							label: 'Evals & Tagging',
+							slug: 'observability/evals-and-tagging',
+						},
+					],
+				},
+				{
 					label: 'Reference',
 					collapsed: true,
 					items: [
