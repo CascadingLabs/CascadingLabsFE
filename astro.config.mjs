@@ -211,6 +211,30 @@ export default defineConfig({
 									slug: 'voidcrawl/guides/stealth',
 								},
 								{
+									label: 'Geolocation & Emulation',
+									slug: 'voidcrawl/guides/emulation',
+								},
+								{
+									label: 'Accessibility Tree',
+									slug: 'voidcrawl/guides/accessibility-tree',
+								},
+								{
+									label: 'MCP Server',
+									slug: 'voidcrawl/guides/mcp-server',
+								},
+								{
+									label: 'Native Chrome Profiles',
+									slug: 'voidcrawl/guides/profiles',
+								},
+								{
+									label: 'Screenshot API',
+									slug: 'voidcrawl/guides/screenshot-api',
+								},
+								{
+									label: 'Captcha Handling',
+									slug: 'voidcrawl/guides/captcha-handling',
+								},
+								{
 									label: 'Cookbook',
 									slug: 'voidcrawl/guides/cookbook',
 								},
