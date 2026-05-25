@@ -76,6 +76,9 @@ export default defineConfig({
 						{ label: 'Custom Types', slug: 'guides/custom-types' },
 						{ label: 'Concurrent Scraping', slug: 'guides/concurrent' },
 						{ label: 'Debugging', slug: 'guides/debugging' },
+						{ label: 'Fetchers', slug: 'guides/fetchers' },
+						{ label: 'DOMLoader', slug: 'guides/dom-loader' },
+						{ label: 'A3Node', slug: 'guides/a3node' },
 						{
 							label: 'Examples',
 							collapsed: true,
