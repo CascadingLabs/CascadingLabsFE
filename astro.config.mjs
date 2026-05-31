@@ -238,6 +238,10 @@ export default defineConfig({
 									slug: 'voidcrawl/guides/captcha-handling',
 								},
 								{
+									label: 'File Downloads',
+									slug: 'voidcrawl/guides/downloads',
+								},
+								{
 									label: 'Cookbook',
 									slug: 'voidcrawl/guides/cookbook',
 								},
