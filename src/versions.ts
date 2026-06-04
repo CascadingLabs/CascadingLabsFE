@@ -11,5 +11,6 @@ export interface Version {
  * Convention: archived docs live at docs/yosoi-docs/<slug>/
  */
 export const versions: Version[] = [];
+	{ slug: '0.0.1a18', label: '0.0.1a18' },
 
 export const currentLabel = 'Latest';

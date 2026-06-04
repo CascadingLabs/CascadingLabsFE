@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://cascadinglabs.com/sitemap-index.xml
+Disallow: /0.0.1a18/
