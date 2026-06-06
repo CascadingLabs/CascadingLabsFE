@@ -79,6 +79,9 @@ export default defineConfig({
 						{ label: 'Fetchers', slug: 'guides/fetchers' },
 						{ label: 'DOMLoader', slug: 'guides/dom-loader' },
 						{ label: 'A3Node', slug: 'guides/a3node' },
+						{ label: 'MCP Discovery', slug: 'guides/mcp-discovery' },
+						{ label: 'JS Fields', slug: 'guides/js-fields' },
+						{ label: 'File Downloads', slug: 'guides/file-downloads' },
 						{
 							label: 'Examples',
 							collapsed: true,
@@ -236,6 +239,10 @@ export default defineConfig({
 								{
 									label: 'Captcha Handling',
 									slug: 'voidcrawl/guides/captcha-handling',
+								},
+								{
+									label: 'Anti-Bot Vendors',
+									slug: 'voidcrawl/guides/anti-bot-vendors',
 								},
 								{
 									label: 'File Downloads',
