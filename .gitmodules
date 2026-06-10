@@ -4,3 +4,6 @@
 [submodule "docs/voidcrawl-docs"]
 	path = docs/voidcrawl-docs
 	url = https://github.com/CascadingLabs/VoidCrawlDocs.git
+[submodule "docs/opensesame-docs"]
+	path = docs/opensesame-docs
+	url = https://github.com/CascadingLabs/OpenSesameDocs.git

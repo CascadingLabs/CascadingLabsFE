@@ -15,15 +15,15 @@
 
 # Cascading Labs
 
-Company website and documentation hub — [cascadinglabs.com](https://cascadinglabs.com)
+Company website and documentation hub: [cascadinglabs.com](https://cascadinglabs.com)
 
 Built with [Astro](https://astro.build/) and [Starlight](https://starlight.astro.build/) for documentation. Hosts product pages and project docs for the Cascading Labs ecosystem.
 
 ## Projects
 
-- **[Yosoi](https://cascadinglabs.com/yosoi)** — AI-powered selector discovery for web scraping
-- **[VoidCrawl](https://cascadinglabs.com/voidcrawl/)** — Rust-native CDP browser automation for Python
-- **[QScrape](https://qscrape.dev)** — Web scraper evaluation suite
+- **[Yosoi](https://cascadinglabs.com/yosoi)**: AI-powered selector discovery for web scraping
+- **[VoidCrawl](https://cascadinglabs.com/voidcrawl/)**: Rust-native CDP browser automation for Python
+- **[QScrape](https://qscrape.dev)**: Web scraper evaluation suite
 
 ## Development
 

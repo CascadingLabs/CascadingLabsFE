@@ -1,10 +1,10 @@
 /**
  * Maps the Starlight-generated `editUrl` to the correct upstream docs repo.
  *
- * The `docs/yosoi-docs/` and `docs/voidcrawl-docs/` directories in this
- * repo are git submodules of the YosoiDocs and VoidCrawlDocs repos
- * respectively, so the file structure inside them mirrors each upstream
- * repo's root. We rewrite the synthesized edit URL by stripping the
+ * The `docs/yosoi-docs/`, `docs/voidcrawl-docs/`, and `docs/opensesame-docs/`
+ * directories in this repo are git submodules of the YosoiDocs, VoidCrawlDocs,
+ * and OpenSesameDocs repos respectively, so the file structure inside them
+ * mirrors each upstream repo's root. We rewrite the synthesized edit URL by stripping the
  * `<...>/docs/<submodule>/` prefix and prepending the upstream `/blob/main/`
  * URL — `/blob/` (not `/edit/`) so the link points at the rendered file on
  * GitHub rather than dropping the user straight into the editor.
@@ -15,10 +15,13 @@
 
 const YOSOI_SEGMENT = '/docs/yosoi-docs/';
 const VOIDCRAWL_SEGMENT = '/docs/voidcrawl-docs/';
+const OPENSESAME_SEGMENT = '/docs/opensesame-docs/';
 
 const YOSOI_EDIT_BASE = 'https://github.com/CascadingLabs/YosoiDocs/blob/main/';
 const VOIDCRAWL_EDIT_BASE =
 	'https://github.com/CascadingLabs/VoidCrawlDocs/blob/main/';
+const OPENSESAME_EDIT_BASE =
+	'https://github.com/CascadingLabs/OpenSesameDocs/blob/main/';
 
 export function transformEditUrl(
 	editUrl: URL | string | undefined | null,
@@ -27,6 +30,14 @@ export function transformEditUrl(
 		return undefined;
 	}
 	const href = typeof editUrl === 'string' ? editUrl : editUrl.href;
+
+	const opensesameIdx = href.indexOf(OPENSESAME_SEGMENT);
+	if (opensesameIdx !== -1) {
+		return (
+			OPENSESAME_EDIT_BASE +
+			href.slice(opensesameIdx + OPENSESAME_SEGMENT.length)
+		);
+	}
 
 	const voidcrawlIdx = href.indexOf(VOIDCRAWL_SEGMENT);
 	if (voidcrawlIdx !== -1) {

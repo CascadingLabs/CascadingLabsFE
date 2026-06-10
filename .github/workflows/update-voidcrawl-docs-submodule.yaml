@@ -35,7 +35,7 @@ jobs:
           git add docs/voidcrawl-docs
 
           if git diff --cached --quiet; then
-            echo "Nothing changed — already up to date"
+            echo "Nothing changed; already up to date"
           else
             git commit -m "chore: update voidcrawl-docs to ${TAG}"
             git push

@@ -80,6 +80,10 @@ export default defineConfig({
 						{ label: 'DOMLoader', slug: 'guides/dom-loader' },
 						{ label: 'A3Node', slug: 'guides/a3node' },
 						{ label: 'MCP Discovery', slug: 'guides/mcp-discovery' },
+						{
+							label: 'Page Identity & Reuse',
+							slug: 'guides/page-identity-reuse',
+						},
 						{ label: 'JS Fields', slug: 'guides/js-fields' },
 						{ label: 'File Downloads', slug: 'guides/file-downloads' },
 						{
@@ -108,6 +112,10 @@ export default defineConfig({
 								{
 									label: 'Nested Contracts',
 									slug: 'guides/examples/nested-contracts',
+								},
+								{
+									label: 'Yahoo Finance Reuse',
+									slug: 'guides/examples/yahoo-finance-reuse',
 								},
 							],
 						},
@@ -307,6 +315,38 @@ export default defineConfig({
 								{
 									label: 'Docker Config',
 									slug: 'voidcrawl/reference/docker-config',
+								},
+							],
+						},
+					],
+				},
+				{
+					label: 'OpenSesame',
+					items: [
+						{
+							label: 'Getting Started',
+							items: [
+								{
+									label: 'Overview',
+									slug: 'opensesame',
+								},
+								{
+									label: 'Installation',
+									slug: 'opensesame/installation',
+								},
+								{
+									label: 'Quick Start',
+									slug: 'opensesame/quickstart',
+								},
+							],
+						},
+						{
+							label: 'Reference',
+							collapsed: true,
+							items: [
+								{
+									label: 'API Reference',
+									slug: 'opensesame/reference/api-reference',
 								},
 							],
 						},

@@ -28,6 +28,13 @@ repos:
         files: \.(js|ts|cjs|mjs|jsx|tsx|json|jsonc|css|astro)$
         stages: [manual]
 
+      - id: no-em-dash
+        name: no em dash in prose
+        entry: python scripts/check_no_em_dash.py
+        language: system
+        files: \.(adoc|md|mdx|rst|txt|ya?ml)$
+        stages: [pre-commit, manual]
+
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.30.0
     hooks:

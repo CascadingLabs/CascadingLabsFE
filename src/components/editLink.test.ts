@@ -63,6 +63,22 @@ describe('transformEditUrl', () => {
 		});
 	});
 
+	describe('opensesame pages', () => {
+		it('rewrites a page in opensesame/', () => {
+			const input = `${SYNTH_BASE}docs/opensesame-docs/opensesame/installation.mdx`;
+			expect(transformEditUrl(input)).toBe(
+				'https://github.com/CascadingLabs/OpenSesameDocs/blob/main/opensesame/installation.mdx',
+			);
+		});
+
+		it('rewrites a page in opensesame/reference/', () => {
+			const input = `${SYNTH_BASE}docs/opensesame-docs/opensesame/reference/api-reference.md`;
+			expect(transformEditUrl(input)).toBe(
+				'https://github.com/CascadingLabs/OpenSesameDocs/blob/main/opensesame/reference/api-reference.md',
+			);
+		});
+	});
+
 	describe('input shapes', () => {
 		it('accepts a URL object (Starlight gives us URL, not string)', () => {
 			const input = new URL(`${SYNTH_BASE}docs/yosoi-docs/yosoi/index.mdx`);

@@ -1,4 +1,4 @@
-# Dependency CVE gate — be proactive instead of waiting on Dependabot.
+# Dependency CVE gate: be proactive instead of waiting on Dependabot.
 # Scanners live in CascadingLabs/.github (reusable workflows); update them once,
 # every repo inherits the change. See that repo's .github/workflows/cve-*.yml.
 

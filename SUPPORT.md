@@ -15,7 +15,7 @@
 
 Use GitHub Issues for bug reports and feature requests on a specific project. Before opening a new issue, please search existing issues to avoid duplicates.
 
-Please do **not** use issues for general questions — Discord is faster for that.
+Please do **not** use issues for general questions; Discord is faster for that.
 
 ## Email
 
