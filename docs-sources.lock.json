@@ -1,0 +1,23 @@
+{
+	"schemaVersion": 1,
+	"sources": {
+		"yosoi": {
+			"repo": "https://github.com/CascadingLabs/YosoiDocs.git",
+			"ref": "3bc827397b76be1af55312c929a70ab5aa548cec",
+			"directory": "yosoi-docs",
+			"editBaseUrl": "https://github.com/CascadingLabs/YosoiDocs/blob/main/"
+		},
+		"voidcrawl": {
+			"repo": "https://github.com/CascadingLabs/VoidCrawlDocs.git",
+			"ref": "c748c59a33e990ab35663d8f765c727bdba963b5",
+			"directory": "voidcrawl-docs",
+			"editBaseUrl": "https://github.com/CascadingLabs/VoidCrawlDocs/blob/main/"
+		},
+		"opensesame": {
+			"repo": "https://github.com/CascadingLabs/OpenSesameDocs.git",
+			"ref": "c4a2825fcaf97d5cd05179dc4b180933b567c6a5",
+			"directory": "opensesame-docs",
+			"editBaseUrl": "https://github.com/CascadingLabs/OpenSesameDocs/blob/main/"
+		}
+	}
+}

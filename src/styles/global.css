@@ -71,6 +71,12 @@ samp {
 	--vc-accent-text: #b07adf;
 	--vc-accent-pale: #d4bfef;
 	--vc-link-hover-bg: color-mix(in srgb, #2d1a4e 15%, transparent);
+
+	/* OpenSesame accent — green */
+	--os-accent: #0b4a2a;
+	--os-accent-text: #3fbf7f;
+	--os-accent-pale: #9af5bf;
+	--os-link-hover-bg: color-mix(in srgb, #0b4a2a 15%, transparent);
 }
 
 /* Light mode — Starlight pages + landing page */
@@ -129,6 +135,12 @@ samp {
 	--vc-accent-text: #5a2d91;
 	--vc-accent-pale: #e2d5f0;
 	--vc-link-hover-bg: color-mix(in srgb, #2d1a4e 10%, transparent);
+
+	/* OpenSesame accent — green */
+	--os-accent: #0b4a2a;
+	--os-accent-text: #1d7a4c;
+	--os-accent-pale: #d8f7e6;
+	--os-link-hover-bg: color-mix(in srgb, #0b4a2a 10%, transparent);
 }
 
 /* Light mode — no-JS fallback (landing page without data-theme) */
@@ -182,6 +194,12 @@ samp {
 		--vc-accent-text: #5a2d91;
 		--vc-accent-pale: #e2d5f0;
 		--vc-link-hover-bg: color-mix(in srgb, #2d1a4e 10%, transparent);
+
+		/* OpenSesame accent — green */
+		--os-accent: #0b4a2a;
+		--os-accent-text: #1d7a4c;
+		--os-accent-pale: #d8f7e6;
+		--os-link-hover-bg: color-mix(in srgb, #0b4a2a 10%, transparent);
 	}
 }
 
@@ -254,6 +272,42 @@ samp {
 		--cl-accent-text: #5a2d91;
 		--cl-accent-pale: #e2d5f0;
 		--cl-link-hover-bg: color-mix(in srgb, #2d1a4e 10%, transparent);
+	}
+}
+
+/* ── OpenSesame brand — green accent ────────────────── */
+[data-brand="opensesame"] {
+	--sl-color-accent-low: #071711;
+	--sl-color-accent: #0b4a2a;
+	--sl-color-accent-high: #9af5bf;
+	--sl-color-text-accent: #3fbf7f;
+	--cl-accent: #0b4a2a;
+	--cl-accent-text: #3fbf7f;
+	--cl-accent-pale: #9af5bf;
+	--cl-link-hover-bg: color-mix(in srgb, #0b4a2a 15%, transparent);
+}
+
+[data-theme="light"][data-brand="opensesame"] {
+	--sl-color-accent-low: #d8f7e6;
+	--sl-color-accent: #0b4a2a;
+	--sl-color-accent-high: #071711;
+	--sl-color-text-accent: #1d7a4c;
+	--cl-accent: #0b4a2a;
+	--cl-accent-text: #1d7a4c;
+	--cl-accent-pale: #d8f7e6;
+	--cl-link-hover-bg: color-mix(in srgb, #0b4a2a 10%, transparent);
+}
+
+@media (prefers-color-scheme: light) {
+	:root:not([data-theme])[data-brand="opensesame"] {
+		--sl-color-accent-low: #d8f7e6;
+		--sl-color-accent: #0b4a2a;
+		--sl-color-accent-high: #071711;
+		--sl-color-text-accent: #1d7a4c;
+		--cl-accent: #0b4a2a;
+		--cl-accent-text: #1d7a4c;
+		--cl-accent-pale: #d8f7e6;
+		--cl-link-hover-bg: color-mix(in srgb, #0b4a2a 10%, transparent);
 	}
 }
 
@@ -810,4 +864,9 @@ site-search {
 .cl-link.hero-link[data-brand="voidcrawl"]:hover {
 	color: var(--vc-accent-text);
 	background: var(--vc-link-hover-bg);
+}
+
+.cl-link.hero-link[data-brand="opensesame"]:hover {
+	color: var(--os-accent-text);
+	background: var(--os-link-hover-bg);
 }

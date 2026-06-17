@@ -5,6 +5,7 @@ import SidebarSublist from '@astrojs/starlight/components/SidebarSublist.astro';
 
 const { sidebar, id } = Astro.locals.starlightRoute;
 const isVoidCrawl = id.startsWith('voidcrawl');
+const isOpenSesame = id.startsWith('opensesame');
 
 // Determine which cross-project overview is currently active
 const activeCP = (() => {
@@ -27,19 +28,23 @@ const activeCP = (() => {
 })();
 
 // Filter sidebar to only show the relevant section.
-// VoidCrawl pages see only the "VoidCrawl" group's children.
-// All other pages see everything except VoidCrawl.
-// VoidCrawl pages: unwrap the VoidCrawl group to show its children directly.
-// All other pages: show everything except the VoidCrawl group.
+// VoidCrawl/OpenSesame pages: unwrap their group to show its children directly.
+// All other pages: show everything except the other products' groups.
 const filtered = isVoidCrawl
 	? (sidebar.find(
 			(entry) => entry.type === 'group' && entry.label === 'VoidCrawl',
 		)?.entries ?? [])
-	: sidebar.filter(
-			(entry) =>
-				entry.type !== 'group' ||
-				(entry.label !== 'VoidCrawl' && entry.label !== 'QScrape'),
-		);
+	: isOpenSesame
+		? (sidebar.find(
+				(entry) => entry.type === 'group' && entry.label === 'OpenSesame',
+			)?.entries ?? [])
+		: sidebar.filter(
+				(entry) =>
+					entry.type !== 'group' ||
+					(entry.label !== 'VoidCrawl' &&
+						entry.label !== 'QScrape' &&
+						entry.label !== 'OpenSesame'),
+			);
 ---
 
 <SidebarPersister>
@@ -83,6 +88,73 @@ const filtered = isVoidCrawl
 						</ul>
 					</details>
 				</li>
+				<li class="cp-opensesame">
+					<details>
+						<summary class="cp-summary">
+							<span class="group-label">
+								<span class="large">OpenSesame</span>
+							</span>
+							<svg class="caret" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="1.25rem" height="1.25rem">
+								<path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
+							</svg>
+						</summary>
+						<ul>
+							<li><a href="/opensesame/" class="sl-external-link">OpenSesame</a></li>
+							<li><a href="https://github.com/CascadingLabs/OpenSesame" target="_blank" class="sl-github-link">GitHub</a></li>
+						</ul>
+					</details>
+				</li>
+			</ul>
+		) : isOpenSesame ? (
+			<ul class="cp-list">
+				<li class="cp-yosoi">
+					<details>
+						<summary class="cp-summary">
+							<span class="group-label">
+								<span class="large">Yosoi</span>
+							</span>
+							<svg class="caret" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="1.25rem" height="1.25rem">
+								<path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
+							</svg>
+						</summary>
+						<ul>
+							<li><a href="/yosoi/" class="sl-external-link">Yosoi</a></li>
+							<li><a href="https://github.com/CascadingLabs/Yosoi" target="_blank" class="sl-github-link">GitHub</a></li>
+						</ul>
+					</details>
+				</li>
+				<li class="cp-voidcrawl">
+					<details>
+						<summary class="cp-summary">
+							<span class="group-label">
+								<span class="large">VoidCrawl</span>
+							</span>
+							<svg class="caret" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="1.25rem" height="1.25rem">
+								<path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
+							</svg>
+						</summary>
+						<ul>
+							<li><a href="/voidcrawl/" class="sl-external-link">VoidCrawl</a></li>
+							<li><a href="https://github.com/CascadingLabs/VoidCrawl" target="_blank" class="sl-github-link">GitHub</a></li>
+						</ul>
+					</details>
+				</li>
+				<li class="cp-qscrape">
+					<details>
+						<summary class="cp-summary">
+							<span class="group-label">
+								<span class="large">QScrape</span>
+							</span>
+							<svg class="caret" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="1.25rem" height="1.25rem">
+								<path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
+							</svg>
+						</summary>
+						<ul>
+							<li><a href="https://qscrape.dev" target="_blank" class="sl-external-link">qscrape.dev</a></li>
+							<li><a href="https://github.com/CascadingLabs/QScrape" target="_blank" class="sl-github-link">GitHub</a></li>
+						</ul>
+					</details>
+				</li>
 			</ul>
 		) : (
 			<ul class="cp-list">
@@ -117,6 +189,22 @@ const filtered = isVoidCrawl
 							<li><a href="/yosoi/qscrape/" {...(activeCP === 'qscrape' ? { 'aria-current': 'page' } : {})}><span>Overview</span></a></li>
 							<li><a href="https://qscrape.dev" target="_blank" class="sl-external-link">qscrape.dev</a></li>
 							<li><a href="https://github.com/CascadingLabs/QScrape" target="_blank" class="sl-github-link">GitHub</a></li>
+						</ul>
+					</details>
+				</li>
+				<li class="cp-opensesame">
+					<details>
+						<summary class="cp-summary">
+							<span class="group-label">
+								<span class="large">OpenSesame</span>
+							</span>
+							<svg class="caret" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="1.25rem" height="1.25rem">
+								<path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
+							</svg>
+						</summary>
+						<ul>
+							<li><a href="/opensesame/" class="sl-external-link">OpenSesame</a></li>
+							<li><a href="https://github.com/CascadingLabs/OpenSesame" target="_blank" class="sl-github-link">GitHub</a></li>
 						</ul>
 					</details>
 				</li>
@@ -199,6 +287,10 @@ const filtered = isVoidCrawl
 		color: var(--vc-accent-text);
 	}
 
+	.cp-opensesame .cp-summary:hover .large {
+		color: var(--os-accent-text);
+	}
+
 	/* ── caret — matches Starlight's [open] rotation ── */
 	.caret {
 		flex-shrink: 0;
@@ -250,5 +342,11 @@ const filtered = isVoidCrawl
 	.cp-voidcrawl details > ul a:focus {
 		color: var(--vc-accent-text);
 		background: var(--vc-link-hover-bg);
+	}
+
+	.cp-opensesame details > ul a:hover,
+	.cp-opensesame details > ul a:focus {
+		color: var(--os-accent-text);
+		background: var(--os-link-hover-bg);
 	}
 </style>

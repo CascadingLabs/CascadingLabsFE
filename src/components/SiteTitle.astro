@@ -1,7 +1,8 @@
 ---
 const { siteTitle, id } = Astro.locals.starlightRoute;
 const isVoidCrawl = id.startsWith('voidcrawl');
-const isYosoi = !isVoidCrawl;
+const isOpenSesame = id.startsWith('opensesame');
+const isYosoi = !isVoidCrawl && !isOpenSesame;
 ---
 
 <a href="/" class="cl-home" title="Cascading Labs home">
@@ -12,6 +13,9 @@ const isYosoi = !isVoidCrawl;
 </a>
 <a href="/voidcrawl" class:list={["vc-home", { active: isVoidCrawl }]} title="VoidCrawl">
     <img data-src-dark="/vc_favicon.svg" data-src-light="/vc_favicon-light.svg" alt="VoidCrawl" class="vc-mark themed-img" width="26" height="26" />
+</a>
+<a href="/opensesame" class:list={["os-home", { active: isOpenSesame }]} title="OpenSesame">
+    <img data-src-dark="/os_favicon.svg" data-src-light="/os_favicon-light.svg" alt="OpenSesame" class="os-mark themed-img" width="26" height="26" />
 </a>
 <a href="/yosoi" class:list={["site-title", "sl-flex", { active: isYosoi }]}>
     <img data-src-dark="/yosoi-favicon.svg" data-src-light="/yosoi-favicon-light.svg" alt="" class="yosoi-mark themed-img" width="26" height="26" aria-hidden="true" />
@@ -153,6 +157,29 @@ const isYosoi = !isVoidCrawl;
 
     .vc-home:hover .vc-mark,
     .vc-home.active .vc-mark {
+        filter: grayscale(0);
+        opacity: 1;
+    }
+
+    .os-home {
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+        margin-inline-end: 0.25rem;
+    }
+
+    .os-mark {
+        width: 26px;
+        height: 26px;
+        border-radius: 4px;
+        filter: grayscale(1);
+        opacity: 0.5;
+        transition: filter 0.15s ease, opacity 0.15s ease;
+        will-change: filter, opacity;
+    }
+
+    .os-home:hover .os-mark,
+    .os-home.active .os-mark {
         filter: grayscale(0);
         opacity: 1;
     }
