@@ -233,6 +233,7 @@ for (let i = 0; i < segments.length; i++) {
 		else if (p.startsWith('/voidcrawl/qscrape')) brand = 'qscrape';
 		else if (p.startsWith('/qscrape')) brand = 'qscrape';
 		else if (p.startsWith('/voidcrawl')) brand = 'voidcrawl';
+		else if (p.startsWith('/opensesame')) brand = 'opensesame';
 		document.documentElement.dataset.brand = brand;
 		renderFavicon(brand);
 		updateTitle(brand);
@@ -241,10 +242,11 @@ for (let i = 0; i < segments.length; i++) {
 	function updateTitle(brand) {
 		var siteName = brand === 'voidcrawl' ? 'VoidCrawl'
 			: brand === 'qscrape' ? 'QScrape'
+			: brand === 'opensesame' ? 'OpenSesame'
 			: brand === 'cascading-labs' ? 'Cascading Labs'
 			: 'Yosoi';
 		var t = document.title || '';
-		var stripped = t.replace(/\s*\|\s*(Yosoi|VoidCrawl|QScrape|Cascading Labs)\s*$/, '');
+		var stripped = t.replace(/\s*\|\s*(Yosoi|VoidCrawl|QScrape|OpenSesame|Cascading Labs)\s*$/, '');
 		document.title = stripped && stripped !== siteName
 			? stripped + ' | ' + siteName
 			: siteName;

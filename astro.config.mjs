@@ -1,11 +1,16 @@
 // @ts-check
 
+import { fileURLToPath } from 'node:url';
 import sitemap from '@astrojs/sitemap';
 import solidJs from '@astrojs/solid-js';
 import starlight from '@astrojs/starlight';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
 import remarkCallouts from './src/plugins/remark-callouts.mjs';
+
+const siteComponentsPath = fileURLToPath(
+	new URL('./src/components', import.meta.url),
+);
 
 // https://astro.build/config
 export default defineConfig({
@@ -80,6 +85,10 @@ export default defineConfig({
 						{ label: 'DOMLoader', slug: 'guides/dom-loader' },
 						{ label: 'A3Node', slug: 'guides/a3node' },
 						{ label: 'MCP Discovery', slug: 'guides/mcp-discovery' },
+						{
+							label: 'Page Identity & Reuse',
+							slug: 'guides/page-identity-reuse',
+						},
 						{ label: 'JS Fields', slug: 'guides/js-fields' },
 						{ label: 'File Downloads', slug: 'guides/file-downloads' },
 						{
@@ -108,6 +117,10 @@ export default defineConfig({
 								{
 									label: 'Nested Contracts',
 									slug: 'guides/examples/nested-contracts',
+								},
+								{
+									label: 'Yahoo Finance Reuse',
+									slug: 'guides/examples/yahoo-finance-reuse',
 								},
 							],
 						},
@@ -312,6 +325,38 @@ export default defineConfig({
 						},
 					],
 				},
+				{
+					label: 'OpenSesame',
+					items: [
+						{
+							label: 'Getting Started',
+							items: [
+								{
+									label: 'Overview',
+									slug: 'opensesame',
+								},
+								{
+									label: 'Installation',
+									slug: 'opensesame/installation',
+								},
+								{
+									label: 'Quick Start',
+									slug: 'opensesame/quickstart',
+								},
+							],
+						},
+						{
+							label: 'Reference',
+							collapsed: true,
+							items: [
+								{
+									label: 'API Reference',
+									slug: 'opensesame/reference/api-reference',
+								},
+							],
+						},
+					],
+				},
 			],
 			customCss: ['./src/styles/global.css'],
 			expressiveCode: {
@@ -332,6 +377,11 @@ export default defineConfig({
 	},
 
 	vite: {
+		resolve: {
+			alias: {
+				'@site-components': siteComponentsPath,
+			},
+		},
 		plugins: [tailwindcss()],
 	},
 });

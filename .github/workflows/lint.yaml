@@ -1,4 +1,4 @@
-# Cascading Labs — Biome Lint CI
+# Cascading Labs Biome Lint CI
 # Note: Astro file support in Biome is best-effort.
 # The base biome.json relaxes rules for *.astro via overrides.
 
@@ -30,3 +30,6 @@ jobs:
 
       - name: Biome lint & format check
         run: bun run check
+
+      - name: Check prose punctuation
+        run: python scripts/check_no_em_dash.py

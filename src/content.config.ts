@@ -8,15 +8,17 @@ export const collections = {
 			pattern: [
 				'yosoi-docs/**/*.{md,mdx}',
 				'voidcrawl-docs/voidcrawl/**/*.{md,mdx}',
+				'opensesame-docs/opensesame/**/*.{md,mdx}',
 				'!**/readme.md',
 				'!**/README.md',
 			],
-			base: './docs',
+			base: './.generated/docs',
 			generateId: ({ entry }) => {
 				return (
 					entry
 						.replace(/^yosoi-docs\//, '')
 						.replace(/^voidcrawl-docs\//, '')
+						.replace(/^opensesame-docs\//, '')
 						.replace(/(\/index)?\.mdx?$/, '') || 'index'
 				);
 			},

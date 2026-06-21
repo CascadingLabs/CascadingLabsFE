@@ -1,4 +1,4 @@
-# CascadingLabsFE — Project Documentation
+# CascadingLabsFE Project Documentation
 
 ## Overview
 CascadingLabsFE is the Cascading Labs company website and documentation hub. Built with [Astro](https://astro.build/) and [Starlight](https://starlight.astro.build/) for docs. Hosts product pages, interactive charts, and project documentation.
@@ -12,41 +12,41 @@ CascadingLabsFE is the Cascading Labs company website and documentation hub. Bui
 - **TypeScript**: Strict mode via `tsconfig.json`
 
 ## Key Commands
-- `bun run dev` — start dev server
-- `bun run build` — production build
-- `bun run preview` — preview production build
-- `bun run check` — biome check with auto-fix
-- `bun run lint` — biome lint only
-- `bun run format` — biome format with write
-- `bun run lighthouse` — build + run Lighthouse (desktop + mobile)
+- `bun run dev`: start dev server
+- `bun run build`: production build
+- `bun run preview`: preview production build
+- `bun run check`: biome check with auto-fix
+- `bun run lint`: biome lint only
+- `bun run format`: biome format with write
+- `bun run lighthouse`: build + run Lighthouse (desktop + mobile)
 
 ## Project Structure
 ```
 src/
   pages/
-    index.astro              — Landing page
-    animated.astro           — Animated variant
-    dna-wave-funnel.astro    — DNA wave funnel page
+    index.astro              Landing page
+    animated.astro           Animated variant
+    dna-wave-funnel.astro    DNA wave funnel page
   components/
-    Head.astro               — HTML head / meta tags
-    Header.astro             — Site header / nav
-    PageFrame.astro          — Page wrapper component
-    SiteTitle.astro          — Logo / site title
-    ThemeSelect.astro        — Dark/light toggle
-    VersionSelect.astro      — Version selector
-    JsonLd.astro             — Structured data (JSON-LD)
-    CostEffortChart.tsx      — Solid.js interactive chart
-    PipelineChart.tsx        — Solid.js pipeline chart
-    useStarlightTheme.ts     — Theme hook for Solid components
+    Head.astro               HTML head / meta tags
+    Header.astro             Site header / nav
+    PageFrame.astro          Page wrapper component
+    SiteTitle.astro          Logo / site title
+    ThemeSelect.astro        Dark/light toggle
+    VersionSelect.astro      Version selector
+    JsonLd.astro             Structured data (JSON-LD)
+    CostEffortChart.tsx      Solid.js interactive chart
+    PipelineChart.tsx        Solid.js pipeline chart
+    useStarlightTheme.ts     Theme hook for Solid components
   layouts/
-    Layout.astro             — Base layout
+    Layout.astro             Base layout
   styles/
-    global.css               — Global stylesheet (Tailwind)
-  plugins/                   — Astro/remark plugins
-  content.config.ts          — Content collection config
-  versions.ts                — Version definitions
-docs/                        — Starlight documentation content
-public/                      — Static assets (images, favicons)
+    global.css               Global stylesheet (Tailwind)
+  plugins/                   Astro/remark plugins
+  content.config.ts          Content collection config
+  versions.ts                Version definitions
+docs/                        Starlight documentation content
+public/                      Static assets (images, favicons)
 ```
 
 ## Reference System Rules

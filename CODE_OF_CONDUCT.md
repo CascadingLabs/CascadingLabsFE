@@ -32,7 +32,7 @@ Maintainers have the right and responsibility to remove, edit, or reject comment
 
 ## Scope
 
-This Code of Conduct applies within all Cascading Labs project spaces — repositories, issues, pull requests, discussions — and also applies when an individual is officially representing the community in public spaces such as our Discord server.
+This Code of Conduct applies within all Cascading Labs project spaces, including repositories, issues, pull requests, and discussions. It also applies when an individual is officially representing the community in public spaces such as our Discord server.
 
 ## Reporting
 
@@ -42,13 +42,13 @@ Instances of abusive, harassing, or otherwise unacceptable behavior may be repor
 
 Maintainers will follow these guidelines when determining consequences for violations:
 
-**1. Correction** — A private written warning with clarity around the nature of the violation and an explanation of why the behavior was inappropriate.
+**1. Correction:** A private written warning with clarity around the nature of the violation and an explanation of why the behavior was inappropriate.
 
-**2. Warning** — A warning with consequences for continued behavior. No interaction with the people involved for a specified period of time.
+**2. Warning:** A warning with consequences for continued behavior. No interaction with the people involved for a specified period of time.
 
-**3. Temporary Ban** — A temporary ban from any sort of interaction or public communication within the community for a specified period of time.
+**3. Temporary Ban:** A temporary ban from any sort of interaction or public communication within the community for a specified period of time.
 
-**4. Permanent Ban** — A permanent ban from any sort of public interaction within the community.
+**4. Permanent Ban:** A permanent ban from any sort of public interaction within the community.
 
 ## Attribution
 

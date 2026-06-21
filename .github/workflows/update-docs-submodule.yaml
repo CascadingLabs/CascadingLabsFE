@@ -29,7 +29,7 @@ jobs:
             echo "slug=${PREV_TAG#v}" >> "$GITHUB_OUTPUT"
             echo "Found previous version: ${PREV_TAG}"
           else
-            echo "No previous version tag found — skipping snapshot"
+            echo "No previous version tag found; skipping snapshot"
           fi
 
       - name: Setup bun
@@ -142,7 +142,7 @@ jobs:
           git add docs/yosoi-docs src/versions.ts public/
 
           if git diff --cached --quiet; then
-            echo "Nothing changed — already up to date"
+            echo "Nothing changed; already up to date"
           else
             MSG="chore: update yosoi-docs to ${TAG}"
             if [ -n "${PREV_SLUG}" ]; then

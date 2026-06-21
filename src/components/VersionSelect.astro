@@ -114,10 +114,10 @@ import { currentLabel, versions } from '../versions';
 	}
 </style>
 
-<script is:inline>
+<script>
+	import { buildVersionPath, getVersionInfoFromPath } from './versionRoutes';
+
 	var versionMQ = window.matchMedia('(min-width: 50rem)');
-	// Regex to detect version-like path segments (e.g. 0.0.1a14, 1.2.3beta4)
-	var VERSION_RE = /^\d+\.\d+\.\d+[a-zA-Z]*\d*$/;
 
 	function mountVersionUI() {
 		var ui = document.getElementById('sl-version-select');
@@ -134,16 +134,7 @@ import { currentLabel, versions } from '../versions';
 	mountVersionUI();
 
 	function getVersionInfo() {
-		var segs = window.location.pathname.split('/').filter(Boolean);
-		var first = segs[0] || '';
-		var isVersioned = VERSION_RE.test(first);
-		return {
-			isVersioned: isVersioned,
-			currentSlug: isVersioned ? first : '',
-			barePath: isVersioned
-				? window.location.pathname.replace(/^\/[^/]+/, '') || '/'
-				: window.location.pathname
-		};
+		return getVersionInfoFromPath(window.location.pathname);
 	}
 
 	function rebuildDropdown(dropdown, versions, currentSlug) {
@@ -224,8 +215,7 @@ import { currentLabel, versions } from '../versions';
 			if (!opt) return;
 
 			var slug = opt.dataset.slug;
-			var vi = getVersionInfo();
-			var target = slug ? '/' + slug + vi.barePath : vi.barePath;
+			var target = buildVersionPath(window.location.pathname, slug || '');
 
 			btn.setAttribute('aria-expanded', 'false');
 			dropdown.hidden = true;

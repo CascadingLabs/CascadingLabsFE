@@ -3,6 +3,9 @@
 # ==========================================
 dist/
 .astro/
+.generated/
+docs/
+docs-sources.local.json
 
 # ==========================================
 # Dependencies
