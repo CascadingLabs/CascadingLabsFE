@@ -8,7 +8,7 @@ export interface Version {
  * The first entry is shown at the top of the dropdown (most recent archive).
  * "Latest" is always prepended automatically by the component.
  *
- * Convention: archived docs are published as static routes under /<version>/.
+ * Convention: archived docs are published under /<product>/versions/<version>/.
  */
 export const versions: Version[] = [
 	{ slug: '0.0.2a18', label: '0.0.2a18' },
