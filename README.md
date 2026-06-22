@@ -29,9 +29,25 @@ Built with [Astro](https://astro.build/) and [Starlight](https://starlight.astro
 
 ```bash
 bun install
+bun run sync-docs # materialize product docs into .generated/docs
 bun run dev       # http://localhost:4321
 bun run build
 bun run preview
+```
+
+Product docs are not git submodules in this repo. `docs-sources.lock.json`
+pins the source commit for each standalone docs repo, and `bun run sync-docs`
+copies those sources into `.generated/docs/` for Astro.
+
+For local docs authoring, create an ignored `docs-sources.local.json` override:
+
+```json
+{
+	"sources": {
+		"yosoi": { "path": "../YosoiDocs" },
+		"voidcrawl": { "path": "../VoidCrawlDocs" }
+	}
+}
 ```
 
 ## Lint

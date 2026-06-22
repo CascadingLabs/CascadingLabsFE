@@ -1,11 +1,16 @@
 // @ts-check
 
+import { fileURLToPath } from 'node:url';
 import sitemap from '@astrojs/sitemap';
 import solidJs from '@astrojs/solid-js';
 import starlight from '@astrojs/starlight';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
 import remarkCallouts from './src/plugins/remark-callouts.mjs';
+
+const siteComponentsPath = fileURLToPath(
+	new URL('./src/components', import.meta.url),
+);
 
 // https://astro.build/config
 export default defineConfig({
@@ -347,6 +352,11 @@ export default defineConfig({
 	},
 
 	vite: {
+		resolve: {
+			alias: {
+				'@site-components': siteComponentsPath,
+			},
+		},
 		plugins: [tailwindcss()],
 	},
 });

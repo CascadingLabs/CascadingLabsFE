@@ -1,0 +1,59 @@
+name: Update VoidCrawl Docs Source
+
+on:
+  repository_dispatch:
+    types: [update-voidcrawl-docs]
+
+jobs:
+  update-docs-source:
+    name: Bump locked VoidCrawl docs source
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout CascadingLabsFE
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          token: ${{ secrets.DOCS_DEPLOY_TOKEN }}
+
+      - name: Resolve target docs ref
+        id: refs
+        env:
+          TARGET_INPUT: ${{ github.event.client_payload.sha || github.event.client_payload.ref || github.event.client_payload.tag || 'main' }}
+        run: |
+          git clone https://github.com/CascadingLabs/VoidCrawlDocs.git /tmp/voidcrawl-docs
+          git -C /tmp/voidcrawl-docs fetch --tags origin
+          TARGET_REF=$(git -C /tmp/voidcrawl-docs rev-parse "${TARGET_INPUT}^{commit}")
+          echo "target_ref=${TARGET_REF}" >> "$GITHUB_OUTPUT"
+
+      - name: Update VoidCrawl docs lock
+        env:
+          TARGET_REF: ${{ steps.refs.outputs.target_ref }}
+        run: |
+          node -e "
+            const fs = require('fs');
+            const file = 'docs-sources.lock.json';
+            const lock = JSON.parse(fs.readFileSync(file, 'utf8'));
+            lock.sources.voidcrawl.ref = process.env.TARGET_REF;
+            fs.writeFileSync(file, JSON.stringify(lock, null, '\t') + '\n');
+          "
+
+      - name: Commit updates
+        env:
+          TAG: ${{ github.event.client_payload.tag }}
+        run: |
+          git config --global user.name  "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs-sources.lock.json
+
+          if git diff --cached --quiet; then
+            echo "Nothing changed - already up to date"
+          else
+            MSG="chore: update voidcrawl-docs source"
+            if [ -n "${TAG}" ]; then
+              MSG="${MSG} to ${TAG}"
+            fi
+            git commit -m "$MSG"
+            git push
+          fi

@@ -1,53 +1,54 @@
-name: Update Yosoi-Docs Submodule
+name: Update Yosoi Docs Source
 
 on:
   repository_dispatch:
     types: [update-yosoi-docs]
 
 jobs:
-  update-submodule:
-    name: Bump docs/yosoi-docs to latest
+  update-docs-source:
+    name: Bump locked Yosoi docs source
     runs-on: ubuntu-latest
     permissions:
       contents: write
 
     steps:
-      - name: Checkout CascadingLabsFE (with submodules)
+      - name: Checkout CascadingLabsFE
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
-          submodules: recursive
           token: ${{ secrets.DOCS_DEPLOY_TOKEN }}
 
-      - name: Determine previous version from submodule
-        id: prev
-        run: |
-          cd docs/yosoi-docs
-          git fetch --tags origin
-          PREV_TAG=$(git describe --tags --exact-match HEAD 2>/dev/null || echo "")
-          echo "tag=${PREV_TAG}" >> "$GITHUB_OUTPUT"
-          if [ -n "${PREV_TAG}" ]; then
-            echo "slug=${PREV_TAG#v}" >> "$GITHUB_OUTPUT"
-            echo "Found previous version: ${PREV_TAG}"
-          else
-            echo "No previous version tag found — skipping snapshot"
-          fi
-
       - name: Setup bun
-        if: steps.prev.outputs.tag != ''
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
 
       - name: Install dependencies
-        if: steps.prev.outputs.tag != ''
         run: bun install --frozen-lockfile
 
+      - name: Resolve current and target docs refs
+        id: refs
+        env:
+          TARGET_INPUT: ${{ github.event.client_payload.sha || github.event.client_payload.ref || github.event.client_payload.tag || 'main' }}
+        run: |
+          CURRENT_REF=$(node -e "const lock=require('./docs-sources.lock.json'); process.stdout.write(lock.sources.yosoi.ref)")
+          git clone https://github.com/CascadingLabs/YosoiDocs.git /tmp/yosoi-docs
+          git -C /tmp/yosoi-docs fetch --tags origin
+          TARGET_REF=$(git -C /tmp/yosoi-docs rev-parse "${TARGET_INPUT}^{commit}")
+          PREV_TAG=$(git -C /tmp/yosoi-docs describe --tags --exact-match "${CURRENT_REF}" 2>/dev/null || echo "")
+
+          echo "current_ref=${CURRENT_REF}" >> "$GITHUB_OUTPUT"
+          echo "target_ref=${TARGET_REF}" >> "$GITHUB_OUTPUT"
+          echo "prev_tag=${PREV_TAG}" >> "$GITHUB_OUTPUT"
+          if [ -n "${PREV_TAG}" ]; then
+            echo "prev_slug=${PREV_TAG#v}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build current site
-        if: steps.prev.outputs.tag != ''
+        if: steps.refs.outputs.prev_tag != ''
         run: bun run build
 
       - name: Snapshot current docs as archived version
-        if: steps.prev.outputs.tag != ''
+        if: steps.refs.outputs.prev_tag != ''
         env:
-          SLUG: ${{ steps.prev.outputs.slug }}
+          SLUG: ${{ steps.refs.outputs.prev_slug }}
         run: |
           DOC_DIRS="yosoi guides reference contributing qscrape roadmap"
           mkdir -p "public/${SLUG}"
@@ -57,39 +58,34 @@ jobs:
             fi
           done
 
-          # Preserve hashed assets so archived pages render correctly
           mkdir -p public/_astro
           cp -rn dist/_astro/* public/_astro/ 2>/dev/null || true
 
-          # Inject noindex meta tag into archived pages
           find "public/${SLUG}" -name "index.html" \
             -exec sed -i 's/<head>/<head><meta name="robots" content="noindex,follow">/' {} +
 
-          # Update robots.txt
           if ! grep -q "Disallow: /${SLUG}/" public/robots.txt; then
             echo "Disallow: /${SLUG}/" >> public/robots.txt
           fi
 
-          echo "Archived docs snapshot at public/${SLUG}/"
-
-      - name: Pull latest Yosoi-Docs
+      - name: Update Yosoi docs lock
+        env:
+          TARGET_REF: ${{ steps.refs.outputs.target_ref }}
         run: |
-          git config --global user.name  "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-          cd docs/yosoi-docs
-          git fetch origin
-          git checkout main
-          git pull origin main
+          node -e "
+            const fs = require('fs');
+            const file = 'docs-sources.lock.json';
+            const lock = JSON.parse(fs.readFileSync(file, 'utf8'));
+            lock.sources.yosoi.ref = process.env.TARGET_REF;
+            fs.writeFileSync(file, JSON.stringify(lock, null, '\t') + '\n');
+          "
 
       - name: Add version entry to src/versions.ts
-        if: steps.prev.outputs.tag != ''
+        if: steps.refs.outputs.prev_tag != ''
         env:
-          SLUG: ${{ steps.prev.outputs.slug }}
-          LABEL: ${{ steps.prev.outputs.slug }}
+          SLUG: ${{ steps.refs.outputs.prev_slug }}
+          LABEL: ${{ steps.refs.outputs.prev_slug }}
         run: |
-          echo "Archiving version: slug=${SLUG} label=${LABEL}"
-
           node -e "
             const fs = require('fs');
             const file = 'src/versions.ts';
@@ -98,57 +94,52 @@ jobs:
             const marker = 'export const versions: Version[] = [';
             const idx = content.indexOf(marker);
             if (idx === -1) { console.error('Could not find versions array'); process.exit(1); }
-            const insertAt = content.indexOf('\n', idx) + 1;
-            content = content.slice(0, insertAt) + entry + content.slice(insertAt);
-            fs.writeFileSync(file, content);
-            console.log('Inserted version entry for ${SLUG}');
+            if (!content.includes(entry.trim())) {
+              const insertAt = content.indexOf('\n', idx) + 1;
+              content = content.slice(0, insertAt) + entry + content.slice(insertAt);
+              fs.writeFileSync(file, content);
+            }
           "
 
       - name: Sync versions.json and update archived HTML
-        if: steps.prev.outputs.tag != ''
+        if: steps.refs.outputs.prev_tag != ''
         run: |
-          # Generate versions.json from versions.ts
           node -e "
             const fs = require('fs');
             const content = fs.readFileSync('src/versions.ts', 'utf8');
             const matches = [...content.matchAll(/\{\s*slug:\s*'([^']+)',\s*label:\s*'([^']+)'\s*\}/g)];
             const versions = matches.map(m => ({ slug: m[1], label: m[2] }));
             fs.writeFileSync('public/versions.json', JSON.stringify(versions, null, '\t') + '\n');
-            console.log('Generated versions.json with', versions.length, 'entries');
           "
 
-          # Build the HTML-escaped data-slugs value from versions.json
           SLUGS_ATTR=$(node -e "
             const vs = require('./public/versions.json');
             const inner = vs.map(v => '\&quot;' + v.slug + '\&quot;').join(',');
             process.stdout.write('[' + inner + ']');
           ")
 
-          # Update data-slugs in ALL archived HTML
-          for dir in public/0.0.1a*/; do
+          for dir in public/0.0.*/; do
             [ -d "$dir" ] || continue
             find "$dir" -name "index.html" -exec sed -i \
               -e "s/data-slugs=\"[^\"]*\"/data-slugs=\"${SLUGS_ATTR}\"/" \
               {} +
           done
 
-          echo "Synced versions.json and updated archived HTML"
-
       - name: Commit updates
         env:
           TAG: ${{ github.event.client_payload.tag }}
-          PREV_SLUG: ${{ steps.prev.outputs.slug }}
         run: |
-          git add docs/yosoi-docs src/versions.ts public/
+          git config --global user.name  "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs-sources.lock.json src/versions.ts public/
 
           if git diff --cached --quiet; then
-            echo "Nothing changed — already up to date"
+            echo "Nothing changed - already up to date"
           else
-            MSG="chore: update yosoi-docs to ${TAG}"
-            if [ -n "${PREV_SLUG}" ]; then
-              MSG="${MSG} (archived ${PREV_SLUG})"
+            MSG="chore: update yosoi-docs source"
+            if [ -n "${TAG}" ]; then
+              MSG="${MSG} to ${TAG}"
             fi
             git commit -m "$MSG"
             git push
-            echo "Pushed update"
           fi

@@ -11,7 +11,7 @@ export const collections = {
 				'!**/readme.md',
 				'!**/README.md',
 			],
-			base: './docs',
+			base: './.generated/docs',
 			generateId: ({ entry }) => {
 				return (
 					entry

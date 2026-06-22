@@ -9,37 +9,44 @@ CascadingLabsFE is the public-facing Astro site for Cascading Labs. Contribution
 ## Clone & Setup
 
 ```bash
-git clone --recurse-submodules https://github.com/CascadingLabs/CascadingLabsFE.git
+git clone https://github.com/CascadingLabs/CascadingLabsFE.git
 cd CascadingLabsFE
 bun install
+bun run sync-docs
 ```
 
-> **Already cloned without `--recurse-submodules`?** Run:
->
-> ```bash
-> git submodule update --init --recursive
-> ```
+### Documentation Sources
 
-### Documentation Submodules
+Product documentation lives in standalone repositories and is materialized into
+`.generated/docs/` before Astro runs. This repo does not use git submodules for
+docs.
 
-Product documentation lives in the `docs/` directory as git submodules:
-
-| Submodule | Path | Repository |
+| Product | Generated path | Repository |
 |-----------|------|------------|
-| YosoiDocs | `docs/yosoi-docs` | [CascadingLabs/YosoiDocs](https://github.com/CascadingLabs/YosoiDocs) |
-| VoidCrawlDocs | `docs/voidcrawl-docs` | [CascadingLabs/VoidCrawlDocs](https://github.com/CascadingLabs/VoidCrawlDocs) |
+| Yosoi | `.generated/docs/yosoi-docs` | [CascadingLabs/YosoiDocs](https://github.com/CascadingLabs/YosoiDocs) |
+| VoidCrawl | `.generated/docs/voidcrawl-docs` | [CascadingLabs/VoidCrawlDocs](https://github.com/CascadingLabs/VoidCrawlDocs) |
 
-To add a new documentation submodule:
-
-```bash
-git submodule add https://github.com/CascadingLabs/<RepoName>.git docs/<submodule-name>
-```
-
-To pull the latest changes for all submodules:
+`docs-sources.lock.json` pins the exact source commit used by CI and normal
+builds. To refresh docs, update the relevant `ref` in that lockfile, then run:
 
 ```bash
-git submodule update --remote --merge
+bun run sync-docs
+bun run build
 ```
+
+To preview local docs changes from sibling checkouts, create an ignored
+`docs-sources.local.json` file:
+
+```json
+{
+	"sources": {
+		"yosoi": { "path": "../YosoiDocs" },
+		"voidcrawl": { "path": "../VoidCrawlDocs" }
+	}
+}
+```
+
+Do not commit `.generated/` or `docs-sources.local.json`.
 
 **Prerequisites:**
 
