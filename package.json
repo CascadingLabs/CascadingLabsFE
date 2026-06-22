@@ -9,6 +9,7 @@
 		"build": "astro build",
 		"preview": "astro preview",
 		"astro": "astro",
+		"test": "vitest run",
 		"lint": "biome lint .",
 		"format": "biome format . --write",
 		"check": "biome check --write --no-errors-on-unmatched .",

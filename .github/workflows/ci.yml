@@ -33,6 +33,9 @@ jobs:
       - name: Astro build
         run: bun run build
 
+      - name: Test
+        run: bun run test
+
       - name: Lighthouse CI (desktop)
         run: bun run lhci autorun --config=lighthouserc.desktop.json
 

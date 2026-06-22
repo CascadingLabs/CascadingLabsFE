@@ -13,6 +13,7 @@ export default defineConfig({
 	output: 'static',
 	redirects: {
 		'/void': '/voidcrawl/',
+		'/guides/fingerprinting-technology/': '/guides/fingerprinting/',
 	},
 	integrations: [
 		sitemap({
@@ -23,7 +24,7 @@ export default defineConfig({
 		solidJs(),
 		starlight({
 			editLink: {
-				baseUrl: 'https://github.com/CascadingLabs/Yosoi-Docs/edit/main/',
+				baseUrl: 'https://github.com/CascadingLabs/YosoiDocs/edit/main/',
 			},
 			components: {
 				EditLink: './src/components/EditLink.astro',
@@ -80,8 +81,18 @@ export default defineConfig({
 						{ label: 'DOMLoader', slug: 'guides/dom-loader' },
 						{ label: 'A3Node', slug: 'guides/a3node' },
 						{ label: 'MCP Discovery', slug: 'guides/mcp-discovery' },
+						{
+							label: 'Page Identity & Reuse',
+							slug: 'guides/page-identity-reuse',
+						},
+						{
+							label: 'Fingerprinting',
+							slug: 'guides/fingerprinting',
+						},
 						{ label: 'JS Fields', slug: 'guides/js-fields' },
 						{ label: 'File Downloads', slug: 'guides/file-downloads' },
+						{ label: 'Proxying', slug: 'guides/proxying' },
+						{ label: 'Scaling', slug: 'guides/scaling' },
 						{
 							label: 'Examples',
 							collapsed: true,
@@ -177,6 +188,10 @@ export default defineConfig({
 								{
 									label: 'Quick Start',
 									slug: 'voidcrawl/quickstart',
+								},
+								{
+									label: 'Yosoi Integration',
+									slug: 'yosoi/voidcrawl',
 								},
 								{
 									label: 'Contributing',

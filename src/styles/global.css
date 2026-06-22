@@ -550,6 +550,99 @@ site-search {
 	margin-block-end: 0.75rem;
 }
 
+/* Yosoi docs figures */
+.sl-markdown-content .ys-figure {
+	margin-block: 1.5rem;
+	padding: 1rem;
+	border: 1px solid var(--cl-border);
+	background: var(--cl-bg-subtle);
+	overflow-x: auto;
+}
+
+.sl-markdown-content .ys-figure figcaption {
+	margin-block-start: 0.75rem;
+	color: var(--cl-text-dim);
+	font-size: var(--sl-text-sm);
+	text-align: center;
+}
+
+.sl-markdown-content .ys-flow {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(10rem, 1fr));
+	gap: 0.75rem;
+	min-width: 44rem;
+	align-items: stretch;
+}
+
+.sl-markdown-content .ys-flow--three {
+	grid-template-columns: repeat(3, minmax(11rem, 1fr));
+	min-width: 36rem;
+}
+
+.sl-markdown-content .ys-node {
+	border: 1px solid var(--cl-border);
+	background: var(--cl-bg);
+	padding: 0.85rem;
+	min-height: 8rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.45rem;
+}
+
+.sl-markdown-content .ys-node--accent {
+	border-color: var(--ys-accent);
+	background: var(--ys-link-hover-bg);
+}
+
+.sl-markdown-content .ys-node__label {
+	color: var(--ys-accent-text);
+	font-size: 0.78rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.sl-markdown-content .ys-node__title {
+	color: var(--cl-text);
+	font-weight: 700;
+}
+
+.sl-markdown-content .ys-node__body {
+	color: var(--cl-text-muted);
+	font-size: var(--sl-text-sm);
+	line-height: 1.5;
+}
+
+.sl-markdown-content .ys-chip-grid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+	margin-block-start: 0.35rem;
+}
+
+.sl-markdown-content .ys-chip {
+	border: 1px solid var(--cl-border);
+	background: var(--cl-bg);
+	color: var(--cl-text-muted);
+	padding: 0.2rem 0.45rem;
+	font-size: 0.75rem;
+	white-space: nowrap;
+}
+
+.sl-markdown-content .ys-equation {
+	margin-block: 0.75rem;
+	padding: 0.85rem;
+	border: 1px solid var(--ys-accent);
+	background: var(--ys-link-hover-bg);
+	color: var(--cl-text);
+	font-size: var(--sl-text-sm);
+	line-height: 1.7;
+}
+
+.sl-markdown-content .ys-equation code {
+	color: var(--ys-accent-text);
+}
+
 /* ── Header right-group normalization ────────────────── */
 
 /* Remove Starlight's vertical bar separator after social icons */
