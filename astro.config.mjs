@@ -273,8 +273,12 @@ export default defineConfig({
 									slug: 'voidcrawl/guides/mcp-server',
 								},
 								{
-									label: 'Native Chrome Profiles',
+									label: 'Profiles',
 									slug: 'voidcrawl/guides/profiles',
+								},
+								{
+									label: 'Challenge Escalation',
+									slug: 'voidcrawl/guides/challenge-escalation',
 								},
 								{
 									label: 'Screenshot API',
