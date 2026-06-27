@@ -1,5 +1,48 @@
 {
   "$defs": {
+    "BrowserProfilePolicy": {
+      "description": "VoidCrawl-managed browser profile selection.",
+      "properties": {
+        "profile": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Profile"
+        },
+        "pool": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pool"
+        },
+        "headful": {
+          "default": false,
+          "title": "Headful",
+          "type": "boolean"
+        },
+        "max_live": {
+          "default": 3,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Max Live",
+          "type": "integer"
+        }
+      },
+      "title": "BrowserProfilePolicy",
+      "type": "object"
+    },
     "CrawlBudget": {
       "description": "Budget controls and traversal limits for one crawl run.",
       "properties": {
@@ -544,6 +587,17 @@
           },
           "title": "Chrome Ws Urls",
           "type": "array"
+        },
+        "profile": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BrowserProfilePolicy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "title": "PagePolicy",
@@ -640,6 +694,69 @@
         }
       },
       "title": "ScrapePolicy",
+      "type": "object"
+    },
+    "SearchPolicy": {
+      "description": "Policy for web-search discovery signals.",
+      "properties": {
+        "kind": {
+          "const": "text",
+          "default": "text",
+          "title": "Kind",
+          "type": "string"
+        },
+        "provider": {
+          "const": "ddgs",
+          "default": "ddgs",
+          "title": "Provider",
+          "type": "string"
+        },
+        "backend": {
+          "default": "google,bing,brave",
+          "title": "Backend",
+          "type": "string"
+        },
+        "region": {
+          "default": "us-en",
+          "title": "Region",
+          "type": "string"
+        },
+        "safesearch": {
+          "default": "moderate",
+          "enum": [
+            "on",
+            "moderate",
+            "off"
+          ],
+          "title": "Safesearch",
+          "type": "string"
+        },
+        "max_results": {
+          "default": 10,
+          "minimum": 1,
+          "title": "Max Results",
+          "type": "integer"
+        },
+        "page": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Page",
+          "type": "integer"
+        },
+        "timelimit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timelimit"
+        }
+      },
+      "title": "SearchPolicy",
       "type": "object"
     },
     "SecretRef": {
@@ -750,6 +867,17 @@
       "anyOf": [
         {
           "$ref": "#/$defs/ScrapePolicy"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "search": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SearchPolicy"
         },
         {
           "type": "null"

@@ -13,6 +13,7 @@ Yosoi stands for "You Only Scrape Once (iteratively)." It uses an LLM to identif
 - [Overview](/yosoi): Introduction, how it works, and FAQs
 - [Installation](/yosoi/installation): Install from PyPI or source, set up API keys
 - [Quick Start](/yosoi/quickstart): CLI and Python API examples to start scraping in minutes
+- [Operations API](/yosoi/operations): Canonical scrape, search, crawl, and map request/result envelopes
 - [Configuration](/yosoi/configuration): Environment variables, local storage layout, and observability
 - [Roadmap](/roadmap): Planned features including DOM-enabled scraping and distributed caching
 - [Contributing](/contributing): Dev setup, tools, commit guidelines, and maintainers
@@ -29,6 +30,7 @@ Yosoi stands for "You Only Scrape Once (iteratively)." It uses an LLM to identif
 - [Debugging](/guides/debugging): Diagnose and fix selector discovery failures, extraction errors, and common issues
 - [Proxying](/guides/proxying): Using proxies with Yosoi for distributed scraping
 - [Scaling](/guides/scaling): Running Yosoi at scale with queues, observability, and distributed storage
+- [Research Frontier Packets](/guides/research-frontier): Capture exploratory search, crawl, scrape, and note evidence before pipeline promotion
 
 ## Examples
 
@@ -48,6 +50,12 @@ Yosoi stands for "You Only Scrape Once (iteratively)." It uses an LLM to identif
 - [Types](/reference/types): Field, Title, Author, Price, Rating, Url, Datetime, BodyText, YosoiType
 - [Provider Helpers](/reference/helpers): Quick config functions for 25+ LLM providers
 - [Selector Cache Types](/reference/selector-cache): Selector cache type reference
+
+## Policy
+
+- [Policy Overview](/policy): Serializable policy tree for scrape, search, crawl, output, downloads, telemetry, and trust gates
+- [Policy Files](/policy/files): JSON/YAML policy discovery, schema, and init commands
+- [Search Policy](/policy/search): Defaults for ys.search and yosoi search
 
 ## Related Projects
 

@@ -3,13 +3,13 @@
 	"sources": {
 		"yosoi": {
 			"repo": "https://github.com/CascadingLabs/YosoiDocs.git",
-			"ref": "be327fc2ce921e5c43ff5cef02cab6ddd58b3008",
+			"ref": "origin/main",
 			"directory": "yosoi-docs",
 			"editBaseUrl": "https://github.com/CascadingLabs/YosoiDocs/blob/main/"
 		},
 		"voidcrawl": {
 			"repo": "https://github.com/CascadingLabs/VoidCrawlDocs.git",
-			"ref": "aca92cab4bfebbde9717fff54f0ababd8e467c70",
+			"ref": "origin/main",
 			"directory": "voidcrawl-docs",
 			"editBaseUrl": "https://github.com/CascadingLabs/VoidCrawlDocs/blob/main/"
 		}
