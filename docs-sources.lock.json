@@ -3,7 +3,7 @@
 	"sources": {
 		"yosoi": {
 			"repo": "https://github.com/CascadingLabs/YosoiDocs.git",
-			"ref": "68cc3e3ed8b52a092e608474764f2d59347828aa",
+			"ref": "be327fc2ce921e5c43ff5cef02cab6ddd58b3008",
 			"directory": "yosoi-docs",
 			"editBaseUrl": "https://github.com/CascadingLabs/YosoiDocs/blob/main/"
 		},
