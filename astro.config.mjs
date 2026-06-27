@@ -130,6 +130,30 @@ export default defineConfig({
 					],
 				},
 				{
+					label: 'Policy',
+					collapsed: true,
+					items: [
+						{ label: 'Overview', slug: 'policy' },
+						{ label: 'Policy Files', slug: 'policy/files' },
+						{
+							label: 'Layering & Precedence',
+							slug: 'policy/layering',
+						},
+						{ label: 'CLI Commands', slug: 'policy/cli' },
+						{ label: 'Atom Reads & Trust', slug: 'policy/trust' },
+						{ label: 'Model Policy', slug: 'policy/model' },
+						{ label: 'Scrape Policy', slug: 'policy/scrape' },
+						{ label: 'Page Policy', slug: 'policy/page' },
+						{ label: 'Crawl Policy', slug: 'policy/crawl' },
+						{ label: 'Output Policy', slug: 'policy/output' },
+						{ label: 'Download Policy', slug: 'policy/downloads' },
+						{ label: 'Discovery Policy', slug: 'policy/discovery' },
+						{ label: 'Telemetry Policy', slug: 'policy/telemetry' },
+						{ label: 'Fingerprint Policy', slug: 'policy/fingerprint' },
+						{ label: 'Full Example', slug: 'policy/full-example' },
+					],
+				},
+				{
 					label: 'Observability',
 					collapsed: true,
 					items: [

@@ -1,0 +1,843 @@
+{
+  "$defs": {
+    "CrawlBudget": {
+      "description": "Budget controls and traversal limits for one crawl run.",
+      "properties": {
+        "max_pages": {
+          "default": 1,
+          "maximum": 1000000,
+          "minimum": 1,
+          "title": "Max Pages",
+          "type": "integer"
+        },
+        "max_depth": {
+          "default": 0,
+          "maximum": 20,
+          "minimum": 0,
+          "title": "Max Depth",
+          "type": "integer"
+        },
+        "max_attempts": {
+          "anyOf": [
+            {
+              "maximum": 2000000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Attempts"
+        },
+        "max_pages_per_host": {
+          "anyOf": [
+            {
+              "maximum": 1000000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Pages Per Host"
+        },
+        "crawl_session_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Crawl Session Id"
+        }
+      },
+      "title": "CrawlBudget",
+      "type": "object"
+    },
+    "CrawlPolicy": {
+      "description": "Declarative crawl policy nested under :class:`~yosoi.policy.core.Policy`.",
+      "properties": {
+        "mode": {
+          "default": "contract_focus",
+          "enum": [
+            "seed_hunt",
+            "contract_focus",
+            "structure_guarded",
+            "explorer"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "budget": {
+          "$ref": "#/$defs/CrawlBudget"
+        },
+        "scheduler": {
+          "$ref": "#/$defs/SchedulerPolicy"
+        },
+        "safety": {
+          "$ref": "#/$defs/CrawlSafety"
+        },
+        "escalation": {
+          "$ref": "#/$defs/EscalationPolicy"
+        },
+        "target_contracts": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/CrawlTarget"
+          },
+          "title": "Target Contracts",
+          "type": "array"
+        },
+        "scrape_contracts": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "items": {
+                "$ref": "#/$defs/CrawlTarget"
+              },
+              "type": "array"
+            }
+          ],
+          "default": false,
+          "title": "Scrape Contracts"
+        },
+        "scrape_url_limit_per_contract": {
+          "default": 1,
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Scrape Url Limit Per Contract",
+          "type": "integer"
+        },
+        "fetcher_type": {
+          "default": "auto",
+          "enum": [
+            "auto",
+            "simple",
+            "headless",
+            "headful"
+          ],
+          "title": "Fetcher Type",
+          "type": "string"
+        }
+      },
+      "title": "CrawlPolicy",
+      "type": "object"
+    },
+    "CrawlSafety": {
+      "description": "Host/domain hygiene and deny rules that fail closed.",
+      "properties": {
+        "respect_robots": {
+          "default": true,
+          "title": "Respect Robots",
+          "type": "boolean"
+        },
+        "allow_redirects": {
+          "default": false,
+          "title": "Allow Redirects",
+          "type": "boolean"
+        },
+        "allow_cross_domain": {
+          "default": false,
+          "title": "Allow Cross Domain",
+          "type": "boolean"
+        },
+        "allowed_hosts": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Hosts",
+          "type": "array"
+        },
+        "denied_hosts": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Denied Hosts",
+          "type": "array"
+        },
+        "blocked_path_prefixes": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Blocked Path Prefixes",
+          "type": "array"
+        }
+      },
+      "title": "CrawlSafety",
+      "type": "object"
+    },
+    "CrawlTarget": {
+      "description": "Contract target constraints for crawl planning and reporting.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "max_budget_pages": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Budget Pages"
+        },
+        "intent_tokens": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Intent Tokens",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "CrawlTarget",
+      "type": "object"
+    },
+    "DiscoveryPolicy": {
+      "description": "Policy for selector discovery behavior.",
+      "properties": {
+        "max_concurrent": {
+          "default": 5,
+          "maximum": 50,
+          "minimum": 1,
+          "title": "Max Concurrent",
+          "type": "integer"
+        },
+        "mode": {
+          "default": "auto",
+          "enum": [
+            "auto",
+            "static",
+            "mcp"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "lesson_cache": {
+          "default": true,
+          "title": "Lesson Cache",
+          "type": "boolean"
+        },
+        "replay_verify_threshold": {
+          "default": 1.0,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Replay Verify Threshold",
+          "type": "number"
+        },
+        "static_mode_warning": {
+          "default": true,
+          "title": "Static Mode Warning",
+          "type": "boolean"
+        }
+      },
+      "title": "DiscoveryPolicy",
+      "type": "object"
+    },
+    "DownloadPolicy": {
+      "description": "Policy for download side effects.",
+      "properties": {
+        "allow": {
+          "default": false,
+          "title": "Allow",
+          "type": "boolean"
+        },
+        "allowed_types": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Types",
+          "type": "array"
+        },
+        "directory": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Directory"
+        },
+        "max_bytes": {
+          "anyOf": [
+            {
+              "gt": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Bytes"
+        },
+        "keep": {
+          "default": true,
+          "title": "Keep",
+          "type": "boolean"
+        }
+      },
+      "title": "DownloadPolicy",
+      "type": "object"
+    },
+    "EscalationPolicy": {
+      "description": "Paid/model/browser escalation permissions for crawl-adjacent work.",
+      "properties": {
+        "allow_model_discovery": {
+          "default": false,
+          "title": "Allow Model Discovery",
+          "type": "boolean"
+        },
+        "allow_paid_scrapers": {
+          "default": false,
+          "title": "Allow Paid Scrapers",
+          "type": "boolean"
+        },
+        "max_llm_calls": {
+          "default": 0,
+          "maximum": 100000,
+          "minimum": 0,
+          "title": "Max Llm Calls",
+          "type": "integer"
+        },
+        "max_paid_scraper_calls": {
+          "default": 0,
+          "maximum": 1000000,
+          "minimum": 0,
+          "title": "Max Paid Scraper Calls",
+          "type": "integer"
+        }
+      },
+      "title": "EscalationPolicy",
+      "type": "object"
+    },
+    "FingerprintPolicy": {
+      "description": "Knobs for the off-path fingerprint/health signal lane.",
+      "properties": {
+        "signal_lane": {
+          "default": true,
+          "title": "Signal Lane",
+          "type": "boolean"
+        },
+        "backpressure": {
+          "default": "defer",
+          "enum": [
+            "defer",
+            "drop"
+          ],
+          "title": "Backpressure",
+          "type": "string"
+        },
+        "max_queue": {
+          "default": 256,
+          "maximum": 1000000,
+          "minimum": 1,
+          "title": "Max Queue",
+          "type": "integer"
+        }
+      },
+      "title": "FingerprintPolicy",
+      "type": "object"
+    },
+    "ModelPolicy": {
+      "description": "Declarative model/provider policy.",
+      "properties": {
+        "provider": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider"
+        },
+        "model_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model Name"
+        },
+        "temperature": {
+          "default": 0.01,
+          "maximum": 2.0,
+          "minimum": 0.0,
+          "title": "Temperature",
+          "type": "number"
+        },
+        "max_tokens": {
+          "anyOf": [
+            {
+              "gt": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Tokens"
+        },
+        "extra_params": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Extra Params"
+        },
+        "credential_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SecretRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "ModelPolicy",
+      "type": "object"
+    },
+    "OutputPolicy": {
+      "description": "Controls human and file output for a run.\n\nUse ``quiet=False`` for examples and demos where Yosoi should show progress,\nselected URLs, tables, and scrape results. Keep the default ``quiet=True`` for\nlibrary use where callers consume returned Python values. ``formats`` chooses\npersisted output shapes in SQLite; ``flat_files`` additionally mirrors them to\n`.yosoi/content` files for workflows that need file artifacts. ``json_output``/\n``plain_output`` switch terminal shape for automation.",
+      "properties": {
+        "formats": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Formats",
+          "type": "array"
+        },
+        "quiet": {
+          "default": true,
+          "title": "Quiet",
+          "type": "boolean"
+        },
+        "json_output": {
+          "default": false,
+          "title": "Json Output",
+          "type": "boolean"
+        },
+        "plain_output": {
+          "default": false,
+          "title": "Plain Output",
+          "type": "boolean"
+        },
+        "debug_html": {
+          "default": false,
+          "title": "Debug Html",
+          "type": "boolean"
+        },
+        "debug_html_dir": {
+          "default": ".yosoi/debug",
+          "format": "path",
+          "title": "Debug Html Dir",
+          "type": "string"
+        },
+        "flat_files": {
+          "default": false,
+          "title": "Flat Files",
+          "type": "boolean"
+        },
+        "logs": {
+          "default": true,
+          "title": "Logs",
+          "type": "boolean"
+        }
+      },
+      "title": "OutputPolicy",
+      "type": "object"
+    },
+    "PagePolicy": {
+      "description": "Policy for acquiring a page before a runtime decides what to do with it.",
+      "properties": {
+        "fetcher_type": {
+          "default": "auto",
+          "enum": [
+            "auto",
+            "simple",
+            "headless",
+            "headful",
+            "waterfall"
+          ],
+          "title": "Fetcher Type",
+          "type": "string"
+        },
+        "timeout_seconds": {
+          "default": 30.0,
+          "exclusiveMinimum": 0.0,
+          "maximum": 300.0,
+          "title": "Timeout Seconds",
+          "type": "number"
+        },
+        "max_fetch_retries": {
+          "default": 1,
+          "maximum": 10,
+          "minimum": 1,
+          "title": "Max Fetch Retries",
+          "type": "integer"
+        },
+        "allow_redirects": {
+          "default": true,
+          "title": "Allow Redirects",
+          "type": "boolean"
+        },
+        "clean_html": {
+          "default": true,
+          "title": "Clean Html",
+          "type": "boolean"
+        },
+        "cleaner_profile": {
+          "default": "discovery",
+          "enum": [
+            "discovery",
+            "raw"
+          ],
+          "title": "Cleaner Profile",
+          "type": "string"
+        },
+        "chrome_ws_urls": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Chrome Ws Urls",
+          "type": "array"
+        }
+      },
+      "title": "PagePolicy",
+      "type": "object"
+    },
+    "SchedulerPolicy": {
+      "description": "Concurrency and politeness controls for crawl workers.",
+      "properties": {
+        "max_workers": {
+          "default": 1,
+          "maximum": 128,
+          "minimum": 1,
+          "title": "Max Workers",
+          "type": "integer"
+        },
+        "per_host_concurrency": {
+          "default": 1,
+          "maximum": 64,
+          "minimum": 1,
+          "title": "Per Host Concurrency",
+          "type": "integer"
+        },
+        "politeness_delay": {
+          "default": 1.0,
+          "maximum": 120.0,
+          "minimum": 0.0,
+          "title": "Politeness Delay",
+          "type": "number"
+        },
+        "fetch_timeout_seconds": {
+          "default": 15.0,
+          "exclusiveMinimum": 0.0,
+          "maximum": 300.0,
+          "title": "Fetch Timeout Seconds",
+          "type": "number"
+        },
+        "max_fetch_retries": {
+          "default": 2,
+          "maximum": 10,
+          "minimum": 0,
+          "title": "Max Fetch Retries",
+          "type": "integer"
+        }
+      },
+      "title": "SchedulerPolicy",
+      "type": "object"
+    },
+    "ScrapePolicy": {
+      "description": "Policy for one scrape execution.",
+      "properties": {
+        "force": {
+          "default": false,
+          "title": "Force",
+          "type": "boolean"
+        },
+        "skip_verification": {
+          "default": false,
+          "title": "Skip Verification",
+          "type": "boolean"
+        },
+        "fetcher_type": {
+          "default": "auto",
+          "enum": [
+            "auto",
+            "simple",
+            "headless",
+            "headful",
+            "waterfall"
+          ],
+          "title": "Fetcher Type",
+          "type": "string"
+        },
+        "selector_level": {
+          "$ref": "#/$defs/SelectorLevel",
+          "default": 8
+        },
+        "max_concurrency": {
+          "anyOf": [
+            {
+              "gt": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Concurrency"
+        },
+        "cross_origin_dom": {
+          "default": false,
+          "title": "Cross Origin Dom",
+          "type": "boolean"
+        }
+      },
+      "title": "ScrapePolicy",
+      "type": "object"
+    },
+    "SecretRef": {
+      "description": "Reference to a secret resolved only at run time.",
+      "properties": {
+        "source": {
+          "const": "env",
+          "title": "Source",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "name"
+      ],
+      "title": "SecretRef",
+      "type": "object"
+    },
+    "SelectorLevel": {
+      "description": "Hierarchy of selector strategies from simplest to most complex.\n\nYosoi tries selectors in ascending level order. CSS is the default and\ncovers most sites. Escalation to higher levels only happens when lower\nstrategies fail inline verification.\n\nAttributes:\n    CSS: Standard CSS selector (level 1). Preferred for speed and readability.\n    XPATH: XPath expression (level 2). Used when CSS cannot express the required traversal.\n    REGEX: Raw regex against page HTML (level 3). Last resort for unstructured content.\n    JSONLD: JSON-LD path (level 4). Extracts from embedded structured data.\n    ATTR: Attribute-addressed selector (level 5). Names the target attribute explicitly.\n    GLOBAL_ID: ID-template selector (level 6). Resolves related nodes by shared ID tokens.\n    ROLE: Accessibility-tree role/name selector (level 7). Stable target for rendered UIs.\n    VISUAL: Coordinate/visual target (level 8). Degraded replay-only fallback.",
+      "enum": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "title": "SelectorLevel",
+      "type": "integer"
+    },
+    "TelemetryPolicy": {
+      "description": "Telemetry policy with secret references instead of raw values.",
+      "properties": {
+        "langfuse_public_key_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SecretRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "langfuse_secret_key_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SecretRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "langfuse_host": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Langfuse Host"
+        }
+      },
+      "title": "TelemetryPolicy",
+      "type": "object"
+    }
+  },
+  "description": "Yosoi policy file schema for JSON and YAML editors.",
+  "properties": {
+    "atom_reads": {
+      "default": false,
+      "title": "Atom Reads",
+      "type": "boolean"
+    },
+    "trust_tier": {
+      "default": "strict",
+      "enum": [
+        "strict",
+        "yellow"
+      ],
+      "title": "Trust Tier",
+      "type": "string"
+    },
+    "model": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ModelPolicy"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "scrape": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ScrapePolicy"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "discovery": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DiscoveryPolicy"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "telemetry": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TelemetryPolicy"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "output": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/OutputPolicy"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "download": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DownloadPolicy"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "page": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PagePolicy"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "crawl": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CrawlPolicy"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "fingerprint": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/FingerprintPolicy"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "title": "Yosoi Policy",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cascadinglabs.com/yosoi/schemas/policy.schema.json",
+  "additionalProperties": false
+}
