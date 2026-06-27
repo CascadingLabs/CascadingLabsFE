@@ -1,7 +1,5 @@
 ---
 import Default from '@astrojs/starlight/components/PageFrame.astro';
-// TODO: revisit version tags at a later date
-// import VersionSelect from './VersionSelect.astro';
 ---
 
 <Default {...Astro.props}>
@@ -9,9 +7,6 @@ import Default from '@astrojs/starlight/components/PageFrame.astro';
 	<slot name="sidebar" slot="sidebar" />
 	<slot />
 </Default>
-
-{/* TODO: revisit version tags at a later date */}
-{/* <VersionSelect /> */}
 
 <!-- Hidden Google Translate initialisation target -->
 <div id="google_translate_element" style="display:none"></div>
@@ -204,13 +199,6 @@ import Default from '@astrojs/starlight/components/PageFrame.astro';
 			btn.setAttribute('aria-expanded', String(!open));
 			dropdown.hidden = open;
 
-			// Close the version dropdown if it's open
-			if (!open) {
-				var vBtn = document.getElementById('sl-version-btn');
-				var vDd = document.getElementById('sl-version-dropdown');
-				if (vBtn) vBtn.setAttribute('aria-expanded', 'false');
-				if (vDd) vDd.hidden = true;
-			}
 		});
 
 		// Close on outside click or Escape

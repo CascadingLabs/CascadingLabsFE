@@ -98,7 +98,11 @@ async function copySource(source, materialized) {
 	await mkdir(path.dirname(target), { recursive: true });
 	await cp(materialized.path, target, {
 		recursive: true,
-		filter: (entry) => !entry.split(path.sep).includes('.git'),
+		filter: (entry) => {
+			const rel = path.relative(materialized.path, entry);
+			if (!rel) return true;
+			return !rel.split(path.sep).some((part) => part.startsWith('.'));
+		},
 	});
 	return target;
 }

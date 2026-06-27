@@ -33,7 +33,6 @@ src/
     PageFrame.astro          — Page wrapper component
     SiteTitle.astro          — Logo / site title
     ThemeSelect.astro        — Dark/light toggle
-    VersionSelect.astro      — Version selector
     JsonLd.astro             — Structured data (JSON-LD)
     CostEffortChart.tsx      — Solid.js interactive chart
     PipelineChart.tsx        — Solid.js pipeline chart
@@ -44,7 +43,6 @@ src/
     global.css               — Global stylesheet (Tailwind)
   plugins/                   — Astro/remark plugins
   content.config.ts          — Content collection config
-  versions.ts                — Version definitions
 docs/                        — Starlight documentation content
 public/                      — Static assets (images, favicons)
 ```
