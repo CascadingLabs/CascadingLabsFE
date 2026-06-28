@@ -17,6 +17,9 @@
 
 Company website and documentation hub — [cascadinglabs.com](https://cascadinglabs.com)
 
+> [!WARNING]
+> CascadingLabsFE is research tooling for API design and web reverse engineering. **You assume all legal risk for how you use it.** Respect `robots.txt`, rate limits, and IP bans; and please don't bypass them with Tor or a VPN. Read [DISCLAIMER.md](DISCLAIMER.md) before pointing it at anything.
+
 Built with [Astro](https://astro.build/) and [Starlight](https://starlight.astro.build/) for documentation. Hosts product pages and project docs for the Cascading Labs ecosystem.
 
 ## Projects
@@ -57,6 +60,10 @@ bun run check     # biome check + autofix
 bun run lint      # biome lint only
 bun run format    # biome format
 ```
+
+## Community
+
+- **Responsible use:** see [DISCLAIMER.md](DISCLAIMER.md)
 
 ## Contact
 
