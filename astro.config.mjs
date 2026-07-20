@@ -78,6 +78,7 @@ export default defineConfig({
 						{ label: 'Selectors', slug: 'guides/selectors' },
 						{ label: 'Multi-Item Extraction', slug: 'guides/multi-item' },
 						{ label: 'List Fields', slug: 'guides/list-fields' },
+						{ label: 'Extractor Fields', slug: 'guides/extractor-fields' },
 						{ label: 'Validators', slug: 'guides/validators' },
 						{ label: 'Custom Types', slug: 'guides/custom-types' },
 						{ label: 'Concurrent Scraping', slug: 'guides/concurrent' },

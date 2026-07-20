@@ -32,41 +32,8 @@ jobs:
           git clone https://github.com/CascadingLabs/YosoiDocs.git /tmp/yosoi-docs
           git -C /tmp/yosoi-docs fetch --tags origin
           TARGET_REF=$(git -C /tmp/yosoi-docs rev-parse "${TARGET_INPUT}^{commit}")
-          PREV_TAG=$(git -C /tmp/yosoi-docs describe --tags --exact-match "${CURRENT_REF}" 2>/dev/null || echo "")
-
           echo "current_ref=${CURRENT_REF}" >> "$GITHUB_OUTPUT"
           echo "target_ref=${TARGET_REF}" >> "$GITHUB_OUTPUT"
-          echo "prev_tag=${PREV_TAG}" >> "$GITHUB_OUTPUT"
-          if [ -n "${PREV_TAG}" ]; then
-            echo "prev_slug=${PREV_TAG#v}" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Build current site
-        if: steps.refs.outputs.prev_tag != ''
-        run: bun run build
-
-      - name: Snapshot current docs as archived version
-        if: steps.refs.outputs.prev_tag != ''
-        env:
-          SLUG: ${{ steps.refs.outputs.prev_slug }}
-        run: |
-          DOC_DIRS="yosoi guides reference contributing qscrape roadmap"
-          mkdir -p "public/${SLUG}"
-          for dir in $DOC_DIRS; do
-            if [ -d "dist/${dir}" ]; then
-              cp -r "dist/${dir}" "public/${SLUG}/${dir}"
-            fi
-          done
-
-          mkdir -p public/_astro
-          cp -rn dist/_astro/* public/_astro/ 2>/dev/null || true
-
-          find "public/${SLUG}" -name "index.html" \
-            -exec sed -i 's/<head>/<head><meta name="robots" content="noindex,follow">/' {} +
-
-          if ! grep -q "Disallow: /${SLUG}/" public/robots.txt; then
-            echo "Disallow: /${SLUG}/" >> public/robots.txt
-          fi
 
       - name: Update Yosoi docs lock
         env:
@@ -80,58 +47,13 @@ jobs:
             fs.writeFileSync(file, JSON.stringify(lock, null, '\t') + '\n');
           "
 
-      - name: Add version entry to src/versions.ts
-        if: steps.refs.outputs.prev_tag != ''
-        env:
-          SLUG: ${{ steps.refs.outputs.prev_slug }}
-          LABEL: ${{ steps.refs.outputs.prev_slug }}
-        run: |
-          node -e "
-            const fs = require('fs');
-            const file = 'src/versions.ts';
-            let content = fs.readFileSync(file, 'utf8');
-            const entry = \`\t{ slug: '${SLUG}', label: '${LABEL}' },\n\`;
-            const marker = 'export const versions: Version[] = [';
-            const idx = content.indexOf(marker);
-            if (idx === -1) { console.error('Could not find versions array'); process.exit(1); }
-            if (!content.includes(entry.trim())) {
-              const insertAt = content.indexOf('\n', idx) + 1;
-              content = content.slice(0, insertAt) + entry + content.slice(insertAt);
-              fs.writeFileSync(file, content);
-            }
-          "
-
-      - name: Sync versions.json and update archived HTML
-        if: steps.refs.outputs.prev_tag != ''
-        run: |
-          node -e "
-            const fs = require('fs');
-            const content = fs.readFileSync('src/versions.ts', 'utf8');
-            const matches = [...content.matchAll(/\{\s*slug:\s*'([^']+)',\s*label:\s*'([^']+)'\s*\}/g)];
-            const versions = matches.map(m => ({ slug: m[1], label: m[2] }));
-            fs.writeFileSync('public/versions.json', JSON.stringify(versions, null, '\t') + '\n');
-          "
-
-          SLUGS_ATTR=$(node -e "
-            const vs = require('./public/versions.json');
-            const inner = vs.map(v => '\&quot;' + v.slug + '\&quot;').join(',');
-            process.stdout.write('[' + inner + ']');
-          ")
-
-          for dir in public/0.0.*/; do
-            [ -d "$dir" ] || continue
-            find "$dir" -name "index.html" -exec sed -i \
-              -e "s/data-slugs=\"[^\"]*\"/data-slugs=\"${SLUGS_ATTR}\"/" \
-              {} +
-          done
-
       - name: Commit updates
         env:
           TAG: ${{ github.event.client_payload.tag }}
         run: |
           git config --global user.name  "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs-sources.lock.json src/versions.ts public/
+          git add docs-sources.lock.json
 
           if git diff --cached --quiet; then
             echo "Nothing changed - already up to date"
