@@ -243,6 +243,10 @@ export default defineConfig({
 									slug: 'voidcrawl/guides/browser-pool',
 								},
 								{
+									label: 'Page Lifecycle and Response Capture',
+									slug: 'voidcrawl/guides/page-lifecycle-and-response-capture',
+								},
+								{
 									label: 'Async Native',
 									slug: 'voidcrawl/guides/async-native',
 								},
