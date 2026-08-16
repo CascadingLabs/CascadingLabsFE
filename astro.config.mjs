@@ -86,6 +86,10 @@ export default defineConfig({
 						{ label: 'Fetchers', slug: 'guides/fetchers' },
 						{ label: 'DOMLoader', slug: 'guides/dom-loader' },
 						{ label: 'A3Node', slug: 'guides/a3node' },
+						{
+							label: 'JavaScript Executors & Flows',
+							slug: 'guides/executor-js-flow',
+						},
 						{ label: 'Recipes', slug: 'guides/recipes' },
 						{ label: 'Agent Workflows', slug: 'guides/agent-workflows' },
 						{ label: 'MCP Discovery', slug: 'guides/mcp-discovery' },
