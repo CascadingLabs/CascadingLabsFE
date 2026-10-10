@@ -73,8 +73,12 @@ export function bundleRegistry(catalog) {
 	};
 }
 
-async function download(url, limit, fetcher) {
-	const response = await fetcher(url, { signal: AbortSignal.timeout(60000), cache: 'no-store' });
+async function download(url, limit, fetcher, headers = {}) {
+	const response = await fetcher(url, {
+		signal: AbortSignal.timeout(60000),
+		cache: 'no-store',
+		headers,
+	});
 	if (!response.ok) throw new Error(`Docs download failed (${response.status})`);
 	if (!response.body) throw new Error('Docs download has no body');
 	const chunks = [];
@@ -98,13 +102,18 @@ export function catalogRefForBuild(env = process.env) {
 	return config.catalogRef;
 }
 
-export async function resolveCatalog(fetcher = fetch, refName = catalogRefForBuild()) {
+export async function resolveCatalog(
+	fetcher = fetch,
+	refName = catalogRefForBuild(),
+	env = process.env,
+) {
 	// Resolve the branch through the API, avoiding raw.githubusercontent.com's moving-ref cache.
 	const ref = JSON.parse(
 		await download(
 			`https://api.github.com/repos/${repository}/git/ref/heads/${refName}`,
 			64 * 1024,
 			fetcher,
+			env.GH_TOKEN ? { Authorization: `Bearer ${env.GH_TOKEN}` } : {},
 		),
 	);
 	if (!commit.test(ref.object?.sha)) throw new Error('Invalid docs artifact branch identity');
