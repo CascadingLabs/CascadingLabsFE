@@ -8,3 +8,7 @@ const olderReference = Astro.locals.starlightRoute.entry.id.startsWith('yosoi/ap
  {olderReference && <p class="docs-preview-note not-content" data-pagefind-ignore>Local preview: reference from source {snapshot.reference.sourceCommit.slice(0, 12)}. Current Markdown is prepared separately.</p>}
  <slot />
 </MarkdownContent>
+<script>
+ import { enhanceCodeBlocks } from '../../scripts/docs-code';
+ enhanceCodeBlocks(document.querySelector('.sl-markdown-content') || document);
+</script>

@@ -486,6 +486,47 @@ button {
 	color: var(--fg);
 	background: var(--surface);
 }
+.sl-markdown-content .docs-code-block {
+	position: relative;
+	margin-block: 1rem;
+}
+.sl-markdown-content .docs-code-block pre {
+	margin: 0;
+	padding-top: 3rem;
+	color: var(--fg);
+	background: var(--surface);
+	overflow-x: auto;
+}
+.sl-markdown-content .docs-copy-code {
+	position: absolute;
+	top: 0.5rem;
+	right: 0.5rem;
+	padding: 0.2rem 0.6rem;
+	border: 1px solid var(--line);
+	border-radius: 3px;
+	background: var(--bg);
+	color: var(--fg);
+	font-size: 0.75rem;
+	cursor: pointer;
+}
+.sl-markdown-content .docs-copy-code:hover {
+	border-color: var(--sl-color-text-accent);
+}
+.sl-markdown-content a.docs-heading-link {
+	font-size: 0.65em;
+	text-decoration: none;
+	padding-inline: 0.25em;
+}
+#docs-archive-view :is(h2, h3)[id] {
+	scroll-margin-top: calc(var(--sl-nav-height) + var(--sl-mobile-toc-height, 0px) + 1rem);
+}
+body:has(#docs-archive-view) :is(starlight-toc, mobile-starlight-toc) a[aria-current='true'] {
+	color: var(--sl-color-text-accent);
+}
+body:has(#docs-archive-view) mobile-starlight-toc a {
+	display: block;
+	padding: 0.5rem 1rem;
+}
 .astro-code span {
 	color: var(--shiki-light);
 }

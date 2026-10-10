@@ -11,7 +11,7 @@ const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
 test('archive shell fetches Markdown from a real GitHub source commit and renders only the requested page', async () => {
 	const source = '80911cec268a96576f513ed1b65da0f0c8623b3e';
 	const raw = `https://raw.githubusercontent.com/CascadingLabs/Yosoi/${source}/docs/public/index.md`;
-	const response = await fetch(raw);
+	const response = await fetch(raw, { signal: AbortSignal.timeout(10000) });
 	expect(response.status).toBe(200);
 	const content = await response.text();
 	await mkdir(path.join(projectRoot, '.generated'), { recursive: true });
@@ -79,6 +79,7 @@ test('archive shell fetches Markdown from a real GitHub source commit and render
 	try {
 		browser = await launchDocsBrowser();
 		const page = await browser.newPage();
+		page.setDefaultTimeout(8000);
 		const requested = [];
 		const errors = [];
 		page.on('request', (req) => {
@@ -106,6 +107,52 @@ test('archive shell fetches Markdown from a real GitHub source commit and render
 			raw,
 		]);
 		expect(await page.locator('starlight-toc a').count()).toBe(2);
+		// Exercise controls and delayed fragment navigation with deterministic Markdown.
+		const controls =
+			'# Controls\n\n## Search\n\n```python\nprint("<hello>")\n```\n\n' +
+			'## Review locally\n\n[Search](#search)\n\n## Search\n\nRepeated heading.\n';
+		manifest.pages[0].sha256 = hash(controls);
+		release.sha256 = hash(JSON.stringify(manifest));
+		await writeFile(
+			path.join(root, 'entry.ts'),
+			`
+    import { renderArchive } from ${JSON.stringify(path.join(projectRoot, 'src/scripts/docs-archive.ts'))};
+    await renderArchive(document.querySelector('#spike'), ${JSON.stringify({ schemaVersion: 1, latest: '0.1.0', versions: [release] })});
+  `,
+		);
+		execFileSync(
+			'bun',
+			[
+				'build',
+				path.join(root, 'entry.ts'),
+				'--outdir',
+				path.join(root, 'assets'),
+				'--target',
+				'browser',
+			],
+			{ cwd: projectRoot },
+		);
+		await page.route(raw, (route) =>
+			route.fulfill({ body: controls, headers: { 'access-control-allow-origin': '*' } }),
+		);
+		await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+		await page.goto(
+			`http://127.0.0.1:${server.address().port}/?version=0.1.0&test=controls#review-locally`,
+		);
+		await page.getByRole('link', { name: 'Link to Review locally', exact: true }).waitFor();
+		expect(
+			await page.locator('#spike h2').evaluateAll((items) => items.map((item) => item.id)),
+		).toEqual(['search', 'review-locally', 'search-1']);
+		await page.getByRole('button', { name: 'Copy code', exact: true }).click();
+		expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('print("<hello>")\n');
+		expect(await page.getByRole('button', { name: 'Copy code', exact: true }).innerText()).toBe(
+			'Copied!',
+		);
+		await page.getByRole('link', { name: 'Link to Search', exact: true }).first().click();
+		expect(new URL(page.url()).hash).toBe('#search');
+		expect(new URL(page.url()).searchParams.get('version')).toBe('0.1.0');
+		await page.getByRole('link', { name: 'Link to Search', exact: true }).nth(1).click();
+		expect(new URL(page.url()).hash).toBe('#search-1');
 		await page.setViewportSize({ width: 390, height: 844 });
 		await page.screenshot({ path: path.join(root, 'archive-mobile.png') });
 		expect(errors).toEqual([]);

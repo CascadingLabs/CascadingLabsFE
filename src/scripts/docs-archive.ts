@@ -1,4 +1,5 @@
 import DOMPurify from 'dompurify';
+import { enhanceCodeBlocks } from './docs-code';
 import {
 	archiveHref,
 	parseReleaseRegistry,
@@ -11,6 +12,7 @@ import type { NavNode } from '../lib/yosoi-snapshot';
 import { referenceKindLabel } from '../lib/docs-path';
 
 const view = document.querySelector<HTMLElement>('#docs-archive-view');
+let outlineEvents: AbortController | undefined;
 if (view) void renderArchive(view);
 export async function renderArchive(
 	view: HTMLElement,
@@ -125,24 +127,96 @@ export async function renderArchive(
 		);
 		const headings = [...view.querySelectorAll<HTMLHeadingElement>('h2,h3')];
 		const used = new Map<string, number>();
-		const toc = document.querySelector('starlight-toc ul');
+		const reserved = new Set([...view.querySelectorAll('[id]')].map((item) => item.id));
 		const outline = headings.map((heading) => {
+			const label = heading.textContent || 'Section';
 			const base =
 				heading.textContent
 					?.toLowerCase()
 					.replace(/[^\p{L}\p{N}]+/gu, '-')
 					.replace(/^-|-$/g, '') || 'section';
-			const count = used.get(base) || 0;
-			used.set(base, count + 1);
-			heading.id ||= base + (count ? `-${count}` : '');
+			if (!heading.id) {
+				let count = used.get(base) || 0;
+				let id = base + (count ? `-${count}` : '');
+				while (reserved.has(id)) id = base + `-${++count}`;
+				used.set(base, count + 1);
+				heading.id = id;
+				reserved.add(id);
+			}
+			const permalink = document.createElement('a');
+			permalink.className = 'docs-heading-link';
+			permalink.href = '#' + encodeURIComponent(heading.id);
+			permalink.textContent = '#';
+			permalink.setAttribute('aria-label', `Link to ${label}`);
+			heading.append(' ', permalink);
 			const li = document.createElement('li');
 			const a = document.createElement('a');
-			a.href = '#' + heading.id;
-			a.textContent = heading.textContent;
+			a.href = permalink.getAttribute('href')!;
+			a.textContent = label;
+			a.style.setProperty('--depth', heading.tagName === 'H3' ? '1' : '0');
 			li.append(a);
 			return li;
 		});
-		toc?.replaceChildren(...outline);
+		for (const toc of document.querySelectorAll('starlight-toc, mobile-starlight-toc')) {
+			const list = toc.querySelector('ul');
+			const template = list?.querySelector('a');
+			list?.replaceChildren(
+				...outline.map((item) => {
+					const copy = item.cloneNode(true) as HTMLLIElement;
+					// Keep Starlight's scoped outline styling for both layouts.
+					copy.className = list.querySelector('li')?.className || '';
+					copy.querySelector('a')!.className = template?.className || '';
+					copy.querySelector('a')!.addEventListener('click', () => {
+						const details = toc.querySelector('details');
+						if (details) details.open = false;
+					});
+					return copy;
+				}),
+			);
+		}
+		// Starlight captures its static headings before the archive fetch completes.
+		// Track the loaded headings without relying on its private observer lifecycle.
+		outlineEvents?.abort();
+		outlineEvents = new AbortController();
+		let scheduled = false;
+		const updateOutline = () => {
+			scheduled = false;
+			const top =
+				(headings[0] ? parseFloat(getComputedStyle(headings[0]).scrollMarginTop) || 0 : 0) +
+				(parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0);
+			const active =
+				headings.filter((heading) => heading.getBoundingClientRect().top <= top + 1).at(-1) ||
+				headings[0];
+			for (const toc of document.querySelectorAll('starlight-toc, mobile-starlight-toc')) {
+				for (const link of toc.querySelectorAll<HTMLAnchorElement>('a')) {
+					if (active && link.hash === '#' + encodeURIComponent(active.id)) {
+						link.setAttribute('aria-current', 'true');
+						const display = toc.querySelector('.display-current');
+						if (display) display.textContent = link.textContent;
+					} else link.removeAttribute('aria-current');
+				}
+			}
+		};
+		const scheduleOutline = () => {
+			if (!scheduled) {
+				scheduled = true;
+				requestAnimationFrame(updateOutline);
+			}
+		};
+		window.addEventListener('scroll', scheduleOutline, {
+			passive: true,
+			signal: outlineEvents.signal,
+		});
+		window.addEventListener('resize', scheduleOutline, { signal: outlineEvents.signal });
+		scheduleOutline();
+		enhanceCodeBlocks(view);
+		if (location.hash) {
+			try {
+				document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView();
+			} catch {
+				/* Ignore malformed URL fragments. */
+			}
+		}
 		const footer = document.querySelector('.pagination-links');
 		const pages = manifest.pages.map((item) => ({ ...item, id: item.route || 'index', order: 0 }));
 		const pagination = paginationForSidebar(
