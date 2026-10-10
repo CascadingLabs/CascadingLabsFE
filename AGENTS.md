@@ -4,10 +4,10 @@
 CascadingLabsFE is the Cascading Labs company website and documentation hub. Built with [Astro](https://astro.build/) and [Starlight](https://starlight.astro.build/) for docs. Hosts product pages, interactive charts, and project documentation.
 
 ## Technology Stack
-- **Framework**: Astro 6.x + Starlight (docs)
+- **Framework**: Astro 7.x + Starlight (docs)
 - **Styling**: Tailwind CSS v4
 - **Interactive Components**: Solid.js (charts, theme select)
-- **Linting/Formatting**: Biome 2.4.x
+- **Linting/Formatting**: Biome 2.5.x
 - **Package Manager**: Bun
 - **TypeScript**: Strict mode via `tsconfig.json`
 
