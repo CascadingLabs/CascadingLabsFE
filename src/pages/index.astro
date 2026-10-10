@@ -1,66 +1,53 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Envelope from '../icons/envelope.svg';
+import BrandIcon from '../components/BrandIcon.astro';
+
+const description =
+    'We are building the future of automation and data systems, starting with web data and finance.';
+
+const email = 'contact@cascadinglabs.com';
 ---
 
-<Layout
-    title="Home | Cascading Labs"
-    description="Cascading Labs is building the future of data and algorithms, starting with web data and finance."
->
-    <h1
-        class="text-xl font-medium mb-10 tracking-tight"
-        style="color: var(--hero-fg);"
-    >
-        Cascading Labs
-    </h1>
+<Layout title="Cascading Labs" description={description}>
+	<h1 slot="heading" class="home-title">Cascading Labs</h1>
 
-    <p class="mb-6 font-light" style="color: var(--hero-fg-muted);">
-        We are building the future of data and algorithms.
-    </p>
+	<div class="home-copy">
+		<p class="home-lead">{description}</p>
 
-    <p class="mb-6 font-light" style="color: var(--hero-fg-muted);">
-        We aren't fully sure what that means yet, but we have the following
-        assumptions:
-    </p>
+		<p>
+			We aren't fully sure what that means yet, but we have the following
+			assumptions:
+		</p>
 
-    <ul
-        class="mb-6 pl-5 list-disc"
-        style="color: var(--hero-fg-muted); --tw-marker-color: var(--hero-fg-dim);"
-    >
-        <li class="mb-2 pl-2 font-light">Black-box AI is universally dumb.</li>
-        <li class="mb-2 pl-2 font-light">
-            Knowledge is the impetus of action.
-        </li>
-        <li class="mb-2 pl-2 font-light">Causality is too complicated.</li>
-        <li class="mb-2 pl-2 font-light">
-            Fact checkers are necessarily biased.
-        </li>
-        <li class="mb-2 pl-2 font-light">
-            Knowledge is a virus, and it spreads.
-        </li>
-    </ul>
+		<ul class="assumptions">
+			<li>Black-box systems are universally dumb.</li>
+			<li>Knowledge is the impetus of action.</li>
+			<li>Causality is complicated.</li>
+			<li>Fact checkers are necessarily biased.</li>
+			<li>Information is a virus, and it spreads.</li>
+		</ul>
+	</div>
 
-    <div class="mt-14 flex gap-2 -ml-2">
-        <a href="/yosoi" class="cl-link hero-link" data-brand="yosoi"> Yosoi </a>
-        <a href="/voidcrawl" class="cl-link hero-link" data-brand="voidcrawl"> VoidCrawl </a>
-        <a
-            href="https://qscrape.dev"
-            class="cl-link hero-link"
-            data-brand="qscrape"
-            target="_blank"
-            rel="noopener noreferrer"
-        >
-            QScrape
-        </a>
-    </div>
+	<footer class="home-footer">
+		<nav class="project-list" aria-label="Projects">
+			<a href="/yosoi/" class="project-card">
+				<BrandIcon brand="yosoi" />
+				<span>Yosoi</span>
+				<svg class="project-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
+			</a>
+			<a href="https://qscrape.dev/" class="project-card">
+				<BrandIcon brand="qscrape" />
+				<span>QScrape</span>
+				<svg class="project-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
+			</a>
+		</nav>
 
-    <p class="mt-10 font-light text-sm" style="color: var(--hero-fg-muted);">
-        Contact:
-        <a
-            href="mailto:contact@cascadinglabs.com"
-            class="underline decoration-dotted underline-offset-4"
-            style="color: var(--hero-fg);"
-        >
-            contact@cascadinglabs.com
-        </a>
-    </p>
+		<hr class="contact-divider" />
+
+		<a class="email-link" href={`mailto:${email}`}>
+			<Envelope width="16" height="16" fill="currentColor" aria-hidden="true" />
+			<span>{email}</span>
+		</a>
+	</footer>
 </Layout>

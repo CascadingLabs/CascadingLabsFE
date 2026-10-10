@@ -1,0 +1,30 @@
+{/* Initialize before first paint; the preference also drives every ThemeToggle. */}
+<script is:inline>
+	(() => {
+		const root = document.documentElement;
+		const system = window.matchMedia('(prefers-color-scheme: dark)');
+		const cookie = document.cookie.match(/(?:^|;\s*)cl-theme=(light|dark|auto)(?:;|$)/);
+		let preference = cookie?.[1] || 'auto';
+		function apply() {
+			const theme = preference === 'auto' ? (system.matches ? 'dark' : 'light') : preference;
+			root.dataset.theme = theme;
+			root.dataset.themePreference = preference;
+			const icon = document.getElementById('site-favicon');
+			if (icon) icon.href = `/favicon-${icon.dataset.brand}-${theme}.svg`;
+			const label = preference === 'auto' ? 'Auto' : preference === 'light' ? 'Light' : 'Dark';
+			document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
+				button.setAttribute('aria-label', `Color theme: ${label}. Click to change.`);
+				button.setAttribute('title', `Color theme: ${label}`);
+			});
+		}
+		apply();
+		system.addEventListener('change', () => { if (preference === 'auto') apply(); });
+		document.addEventListener('DOMContentLoaded', apply);
+		document.addEventListener('click', (event) => {
+			if (!(event.target instanceof Element) || !event.target.closest('[data-theme-toggle]')) return;
+			preference = preference === 'auto' ? 'light' : preference === 'light' ? 'dark' : 'auto';
+			document.cookie = `cl-theme=${preference}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === 'https:' ? '; Secure' : ''}`;
+			apply();
+		});
+	})();
+</script>
