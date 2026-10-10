@@ -1,0 +1,49 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+interface Props {
+	brand: 'yosoi' | 'cascading-labs';
+}
+
+const isYosoi = Astro.props.brand === 'yosoi';
+const name = isYosoi ? 'Yosoi' : 'Cascading Labs';
+const home = isYosoi ? '/yosoi/' : '/';
+const description = isYosoi
+	? "This Yosoi page doesn't exist. The link may be out of date, or the address may have a typo."
+	: "This Cascading Labs page doesn't exist. The link may be out of date, or the address may have a typo.";
+---
+
+<Layout title={`404 — Page not found | ${name}`} description={description}>
+	<meta slot="head" name="robots" content="noindex" />
+	<a slot="heading" class="wordmark" href={home}>{name}</a>
+	<div class="not-found">
+		<p class="status-code">404</p>
+		<h1>Page not found</h1>
+		<p class="explanation">{description}</p>
+		<nav class="project-list" aria-label="Find your way back">
+			<a class="project-card" href={home}>{isYosoi ? 'Yosoi documentation' : 'Cascading Labs home'}</a>
+			{isYosoi && <a class="project-card" href="/yosoi/quickstart/">Quickstart</a>}
+		</nav>
+	</div>
+</Layout>
+
+<style>
+	.status-code {
+		margin: 48px 0 12px;
+		color: var(--muted);
+		font-size: 14px;
+	}
+
+	h1 {
+		margin: 0;
+		font-size: 32px;
+		font-weight: 500;
+		line-height: 1.3;
+		letter-spacing: -1px;
+	}
+
+	.explanation {
+		margin-block: 20px 32px;
+		color: var(--muted);
+	}
+</style>

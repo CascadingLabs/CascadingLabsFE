@@ -1,7 +1,9 @@
 import mdx from '@astrojs/mdx';
+import sitemap from '@astrojs/sitemap';
 import starlight from '@astrojs/starlight';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
+import { rename } from 'node:fs/promises';
 import { docsSnapshotIntegration } from './scripts/docs/snapshot-integration.mjs';
 
 export default defineConfig({
@@ -12,7 +14,18 @@ export default defineConfig({
 	},
 	integrations: [
 		mdx(),
+		sitemap({ filter: (url) => new URL(url).pathname !== '/yosoi/404/' }),
 		docsSnapshotIntegration(),
+		{
+			name: 'yosoi-not-found',
+			hooks: {
+				'astro:build:done': async ({ dir }) => {
+					// Cloudflare Pages finds the nearest 404.html for a missing route.
+					// Astro only emits the root 404 as a file; nested pages use directories.
+					await rename(new URL('yosoi/404/index.html', dir), new URL('yosoi/404.html', dir));
+				},
+			},
+		},
 		starlight({
 			title: 'Yosoi',
 			social: [

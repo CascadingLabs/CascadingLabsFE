@@ -1,0 +1,8 @@
+---
+import NotFound from '../components/NotFound.astro';
+
+// Astro's dev server uses this page for every missing route.
+const brand = Astro.url.pathname.startsWith('/yosoi/') ? 'yosoi' : 'cascading-labs';
+---
+
+<NotFound brand={brand} />
