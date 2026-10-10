@@ -3,7 +3,9 @@
 # ==========================================
 dist/
 .astro/
+.vite/
 .generated/
+src/content/docs/yosoi
 docs-sources.local.json
 
 # ==========================================
@@ -34,16 +36,6 @@ TODO.md
 .todo.md
 
 # ==========================================
-# Lighthouse
-# ==========================================
-.unlighthouse/
-.cilighthouse
-.lighthouseci
-lighthouse-results/
-lighthouse-report.html
-lighthouserc.json
-
-# ==========================================
 # IDEs & Editors
 # ==========================================
 .vscode/
@@ -63,3 +55,7 @@ lighthouserc.json
 # ==========================================
 .DS_Store
 Thumbs.db
+
+# Workstation server state
+.wtf-server.log
+.wtf-server.pid

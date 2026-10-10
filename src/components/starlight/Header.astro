@@ -1,0 +1,21 @@
+---
+import ThemeToggle from '../ThemeToggle.astro';
+import BrandIcon from '../BrandIcon.astro';
+import Search from '@astrojs/starlight/components/Search.astro';
+import SocialIcons from '@astrojs/starlight/components/SocialIcons.astro';
+import DocsReleaseSelect from '../DocsReleaseSelect.astro';
+---
+<div class="starlight-docs-header">
+ <a class="starlight-docs-home" href="/" title="Cascading Labs home">
+  <BrandIcon brand="cascading-labs" size={26} />
+  <span class="sr-only">Cascading Labs</span>
+ </a>
+ <a class="starlight-docs-brand" href="/yosoi/" title="Yosoi documentation">
+  <BrandIcon brand="yosoi" size={26} />
+  <span class="sr-only">Yosoi</span>
+ </a>
+ <DocsReleaseSelect />
+ <div class="starlight-docs-search"><Search /></div>
+ <div class="starlight-docs-social"><SocialIcons /></div>
+ <ThemeToggle />
+</div>

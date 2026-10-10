@@ -1,43 +1,25 @@
-name: CI
-
+name: Frontend CI
 on:
-  push:
-    branches: [main, staging]
   pull_request:
-    branches: [main, staging]
-
+  push:
+    branches: [main]
+permissions:
+  contents: read
 jobs:
-  ci:
-    name: Build & Lighthouse
-    runs-on: ubuntu-latest
-
+  check:
+    runs-on: ubuntu-24.04
+    env:
+      YOSOI_REPO_ROOT: .generated/yosoi-source
+      DOCS_PREVIEW: ${{ github.event_name == 'pull_request' && '1' || '' }}
     steps:
-      - name: Checkout (with submodules)
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-        with:
-          submodules: recursive
-
-      - name: Setup Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
-        with:
-          node-version: 24
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
           bun-version: 1.4.2
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Astro build
-        run: bun run build
-
-      - name: Test
-        run: bun run test
-
-      - name: Lighthouse CI (desktop)
-        run: bun run lhci autorun --config=lighthouserc.desktop.json
-
-      - name: Lighthouse CI (mobile)
-        run: bun run lhci autorun --config=lighthouserc.mobile.json
+      - run: bun install --frozen-lockfile
+      - name: Prepare published docs (no Rust compilation)
+        run: bun scripts/docs/bundle.mjs --prepare-only
+      - run: bun run check
+      - run: bun run test
+      - name: Build static site
+        run: bunx --no-install astro build

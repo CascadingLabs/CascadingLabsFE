@@ -1,0 +1,5 @@
+---
+const { head } = Astro.locals.starlightRoute;
+---
+{head.filter(item => !(item.tag === 'link' && item.attrs?.rel === 'icon')).map(({ tag: Tag, attrs, content }) => <Tag {...attrs} set:html={content} />)}
+<link id="site-favicon" rel="icon" type="image/svg+xml" href="/favicon-yosoi-light.svg" data-brand="yosoi" />

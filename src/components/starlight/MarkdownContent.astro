@@ -1,0 +1,10 @@
+---
+import MarkdownContent from '@astrojs/starlight/components/MarkdownContent.astro';
+import { readSnapshot } from '../../lib/yosoi-snapshot';
+const snapshot = readSnapshot();
+const olderReference = Astro.locals.starlightRoute.entry.id.startsWith('yosoi/api') && snapshot.source.commit !== snapshot.reference.sourceCommit;
+---
+<MarkdownContent>
+ {olderReference && <p class="docs-preview-note not-content" data-pagefind-ignore>Local preview: reference from source {snapshot.reference.sourceCommit.slice(0, 12)}. Current Markdown is prepared separately.</p>}
+ <slot />
+</MarkdownContent>

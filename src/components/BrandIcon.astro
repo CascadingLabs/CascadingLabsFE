@@ -1,0 +1,18 @@
+---
+import clLight from '../assets/brands/cascading-labs-light.png?url&inline';
+import clDark from '../assets/brands/cascading-labs-dark.png?url&inline';
+import yosoiLight from '../assets/brands/yosoi-light.png?url&inline';
+import yosoiDark from '../assets/brands/yosoi-dark.png?url&inline';
+import qscrapeLight from '../assets/brands/qscrape-light.png?url&inline';
+import qscrapeDark from '../assets/brands/qscrape-dark.png?url&inline';
+
+const icons = {
+ 'cascading-labs': { light: clLight, dark: clDark },
+ yosoi: { light: yosoiLight, dark: yosoiDark },
+ qscrape: { light: qscrapeLight, dark: qscrapeDark },
+};
+interface Props { brand: keyof typeof icons; size?: number; }
+const { brand, size = 24 } = Astro.props;
+---
+<img class="project-icon project-icon-light" src={icons[brand].light} width={size} height={size} alt="" decoding="sync" loading="eager" />
+<img class="project-icon project-icon-dark" src={icons[brand].dark} width={size} height={size} alt="" decoding="sync" loading="eager" />

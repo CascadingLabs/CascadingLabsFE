@@ -1,0 +1,33 @@
+---
+import Tag from '../icons/tag.svg';
+import { readReleaseRegistry } from '../lib/docs-release-data';
+import { readSnapshot } from '../lib/yosoi-snapshot';
+const registry = readReleaseRegistry();
+const snapshot = readSnapshot();
+const label = snapshot.source.preview ? 'Preview' : 'Latest';
+---
+<label class="docs-release-select">
+ <Tag width={13} height={13} aria-hidden="true" />
+ <span class="sr-only">Documentation release</span>
+ <select aria-label="Documentation release" data-docs-release title={`${label} · ${snapshot.source.version}`} disabled>
+  <option value="latest" selected>{snapshot.mode === 'working-tree-preview' ? label : `${label} · ${snapshot.source.version}`}</option>
+  {registry.versions.map((release) => <option value={release.version}>{snapshot.source.preview ? `Preview · ${release.version}` : release.tag}</option>)}
+ </select>
+</label>
+<script>
+ import { archiveHref } from '../lib/docs-releases';
+ const select = document.querySelector<HTMLSelectElement>('[data-docs-release]');
+ const url = new URL(location.href);
+ const current = url.pathname === '/yosoi/archive/' ? url.searchParams.get('version') : 'latest';
+ if (select && [...select.options].some((option) => option.value === current)) select.value = current!;
+ select?.addEventListener('change', async () => {
+  const page = url.pathname === '/yosoi/archive/' ? url.searchParams.get('page') || '' : url.pathname.replace(/^\/yosoi\/?/, '').replace(/\/$/, '');
+  if (select.value === 'latest' && url.pathname === '/yosoi/archive/') {
+   const response = await fetch('/yosoi/route-index.json', { cache: 'no-cache' });
+   const routes = response.ok ? await response.json() as string[] : [];
+   const target = routes.includes(page) ? page : '';
+   location.assign(`/yosoi/${target ? target + '/' : ''}`);
+  } else location.assign(select.value === 'latest' ? `/yosoi/${page ? page + '/' : ''}` : archiveHref(select.value, page));
+ });
+ if (select) select.disabled = false;
+</script>

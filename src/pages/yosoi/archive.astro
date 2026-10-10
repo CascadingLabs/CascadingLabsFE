@@ -1,0 +1,14 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import { readReleaseRegistry } from '../../lib/docs-release-data';
+const registry = readReleaseRegistry();
+---
+<StarlightPage frontmatter={{ title: 'Yosoi documentation', description: 'Versioned Yosoi documentation.' }}>
+ <div id="docs-archive-view" data-pagefind-ignore data-releases={JSON.stringify(registry)}>
+  <p role="status">Loading release documentation…</p>
+  <noscript>Archived documentation requires JavaScript. <a href="/yosoi/">Read the latest documentation.</a></noscript>
+ </div>
+</StarlightPage>
+<script>
+ import '../../scripts/docs-archive';
+</script>

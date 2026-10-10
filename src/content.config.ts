@@ -1,45 +1,16 @@
 import { defineCollection, z } from 'astro:content';
-import { docsSchema } from '@astrojs/starlight/schema';
-import { glob } from 'astro/loaders';
+import { docsSchema, i18nSchema } from '@astrojs/starlight/schema';
+import { docsLoader, i18nLoader } from '@astrojs/starlight/loaders';
 
 export const collections = {
+	i18n: defineCollection({ loader: i18nLoader(), schema: i18nSchema() }),
 	docs: defineCollection({
-		loader: glob({
-			pattern: [
-				'yosoi-docs/**/*.{md,mdx}',
-				'voidcrawl-docs/voidcrawl/**/*.{md,mdx}',
-				'!**/readme.md',
-				'!**/README.md',
-			],
-			base: './.generated/docs',
-			generateId: ({ entry }) => {
-				return (
-					entry
-						.replace(/^yosoi-docs\//, '')
-						.replace(/^voidcrawl-docs\//, '')
-						.replace(/(\/index)?\.mdx?$/, '') || 'index'
-				);
-			},
+		loader: docsLoader({
+			generateId: ({ entry }) => entry.replace(/\.(md|mdx)$/, '').replace(/(^|\/)index$/, ''),
 		}),
-		schema: docsSchema({
-			extend: z.object({
-				faqs: z
-					.array(
-						z.object({
-							q: z.string(),
-							a: z.string(),
-						}),
-					)
-					.optional(),
-				references: z
-					.array(
-						z.object({
-							title: z.string(),
-							url: z.string().url(),
-						}),
-					)
-					.optional(),
-			}),
-		}),
+		schema: (context) =>
+			docsSchema({ extend: z.object({ order: z.number().default(0) }) })(context).transform(
+				(data) => ({ ...data, sidebar: { ...data.sidebar, order: data.order } }),
+			),
 	}),
 };
