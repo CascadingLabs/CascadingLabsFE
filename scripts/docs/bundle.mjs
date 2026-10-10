@@ -248,7 +248,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
 		bundleRegistry(catalog);
 		await writeFile(
 			path.join(root, 'docs-bundle.lock.json'),
-			JSON.stringify(selectBundle(catalog), null, 2) + '\n',
+			JSON.stringify(selectBundle(catalog), null, '\t') + '\n',
 		);
 	} else await consumeLatest({ build: !values['prepare-only'] });
 }
