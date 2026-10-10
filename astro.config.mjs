@@ -381,9 +381,6 @@ export default defineConfig({
 		}),
 	],
 
-	experimental: {
-		rustCompiler: true,
-	},
 
 	markdown: {
 		smartypants: true,
