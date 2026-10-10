@@ -1,0 +1,10 @@
+{
+  "sourceCommit": "dbf517516f038485958bbfd41923f3e1ce6f8aa4",
+  "version": "0.1.0-rc.4",
+  "repository": "CascadingLabs/Yosoi",
+  "artifactCommit": "a886d96ef3e745486996be532fb4eeb62e887763",
+  "bundlePath": "snapshots/dbf517516f038485958bbfd41923f3e1ce6f8aa4/bundle.tar.gz",
+  "sha256": "3e655b54dab62d642888b8bc2b55bca50953fe6ee666e99ce26dbc18d944f4c4",
+  "manifestPath": "snapshots/dbf517516f038485958bbfd41923f3e1ce6f8aa4/content/archive-manifest.json",
+  "manifestSha256": "5351197cedb37f0a4e4271f5d6a20f247276b3b32188439638321173e49ee5e1"
+}
