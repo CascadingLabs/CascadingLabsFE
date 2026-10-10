@@ -20,7 +20,7 @@ const isHome = Astro.url.pathname === '/';
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="description" content={description} />
-		<link id="site-favicon" rel="icon" type="image/svg+xml" href={`/favicon-${brand}-light.svg`} data-brand={brand} />
+		<link id="site-favicon" rel="icon" type="image/x-icon" sizes="96x96" href="/favicon.ico" data-brand={brand} />
 		<ThemeInit />
 		<title>{title === 'Cascading Labs' || title.includes('|') ? title : `${title} | Cascading Labs`}</title>
 	</head>

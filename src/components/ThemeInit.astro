@@ -10,7 +10,11 @@
 			root.dataset.theme = theme;
 			root.dataset.themePreference = preference;
 			const icon = document.getElementById('site-favicon');
-			if (icon) icon.href = `/favicon-${icon.dataset.brand}-${theme}.svg`;
+			if (icon) {
+				icon.href = `/favicon-${icon.dataset.brand}-${theme}.svg`;
+				icon.type = 'image/svg+xml';
+				icon.sizes.value = 'any';
+			}
 			const label = preference === 'auto' ? 'Auto' : preference === 'light' ? 'Light' : 'Dark';
 			document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
 				button.setAttribute('aria-label', `Color theme: ${label}. Click to change.`);
