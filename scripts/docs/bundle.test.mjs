@@ -4,7 +4,13 @@ import { execFileSync } from 'node:child_process';
 import { cp, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import * as tar from 'tar';
-import { bundleRegistry, catalogRefForBuild, selectBundle, unpackBundle } from './bundle.mjs';
+import {
+	bundleRegistry,
+	catalogRefForBuild,
+	resolveCatalog,
+	selectBundle,
+	unpackBundle,
+} from './bundle.mjs';
 import { projectRoot, repositoryRoot } from './prepare.mjs';
 
 const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
@@ -18,6 +24,22 @@ const pointer = (source = '1'.repeat(40), version = '0.1.0') => ({
 	sha256: '3'.repeat(64),
 	manifestPath: `snapshots/${source}/content/archive-manifest.json`,
 	manifestSha256: '4'.repeat(64),
+});
+test('catalog lookup authenticates only the GitHub API request and raw downloads stay anonymous', async () => {
+	for (const token of ['', 'fixture-token']) {
+		const calls = [];
+		const catalog = { schemaVersion: 1, latest: '1'.repeat(40), snapshots: {} };
+		const fetcher = async (url, options) => {
+			calls.push({ url, headers: options.headers });
+			return Response.json(
+				url.startsWith('https://api.github.com/') ? { object: { sha: '2'.repeat(40) } } : catalog,
+			);
+		};
+		expect(await resolveCatalog(fetcher, 'docs-artifacts', { GH_TOKEN: token })).toEqual(catalog);
+		expect(calls[0].headers).toEqual(token ? { Authorization: `Bearer ${token}` } : {});
+		expect(calls[1].url).toContain('/' + '2'.repeat(40) + '/catalog.json');
+		expect(calls[1].headers).toEqual({});
+	}
 });
 test('RC bundle pointers and archive registry retain candidate identities and SemVer ordering', () => {
 	const versions = ['0.1.0-rc.2', '0.1.0-rc.10', '0.1.0'];
