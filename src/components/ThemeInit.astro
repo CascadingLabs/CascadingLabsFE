@@ -1,34 +1,79 @@
-{/* Initialize before first paint; the preference also drives every ThemeToggle. */}
 <script is:inline>
-	(() => {
-		const root = document.documentElement;
-		const system = window.matchMedia('(prefers-color-scheme: dark)');
-		const cookie = document.cookie.match(/(?:^|;\s*)cl-theme=(light|dark|auto)(?:;|$)/);
-		let preference = cookie?.[1] || 'auto';
-		function apply() {
-			const theme = preference === 'auto' ? (system.matches ? 'dark' : 'light') : preference;
-			root.dataset.theme = theme;
-			root.dataset.themePreference = preference;
-			const icon = document.getElementById('site-favicon');
-			if (icon) {
-				icon.href = `/favicon-${icon.dataset.brand}-${theme}.svg`;
-				icon.type = 'image/svg+xml';
-				icon.sizes.value = 'any';
-			}
-			const label = preference === 'auto' ? 'Auto' : preference === 'light' ? 'Light' : 'Dark';
-			document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
-				button.setAttribute('aria-label', `Color theme: ${label}. Click to change.`);
-				button.setAttribute('title', `Color theme: ${label}`);
-			});
+(() => {
+	const root = document.documentElement;
+	const system = window.matchMedia('(prefers-color-scheme: dark)');
+	const valid = (value) => ['light', 'dark', 'auto'].includes(value);
+	const params = new URLSearchParams(location.search);
+	const incoming = params.get('cl-theme');
+	const cookie = document.cookie.match(/(?:^|;\s*)cl-theme=(light|dark|auto)(?:;|$)/);
+	let preference = valid(incoming) ? incoming : cookie?.[1] || 'auto';
+	function persist() {
+		document.cookie = `cl-theme=${preference}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === 'https:' ? '; Secure' : ''}`;
+		try { localStorage.setItem('starlight-theme', preference === 'auto' ? '' : preference); } catch { /* Cookies remain the preference source. */ }
+	}
+	if (valid(incoming)) {
+		params.delete('cl-theme');
+		const query = params.toString();
+		history.replaceState(history.state, '', `${location.pathname}${query ? `?${query}` : ''}${location.hash}`);
+	}
+	const hosts = new Set(['cascadinglabs.com', 'www.cascadinglabs.com', 'qscrape.dev', 'www.qscrape.dev']);
+	function preferenceURL(href) {
+		if (!href || href.startsWith('#')) return null;
+		let url;
+		try { url = new URL(href, location.href); } catch { return null; }
+		const sameOrigin = url.origin === location.origin;
+		if (url.protocol !== 'https:' && !(sameOrigin && url.protocol === 'http:')) return null;
+		if (!sameOrigin && !hosts.has(url.hostname)) return null;
+		url.searchParams.set('cl-theme', preference);
+		return url.href;
+	}
+	function carryPreference(link) {
+		if (!(link instanceof HTMLAnchorElement)) return;
+		const href = preferenceURL(link.getAttribute('href'));
+		if (href) link.href = href;
+	}
+	function apply() {
+		const theme = preference === 'auto' ? (system.matches ? 'dark' : 'light') : preference;
+		root.dataset.theme = theme;
+		root.dataset.themePreference = preference;
+		const icon = document.getElementById('site-favicon');
+		if (icon) {
+			icon.href = `/favicon-${icon.dataset.brand}-${theme}.svg`;
+			icon.type = 'image/svg+xml';
+			icon.sizes.value = 'any';
 		}
-		apply();
-		system.addEventListener('change', () => { if (preference === 'auto') apply(); });
-		document.addEventListener('DOMContentLoaded', apply);
-		document.addEventListener('click', (event) => {
-			if (!(event.target instanceof Element) || !event.target.closest('[data-theme-toggle]')) return;
-			preference = preference === 'auto' ? 'light' : preference === 'light' ? 'dark' : 'auto';
-			document.cookie = `cl-theme=${preference}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === 'https:' ? '; Secure' : ''}`;
-			apply();
+		document.querySelectorAll('[data-theme-logo]').forEach((image) => {
+			image.src = theme === 'light' ? '/favicon-light.svg' : '/favicon.svg';
 		});
-	})();
+		const label = preference === 'auto' ? 'Auto' : preference === 'light' ? 'Light' : 'Dark';
+		document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
+			button.setAttribute('aria-label', `Color theme: ${label}. Click to change.`);
+			button.setAttribute('title', `Color theme: ${label}`);
+		});
+		document.querySelectorAll('a[href]').forEach(carryPreference);
+	}
+	persist();
+	apply();
+	system.addEventListener('change', () => { if (preference === 'auto') apply(); });
+	document.addEventListener('DOMContentLoaded', apply);
+	document.addEventListener('astro:page-load', apply);
+	document.addEventListener('click', (event) => {
+		if (!(event.target instanceof Element)) return;
+		if (event.target.closest('[data-theme-toggle]')) {
+			preference = preference === 'auto' ? 'light' : preference === 'light' ? 'dark' : 'auto';
+			persist();
+			apply();
+		}
+		const link = event.target.closest('a[href]');
+		if (link) carryPreference(link);
+	}, true);
+	window.addEventListener('pageshow', apply);
+	// Decorate late-added links before middle-click, copy-link, or navigation.
+	document.addEventListener('pointerdown', (event) => {
+		if (event.target instanceof Element) carryPreference(event.target.closest('a[href]'));
+	}, true);
+	document.addEventListener('contextmenu', (event) => {
+		if (event.target instanceof Element) carryPreference(event.target.closest('a[href]'));
+	}, true);
+})();
 </script>
