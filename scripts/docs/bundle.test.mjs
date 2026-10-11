@@ -4,13 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { cp, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import * as tar from 'tar';
-import {
-	bundleRegistry,
-	catalogRefForBuild,
-	resolveCatalog,
-	selectBundle,
-	unpackBundle,
-} from './bundle.mjs';
+import { bundleRegistry, resolveCatalog, selectBundle, unpackBundle } from './bundle.mjs';
 import { projectRoot, repositoryRoot } from './prepare.mjs';
 
 const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
@@ -35,7 +29,7 @@ test('catalog lookup authenticates only the GitHub API request and raw downloads
 				url.startsWith('https://api.github.com/') ? { object: { sha: '2'.repeat(40) } } : catalog,
 			);
 		};
-		expect(await resolveCatalog(fetcher, 'docs-artifacts', { GH_TOKEN: token })).toEqual(catalog);
+		expect(await resolveCatalog(fetcher, { GH_TOKEN: token })).toEqual(catalog);
 		expect(calls[0].headers).toEqual(token ? { Authorization: `Bearer ${token}` } : {});
 		expect(calls[1].url).toContain('/' + '2'.repeat(40) + '/catalog.json');
 		expect(calls[1].headers).toEqual({});
@@ -57,14 +51,27 @@ test('RC bundle pointers and archive registry retain candidate identities and Se
 		'0.1.0-rc.2',
 	]);
 });
-test('Cloudflare previews use their own catalog while production always uses the production catalog', () => {
-	expect(catalogRefForBuild({ CF_PAGES: '1', CF_PAGES_BRANCH: 'docs-crossrepo-frontend' })).toBe(
-		'docs-artifacts-preview',
-	);
-	expect(catalogRefForBuild({ CF_PAGES: '1', CF_PAGES_BRANCH: 'main', DOCS_PREVIEW: '1' })).toBe(
-		'docs-artifacts',
-	);
-	expect(catalogRefForBuild({})).toBe('docs-artifacts');
+test('local, pull-request, and main builds resolve the same published catalog', async () => {
+	for (const env of [
+		{},
+		{ DOCS_PREVIEW: '1' },
+		{ CF_PAGES: '1', CF_PAGES_BRANCH: 'feature' },
+		{ CF_PAGES: '1', CF_PAGES_BRANCH: 'main' },
+	]) {
+		const urls = [];
+		const catalog = { schemaVersion: 1, latest: '1'.repeat(40), snapshots: {} };
+		const fetcher = async (url) => {
+			urls.push(url);
+			return Response.json(
+				url.startsWith('https://api.github.com/') ? { object: { sha: '2'.repeat(40) } } : catalog,
+			);
+		};
+		expect(await resolveCatalog(fetcher, env)).toEqual(catalog);
+		expect(urls).toEqual([
+			'https://api.github.com/repos/CascadingLabs/Yosoi/git/ref/heads/docs-artifacts',
+			`https://raw.githubusercontent.com/CascadingLabs/Yosoi/${'2'.repeat(40)}/catalog.json`,
+		]);
+	}
 });
 test('latest is a commit-pinned pointer; SDK versions and docs revisions are independent', () => {
 	const old = pointer('5'.repeat(40));
@@ -231,7 +238,7 @@ test('published importer downloads only latest, verifies it, and prepares static
 		);
 		execFileSync('bun', [entry], {
 			cwd: frontend,
-			env: { ...process.env, DOCS_PREVIEW: '', CF_PAGES: '' },
+			env: process.env,
 		});
 		const urls = JSON.parse(await readFile(path.join(frontend, 'requests.json'), 'utf8'));
 		expect(urls).toEqual([
@@ -250,7 +257,7 @@ test('published importer downloads only latest, verifies it, and prepares static
 		expect(() =>
 			execFileSync('bun', [entry], {
 				cwd: frontend,
-				env: { ...process.env, DOCS_PREVIEW: '', CF_PAGES: '', BAD_BUNDLE: '1' },
+				env: { ...process.env, BAD_BUNDLE: '1' },
 				stdio: 'pipe',
 			}),
 		).toThrow(/checksum/);

@@ -1,10 +1,18 @@
-import { watch } from 'node:fs';
+import { watch, existsSync } from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:http';
 import { optionsFromArgs, prepareDocs, projectRoot, repositoryRoot } from './prepare.mjs';
 
 const options = optionsFromArgs(process.argv.slice(2));
+// Reject duplicate previews before preparation can replace an active server's snapshot.
+const portProbe = createServer();
+await new Promise((resolve, reject) => {
+	portProbe.once('error', reject);
+	portProbe.listen(Number(options.port || 4321), options.host || '127.0.0.1', () => {
+		portProbe.close((error) => (error ? reject(error) : resolve()));
+	});
+});
 await prepareDocs(options);
 const clients = new Set();
 let revision = 0;
@@ -96,9 +104,9 @@ async function refresh() {
 		do {
 			pending = false;
 			try {
-				await prepareDocs({ ...options, 'docs-only': true });
-				if (closing) break;
 				await stopServer();
+				if (closing) break;
+				await prepareDocs({ ...options, 'docs-only': true });
 				if (closing) break;
 				await startServer(revision + 1);
 				revision++;
@@ -106,13 +114,20 @@ async function refresh() {
 				console.log('Yosoi snapshot refreshed.');
 			} catch (error) {
 				console.error(`Docs refresh failed; fix the source and save again. ${error.message}`);
+				if (!closing && (server.exitCode !== null || server.signalCode !== null)) {
+					try {
+						await startServer(revision);
+					} catch (restartError) {
+						console.error(`Could not restart the last prepared snapshot: ${restartError.message}`);
+					}
+				}
 			}
 		} while (pending && !closing);
 	} finally {
 		running = false;
 	}
 }
-const watcher = watch(path.join(repositoryRoot(), 'docs/public'), { recursive: true }, () => {
+const onSourceChange = () => {
 	clearTimeout(timer);
 	timer = setTimeout(() => {
 		if (running) {
@@ -121,15 +136,19 @@ const watcher = watch(path.join(repositoryRoot(), 'docs/public'), { recursive: t
 		}
 		activeRefresh = refresh();
 	}, 250);
-});
+};
+const watchers = ['docs/public', 'python/yosoi']
+	.map((directory) => path.join(repositoryRoot(), directory))
+	.filter(existsSync)
+	.map((directory) => watch(directory, { recursive: true }, onSourceChange));
 console.log(
-	'Watching all of Yosoi/docs/public, including _navigation.json. Changes refresh the prepared snapshot and browser; API compilation stays cached.',
+	'Watching Yosoi/docs/public and Python declarations. Changes refresh the prepared snapshot and browser; Rust API compilation stays cached.',
 );
 async function stop() {
 	if (closing) return;
 	closing = true;
 	clearTimeout(timer);
-	watcher.close();
+	for (const watcher of watchers) watcher.close();
 	await activeRefresh;
 	await stopServer();
 	for (const client of clients) client.end();

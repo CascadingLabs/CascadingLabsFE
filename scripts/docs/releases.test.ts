@@ -4,6 +4,7 @@ import {
 	parseReleaseRegistry,
 	compareReleaseVersions,
 	isReleaseVersion,
+	visibleReleases,
 	rawArtifactUrl,
 	releaseFilePath,
 	archiveHref,
@@ -36,6 +37,25 @@ const manifest = {
 	],
 	assets: {},
 };
+
+test('the version picker hides RCs and orders final releases newest first without losing archives', () => {
+	const registry = parseReleaseRegistry({
+		schemaVersion: 1,
+		latest: '0.10.0',
+		versions: ['0.1.0', '0.2.0-rc.1', '0.10.0', '0.2.0', '0.1.2'].map((version) => ({
+			...release,
+			version,
+			tag: `v${version}`,
+		})),
+	});
+	expect(visibleReleases(registry).map((release) => release.version)).toEqual([
+		'0.10.0',
+		'0.2.0',
+		'0.1.2',
+		'0.1.0',
+	]);
+	expect(registry.versions.map((release) => release.version)).toContain('0.2.0-rc.1');
+});
 
 test('numbered RC docs are valid and sort before the corresponding final release', () => {
 	const candidate = { ...release, version: '0.1.0-rc.2', tag: 'v0.1.0-rc.2' };

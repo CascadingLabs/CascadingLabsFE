@@ -1,6 +1,6 @@
 import type { StarlightRouteData } from '@astrojs/starlight/route-data';
 import type { DocPage, NavNode } from './yosoi-snapshot';
-import { docHref, referenceKindLabel } from './docs-path';
+import { docHref, referenceLinkAttributes, referenceLanguageBadge } from './docs-path';
 type SidebarEntry = StarlightRouteData['sidebar'][number];
 const containsCurrent = (entry: SidebarEntry): boolean =>
 	entry.type === 'link' ? entry.isCurrent : entry.entries.some(containsCurrent);
@@ -11,10 +11,8 @@ export function sidebarForNavigation(navigation: NavNode, currentId: string): Si
 		label,
 		href: docHref(node.route),
 		isCurrent: currentId === ['yosoi', node.route].filter(Boolean).join('/'),
-		attrs: node.kind ? { class: 'reference-item' } : {},
-		badge: node.kind
-			? { text: referenceKindLabel(node.kind)!, variant: 'note', class: 'reference-kind-badge' }
-			: undefined,
+		attrs: node.kind ? referenceLinkAttributes(node.kind, label) : {},
+		badge: undefined,
 	});
 	const entry = (node: NavNode): SidebarEntry => {
 		if (!node.children.length && node.collapsed === undefined) return link(node);
@@ -24,7 +22,7 @@ export function sidebarForNavigation(navigation: NavNode, currentId: string): Si
 			label: node.title,
 			entries,
 			collapsed: (node.collapsed ?? navigation.collapsed ?? true) && !entries.some(containsCurrent),
-			badge: undefined,
+			badge: referenceLanguageBadge(node.route),
 		};
 	};
 	return [...(navigation.id ? [link(navigation)] : []), ...navigation.children.map(entry)];

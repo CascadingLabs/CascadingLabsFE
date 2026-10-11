@@ -1,16 +1,18 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Envelope from '../icons/envelope.svg';
-import BrandIcon from '../components/BrandIcon.astro';
+import Layout from "../layouts/Layout.astro";
+import Envelope from "../icons/envelope.svg";
+import BrandIcon from "../components/BrandIcon.astro";
 
 const description =
-    'We are building the future of automation and data systems, starting with web data and finance.';
+	"We are building the future of automation and data systems, starting with web data and finance.";
 
-const email = 'contact@cascadinglabs.com';
+const email = "contact@cascadinglabs.com";
 ---
 
 <Layout title="Cascading Labs" description={description}>
-	<h1 slot="heading" class="home-title">Cascading Labs</h1>
+	<h1 slot="heading" class="home-title">
+		Cascading Labs
+	</h1>
 
 	<div class="home-copy">
 		<p class="home-lead">{description}</p>
@@ -34,12 +36,35 @@ const email = 'contact@cascadinglabs.com';
 			<a href="/yosoi/" class="project-card">
 				<BrandIcon brand="yosoi" />
 				<span>Yosoi</span>
-				<svg class="project-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
+				<svg
+					class="project-arrow"
+					width="14"
+					height="14"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="1.5"
+					aria-hidden="true"
+				>
+					<path d="M5 12h14m-6-6 6 6-6 6" />
+				</svg>
 			</a>
 			<a href="https://qscrape.dev/" class="project-card">
 				<BrandIcon brand="qscrape" />
+
 				<span>QScrape</span>
-				<svg class="project-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
+				<svg
+					class="project-arrow"
+					width="14"
+					height="14"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="1.5"
+					aria-hidden="true"
+				>
+					<path d="M5 12h14m-6-6 6 6-6 6" />
+				</svg>
 			</a>
 		</nav>
 

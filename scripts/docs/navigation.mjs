@@ -9,6 +9,7 @@ const content = await import(pathToFileURL(path.join(source, 'content.mjs')).hre
 export const resolveNavigation = navigation.resolveNavigation;
 export const directoryNavigation = navigation.directoryNavigation;
 export const referenceNavigation = navigation.referenceNavigation;
+export const referenceGroups = navigation.referenceGroups;
 export const parseNavigationMetadata = (source) =>
 	navigation.parseNavigationMetadata(source, jsonc);
 export const {
@@ -17,5 +18,6 @@ export const {
 	readPublicNavigation,
 	rewriteMarkdownLinks,
 	validateDocHeadings,
+	preparePythonReference,
 } = content;
 export { jsonc };

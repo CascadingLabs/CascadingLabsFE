@@ -32,7 +32,7 @@ After publishing the bundle and catalog, Yosoi sends `yosoi-docs-published` to t
 
 The pointer-update token needs Contents write on CascadingLabsFE. The token used by Yosoi to send the repository dispatch also needs access to CascadingLabsFE's repository-dispatch endpoint. Tokens stay in GitHub secrets. The workflow must be on frontend main before notifications can run. Bootstrap by publishing the first Yosoi docs snapshot, then landing the new frontend; subsequent changes deploy automatically. Hosted execution and a live Cloudflare deployment still need verification.
 
-Cloudflare branch previews and pull-request CI use the separate `docs-artifacts-preview` catalog selected by `docs-preview.json`. Production main always uses `docs-artifacts`. This permits a real bundle/raw-content preview before the release stack lands, without promoting unreleased docs to production. `DOCS_PREVIEW=1 bun run build` reproduces the preview build locally. `/yosoi/build.json` records the deployed source and bundle hashes.
+All frontend builds, including Cloudflare branch previews and pull-request CI, use the same published `docs-artifacts` catalog. Each build resolves that catalog once and downloads the selected immutable bundle; historical releases load on demand. `bun run build` reproduces this build locally. `/yosoi/build.json` records the deployed source and bundle hashes. To review unpublished documentation, use the local Yosoi workspace workflow below.
 
 ## Foundation
 
@@ -96,7 +96,11 @@ Production builds emit normal static HTML for all routes. The content and links 
 
 ## Source-owned navigation
 
-Generated Reference navigation follows public Rust namespaces. Each namespace contains an alphabetical list of items with compact kind badges; actual sub-namespaces remain nested. Namespace overviews show Name / Kind / Summary tables. Item pages group variants, fields, inherent methods, and associated items; trait implementations use native closed details sections. The right outline shows section headings. Canonical reference URLs remain unchanged, and archived snapshots preserve this navigation metadata.
+Reference contains nested Rust and Python sections. Rust module containers group items into Types, Functions, Macros, Constants, and Exports; child namespaces live under Modules. Individual symbols are always links, with compact SVG kind icons and single-line names that truncate with an ellipsis. Hover titles and accessible labels retain the full name and kind; archived navigation uses the same attributes. Module overviews use the same categories and Name / Kind / Summary tables. Item pages group variants, fields, inherent methods, and associated items; trait implementations use native closed details sections. Canonical Rust URLs remain unchanged.
+
+Python reference Markdown is generated from source declarations by Yosoi's `scripts/docs/python_reference.py`, without importing the native SDK. Local preparation uses UV and Python 3.15 to read the selected Yosoi workspace; production consumes already-generated Markdown from the immutable bundle and needs no Python interpreter. Each public module has Types, Functions, Aliases, and Constants groups. Symbol pages preserve Python signatures, declared fields/methods, and source links; inherited and dynamically generated members are not expanded. The dev watcher also watches `python/yosoi`. Restart it after changing the docs generator or preparation tooling.
+
+The Rust and Python reference headings use unchanged monochrome Simple Icons logos, displayed at 13px with reduced opacity in the text color through Starlight's group-badge hook. Archived navigation uses the same language markers. SVG provenance is recorded in `src/icons/SIMPLE-ICONS-NOTICE.md`.
 
 `Yosoi/docs/public/_navigation.json` is authored and version-controlled with the docs. Comments (`//` and `/* ... */`) and trailing commas are supported. Its section array controls labels and order; `pages` selects named Markdown files (optionally with a navigation-only label), `directory` discovers pages automatically, and `generated: "rust-api"` includes the complete generated reference. Directory `order` arrays prioritize known pages while newly discovered pages are appended. Each section's overview comes first.
 

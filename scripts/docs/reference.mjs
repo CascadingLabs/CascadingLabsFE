@@ -18,14 +18,14 @@ export function referenceSummary(docs = '') {
 		.trim();
 	return plain.length > 200 ? plain.slice(0, 197).replace(/\s+\S*$/, '') + '…' : plain;
 }
-export function referenceMarkdown(page, manifest, descriptors) {
+export function referenceMarkdown(page, manifest, descriptors, referenceGroups) {
 	const title = page.publicPath.split('::').at(-1) || page.title;
 	const source = (item) =>
 		item?.url
 			? `[Source: ${item.file}:${item.lineStart}](${item.url})`
 			: 'Source location unavailable.';
 	const parts = [
-		`# ${page.publicPath === manifest.sdk.crate ? 'Reference' : title}`,
+		`# ${page.publicPath === manifest.sdk.crate ? 'Rust reference' : title}`,
 		'',
 		`\`${page.publicPath}\``,
 		'',
@@ -44,14 +44,17 @@ export function referenceMarkdown(page, manifest, descriptors) {
 					!item.publicPath.slice(prefix.length).includes('::'),
 			)
 			.sort((a, b) => a.publicPath.localeCompare(b.publicPath));
-		if (children.length)
+		// Historical bundles may predate grouped reference navigation.
+		for (const group of referenceGroups
+			? referenceGroups(children)
+			: [{ title: 'Public items', children }])
 			parts.push(
 				'',
-				'## Public items',
+				`## ${group.title}`,
 				'',
 				'| Name | Kind | Summary |',
 				'| --- | --- | --- |',
-				...children.map(
+				...group.children.map(
 					(item) =>
 						`| [\`${item.publicPath.slice(prefix.length)}\`](${href(item.route)}) | ${item.kind === 'module' ? 'namespace' : item.kind.replaceAll('_', ' ')} | ${(item.summary || '—').replaceAll('|', '\\|')} |`,
 				),
@@ -67,6 +70,7 @@ export function referenceMarkdown(page, manifest, descriptors) {
 			'',
 			source(item.source),
 			'',
+			...(item.fields || []).flatMap((field) => member(field, depth + 1)),
 		];
 		const groups = [
 			['Variants', members.filter((item) => item.kind === 'variant')],

@@ -25,7 +25,8 @@
 		"docs:test:archive": "bun scripts/docs/test.mjs scripts/docs/archive-browser.test.mjs",
 		"docs:test:preview": "bun scripts/docs/test.mjs scripts/docs/preview.test.mjs",
 		"docs:test:site": "bun scripts/docs/test.mjs scripts/docs/site.test.mjs",
-		"docs:test:live": "bun scripts/docs/test.mjs scripts/docs/live.test.mjs"
+		"docs:test:live": "bun scripts/docs/test.mjs scripts/docs/live.test.mjs",
+		"docs:test:variants": "bun scripts/docs/test.mjs scripts/docs/code-variants.test.mjs"
 	},
 	"dependencies": {
 		"@astrojs/mdx": "8.0.3",

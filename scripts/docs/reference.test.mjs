@@ -1,7 +1,7 @@
 import { expect, test } from 'vite-plus/test';
 import { markdownToHtml } from 'satteri';
 import { referenceMarkdown, referenceSummary } from './reference.mjs';
-import { referenceNavigation } from './navigation.mjs';
+import { referenceNavigation, referenceGroups } from './navigation.mjs';
 const item = (name, kind, namespace = 'locators') => ({
 	id: `api/${namespace}/${kind}/${name.toLowerCase()}`,
 	route: `api/${namespace}/${kind}/${name.toLowerCase()}`,
@@ -11,7 +11,38 @@ const item = (name, kind, namespace = 'locators') => ({
 	order: 0,
 });
 
-test('reference lists namespace items alphabetically with kinds rather than kind folders', () => {
+test('reference retains source explanations for enum variants and their fields', () => {
+	const page = {
+		publicPath: 'yosoi::Example',
+		kind: 'enum',
+		docs: 'An outcome whose evidence may be incomplete.',
+		members: [
+			{
+				publicPath: 'yosoi::Example::Partial',
+				kind: 'variant',
+				signature: 'Partial { lost: u64 }',
+				docs: 'Some evidence was omitted.',
+				fields: [
+					{
+						publicPath: 'yosoi::Example::Partial::lost',
+						kind: 'struct_field',
+						signature: 'lost: u64',
+						docs: 'Number of omitted evidence items.',
+						source: { file: 'src/lib.rs', lineStart: 12, url: 'https://example.test/source#L12' },
+					},
+				],
+			},
+		],
+	};
+	const markdown = referenceMarkdown(page, { sdk: { crate: 'yosoi' } }, []);
+	expect(markdown).toContain('### Partial');
+	expect(markdown).toContain('Some evidence was omitted.');
+	expect(markdown).toContain('#### lost');
+	expect(markdown).toContain('Number of omitted evidence items.');
+	expect(markdown).toContain('[Source: src/lib.rs:12](https://example.test/source#L12)');
+});
+
+test('reference preserves symbol URLs with grouped and legacy source navigation', () => {
 	const pages = [
 		{
 			id: 'api',
@@ -36,22 +67,31 @@ test('reference lists namespace items alphabetically with kinds rather than kind
 		item('build', 'function', 'locators::locator'),
 	];
 	const tree = referenceNavigation(pages);
-	expect(tree.children.map((node) => node.title)).toEqual(['Locators']);
-	const locators = tree.children[0];
+	if (!referenceGroups) {
+		// Published snapshots before grouped navigation retain alphabetical namespace lists.
+		expect(tree.children.map((node) => node.title)).toEqual(['Locators']);
+		const locators = tree.children[0];
+		expect(locators.route).toBe('api/yosoi/module/locators');
+		expect(locators.children.map((node) => node.title)).toEqual([
+			'Alpha',
+			'locate',
+			'Locator',
+			'Zulu',
+		]);
+		expect(locators.children[0]).toMatchObject({ route: pages[3].route, kind: 'enum' });
+		expect(locators.children[2].children[0].title).toBe('build');
+		return;
+	}
+	expect(tree.children.map((node) => node.title)).toEqual(['Modules']);
+	const locators = tree.children[0].children[0];
 	expect(locators.route).toBe('api/yosoi/module/locators');
-	expect(locators.children.map((node) => node.title)).toEqual([
-		'Alpha',
-		'locate',
-		'Locator',
-		'Zulu',
-	]);
-	expect(locators.children.find((node) => node.title === 'Alpha')).toMatchObject({
+	expect(locators.children.map((node) => node.title)).toEqual(['Modules', 'Types', 'Functions']);
+	expect(locators.children[1].children.map((node) => node.title)).toEqual(['Alpha', 'Zulu']);
+	expect(locators.children[1].children[0]).toMatchObject({
 		route: pages[3].route,
 		kind: 'enum',
 	});
-	expect(locators.children.find((node) => node.title === 'Locator').children[0].title).toBe(
-		'build',
-	);
+	expect(locators.children[0].children[0].children[0].children[0].title).toBe('build');
 });
 test('namespace overview tables include stable links, item kinds, and escaped summaries', () => {
 	const page = {
@@ -61,9 +101,24 @@ test('namespace overview tables include stable links, item kinds, and escaped su
 		docs: 'Locate documents.',
 		members: [],
 	};
-	const markdown = referenceMarkdown(page, { sdk: { crate: 'yosoi' } }, [
-		{ ...item('Completeness', 'enum'), summary: 'A | B' },
-	]);
+	const descriptors = [{ ...item('Completeness', 'enum'), summary: 'A | B' }];
+	const markdown = referenceMarkdown(
+		page,
+		{ sdk: { crate: 'yosoi' } },
+		descriptors,
+		referenceGroups,
+	);
+	expect(markdown).toContain(referenceGroups ? '## Types' : '## Public items');
+	// Injection remains independently testable when the published source lacks grouping.
+	expect(
+		referenceMarkdown(page, { sdk: { crate: 'yosoi' } }, descriptors, (children) => [
+			{ title: 'Types', children },
+		]),
+	).toContain('## Types');
+	// Browser archive rendering has no access to the Node-only source loader.
+	expect(referenceMarkdown(page, { sdk: { crate: 'yosoi' } }, descriptors)).toContain(
+		'## Public items',
+	);
 	expect(markdown).toContain('| Name | Kind | Summary |');
 	expect(markdown).toContain('/yosoi/api/locators/enum/completeness/');
 	expect(markdown).toContain('A \\| B');
