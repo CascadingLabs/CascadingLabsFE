@@ -5,7 +5,7 @@ import path from 'node:path';
 import { projectRoot } from './prepare.mjs';
 import { launchDocsBrowser } from './browser.mjs';
 
-test('reference renders a flat namespace list, kind badges, overview tables, and grouped outlines', async () => {
+test('reference renders kind icons, truncated labels, overview tables, and grouped outlines', async () => {
 	const root = path.join(projectRoot, 'dist');
 	const mime = {
 		'.html': 'text/html',
@@ -35,6 +35,8 @@ test('reference renders a flat namespace list, kind badges, overview tables, and
 			viewport: { width: 1440, height: 1000 },
 			colorScheme: 'dark',
 		});
+		const errors = [];
+		page.on('pageerror', (error) => errors.push(error.message));
 		const base = `http://127.0.0.1:${server.address().port}`;
 		const response = await page.goto(base + '/yosoi/api/yosoi/locators/enum/completeness/');
 		expect(response.status()).toBe(200);
@@ -43,7 +45,17 @@ test('reference renders a flat namespace list, kind badges, overview tables, and
 		for (const kind of ['enum', 'struct', 'function', 'yosoi sdk'])
 			expect(labels).not.toContain(kind);
 		const selected = page.locator('.sidebar a[aria-current="page"]');
-		expect(await selected.locator('.reference-kind-badge').innerText()).toBe('enum');
+		expect(await selected.getAttribute('data-kind')).toBe('enum');
+		expect(await selected.getAttribute('aria-label')).toBe('Completeness, enum');
+		expect(
+			await selected.evaluate((element) => getComputedStyle(element, '::before').maskImage),
+		).not.toBe('none');
+		expect(
+			await selected
+				.locator('span')
+				.first()
+				.evaluate((element) => getComputedStyle(element).textOverflow),
+		).toBe('ellipsis');
 		expect(await page.locator('main h1').innerText()).toBe('Completeness');
 		expect(
 			(await page.locator('starlight-toc a').allTextContents()).map((text) => text.trim()),
@@ -62,12 +74,17 @@ test('reference renders a flat namespace list, kind badges, overview tables, and
 		await mkdir(screenshots, { recursive: true });
 		await page.screenshot({ path: path.join(screenshots, 'reference-namespace.png') });
 		await page.goto(base + '/yosoi/api/yosoi/module/locators/');
-		expect(await page.locator('main table thead').innerText()).toContain('Summary');
-		expect(
-			await page
-				.locator('main table a[href="/yosoi/api/yosoi/locators/enum/completeness/"]')
-				.count(),
-		).toBe(1);
+		const headers = await page.locator('main table thead').allTextContents();
+		expect(headers.length).toBeGreaterThan(0);
+		for (const header of headers) expect(header).toContain('Summary');
+		const completeness = page
+			.locator('main table')
+			.getByRole('link', { name: 'Completeness', exact: true });
+		expect(await completeness.count()).toBe(1);
+		expect(new URL(await completeness.getAttribute('href'), base).pathname).toBe(
+			'/yosoi/api/yosoi/locators/enum/completeness/',
+		);
+		expect(errors).toEqual([]);
 		const nojs = await browser.newContext({ javaScriptEnabled: false });
 		const staticPage = await nojs.newPage();
 		await staticPage.goto(base + '/yosoi/api/yosoi/locators/enum/completeness/');

@@ -1,5 +1,8 @@
+import { enhanceCodeVariants } from './docs-variants';
+
 /** Attach controls after static rendering or an archive fetch. */
 export function enhanceCodeBlocks(root: ParentNode) {
+	enhanceCodeVariants(root);
 	for (const pre of root.querySelectorAll<HTMLPreElement>('pre')) {
 		const code = pre.querySelector('code');
 		if (!code || pre.parentElement?.classList.contains('docs-code-block')) continue;
@@ -7,6 +10,10 @@ export function enhanceCodeBlocks(root: ParentNode) {
 		wrapper.className = 'docs-code-block';
 		pre.before(wrapper);
 		wrapper.append(pre);
+		const panel = wrapper.closest('.docs-variant-panel');
+		if (panel && !panel.querySelector('.docs-variant-leading-code')) {
+			wrapper.classList.add('docs-variant-leading-code');
+		}
 		const button = document.createElement('button');
 		button.type = 'button';
 		button.className = 'docs-copy-code';

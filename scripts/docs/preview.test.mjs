@@ -12,7 +12,7 @@ test('deployed preview serves bundled latest and fetches Markdown/API pages from
 	const identity = await identityResponse.json();
 	if (process.env.DOCS_FRONTEND_SHA)
 		expect(identity.frontendCommit).toBe(process.env.DOCS_FRONTEND_SHA);
-	expect(identity.source.preview).toBe(true);
+	expect(identity.source.preview).not.toBe(true);
 	expect(identity.source.commit).toBe(identity.bundle.sourceCommit);
 	const prefix = `https://raw.githubusercontent.com/CascadingLabs/Yosoi/${identity.bundle.artifactCommit}/snapshots/${identity.source.commit}/content/`;
 	let browser;

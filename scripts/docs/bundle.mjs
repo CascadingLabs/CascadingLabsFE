@@ -1,5 +1,4 @@
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
 import { cp, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -91,26 +90,11 @@ async function download(url, limit, fetcher, headers = {}) {
 	return Buffer.concat(chunks);
 }
 
-export function catalogRefForBuild(env = process.env) {
-	const preview =
-		env.DOCS_PREVIEW === '1' ||
-		(env.CF_PAGES === '1' && env.CF_PAGES_BRANCH && env.CF_PAGES_BRANCH !== 'main');
-	if (!preview || (env.CF_PAGES === '1' && env.CF_PAGES_BRANCH === 'main')) return 'docs-artifacts';
-	const config = JSON.parse(readFileSync(path.join(root, 'docs-preview.json'), 'utf8'));
-	if (config.schemaVersion !== 1 || config.catalogRef !== 'docs-artifacts-preview')
-		throw new Error('Invalid preview docs catalog configuration');
-	return config.catalogRef;
-}
-
-export async function resolveCatalog(
-	fetcher = fetch,
-	refName = catalogRefForBuild(),
-	env = process.env,
-) {
+export async function resolveCatalog(fetcher = fetch, env = process.env) {
 	// Resolve the branch through the API, avoiding raw.githubusercontent.com's moving-ref cache.
 	const ref = JSON.parse(
 		await download(
-			`https://api.github.com/repos/${repository}/git/ref/heads/${refName}`,
+			`https://api.github.com/repos/${repository}/git/ref/heads/docs-artifacts`,
 			64 * 1024,
 			fetcher,
 			env.GH_TOKEN ? { Authorization: `Bearer ${env.GH_TOKEN}` } : {},
@@ -210,12 +194,6 @@ export async function consumeLatest({ fetcher = fetch, build = true } = {}) {
 			version: selected.version,
 			'reference-artifact': path.join(bundleRoot, 'reference'),
 		});
-		if (catalog.preview === true) {
-			const file = path.join(generated, 'yosoi/routes.json');
-			const snapshot = JSON.parse(await readFile(file, 'utf8'));
-			snapshot.source.preview = true;
-			await writeFile(file, JSON.stringify(snapshot, null, 2) + '\n');
-		}
 		await writeFile(
 			path.join(generated, 'yosoi/releases.json'),
 			JSON.stringify(registry, null, 2) + '\n',

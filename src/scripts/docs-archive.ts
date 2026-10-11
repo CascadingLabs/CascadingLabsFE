@@ -9,7 +9,7 @@ import {
 import { fetchVerified, loadArchiveManifest, renderArchiveContent } from '../lib/docs-archive';
 import { paginationForSidebar, sidebarForNavigation } from '../lib/docs-sidebar';
 import type { NavNode } from '../lib/yosoi-snapshot';
-import { referenceKindLabel } from '../lib/docs-path';
+import { referenceLinkAttributes, referenceLanguageBadge } from '../lib/docs-path';
 
 const view = document.querySelector<HTMLElement>('#docs-archive-view');
 let outlineEvents: AbortController | undefined;
@@ -92,11 +92,12 @@ export async function renderArchive(
 			a.replaceChildren(name);
 			if (node.kind) {
 				a.classList.add('reference-item');
-				const badge = document.createElement('span');
-				badge.className = 'reference-kind-badge';
-				badge.textContent = referenceKindLabel(node.kind)!;
-				a.append(badge);
-			} else a.classList.remove('reference-item');
+				for (const [key, value] of Object.entries(referenceLinkAttributes(node.kind, label)))
+					if (key !== 'class') a.setAttribute(key, value);
+			} else {
+				a.classList.remove('reference-item');
+				for (const key of ['data-kind', 'title', 'aria-label']) a.removeAttribute(key);
+			}
 			if (node.route === page.route) a.setAttribute('aria-current', 'page');
 			li.append(a);
 			return li;
@@ -113,6 +114,13 @@ export async function renderArchive(
 			const label = summary.querySelector('.group-label') || document.createElement('span');
 			label.classList.add('group-label');
 			label.textContent = node.title;
+			const language = referenceLanguageBadge(node.route);
+			if (language) {
+				const icon = document.createElement('span');
+				icon.className = language.class;
+				icon.setAttribute('aria-hidden', 'true');
+				label.append(icon);
+			}
 			if (!label.parentNode) summary.append(label);
 			const ul = scoped('ul');
 			if (node.id !== undefined) ul.append(link(node, 'Overview'));

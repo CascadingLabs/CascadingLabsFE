@@ -110,7 +110,7 @@ test('the root document and overview-only sections remain accessible', () => {
 	});
 });
 
-test('reference kind badges stay on links and preserve the canonical item URL', () => {
+test('reference kind icons retain accessible full names and canonical item URLs', () => {
 	const tree = {
 		...navigation,
 		children: [
@@ -143,6 +143,12 @@ test('reference kind badges stay on links and preserve the canonical item URL', 
 		type: 'link',
 		label: 'Completeness',
 		href: '/yosoi/api/yosoi/locators/enum/completeness/',
-		badge: { text: 'enum', class: 'reference-kind-badge' },
+		attrs: {
+			class: 'reference-item',
+			'data-kind': 'enum',
+			title: 'Completeness (enum)',
+			'aria-label': 'Completeness, enum',
+		},
+		badge: undefined,
 	});
 });

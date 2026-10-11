@@ -25,8 +25,10 @@ import {
 	readPublicNavigation,
 	rewriteMarkdownLinks,
 	validateDocHeadings,
+	preparePythonReference,
 	resolveNavigation,
 	referenceNavigation,
+	referenceGroups,
 	jsonc,
 } from './navigation.mjs';
 import { referenceMarkdown, referenceSummary } from './reference.mjs';
@@ -137,11 +139,15 @@ export async function prepareDocs(options = {}) {
 			supplied.preview)
 	)
 		throw new Error('Published content manifest does not match the selected bundle');
+	const sourceRevision =
+		!options.source && existsSync(path.join(repo, '.jj'))
+			? run('jj', ['log', '-r', '@', '--no-graph', '-T', 'commit_id'], repo).trim()
+			: options.source || 'HEAD';
 	const sourceCommit =
 		supplied?.source.commit ||
 		run(
 			'git',
-			['rev-parse', '--verify', '--end-of-options', `${options.source || 'HEAD'}^{commit}`],
+			['rev-parse', '--verify', '--end-of-options', `${sourceRevision}^{commit}`],
 			repo,
 		).trim();
 	const apiCommit = /^[a-f0-9]{40}$/.test(options['api-source'] || '')
@@ -186,9 +192,21 @@ export async function prepareDocs(options = {}) {
 		if (options.source && !supplied) {
 			sourceRoot = path.join(stage, 'checkout/docs/public');
 			const archive = path.join(stage, 'public.tar');
+			const python = run(
+				'git',
+				['ls-tree', '--name-only', sourceCommit, '--', 'scripts/docs/python_reference.py'],
+				repo,
+			).trim();
 			run(
 				'git',
-				['archive', '--format=tar', `--output=${archive}`, sourceCommit, 'docs/public'],
+				[
+					'archive',
+					'--format=tar',
+					`--output=${archive}`,
+					sourceCommit,
+					'docs/public',
+					...(python ? ['python/yosoi', 'scripts/docs/python_reference.py'] : []),
+				],
 				repo,
 			);
 			await mkdir(path.join(stage, 'checkout'), { recursive: true });
@@ -200,6 +218,13 @@ export async function prepareDocs(options = {}) {
 		);
 		await mkdir(publicTree, { recursive: true });
 		await copyPublicTree(sourceRoot, publicTree);
+		if (!supplied && preparePythonReference)
+			preparePythonReference(
+				options.source ? path.join(stage, 'checkout') : repo,
+				publicTree,
+				sourceCommit,
+				repository,
+			);
 		const manifest = supplied
 			? generator.validateManifest(supplied, { allowPreview: false })
 			: generator.generatePreview({
@@ -312,13 +337,16 @@ export async function prepareDocs(options = {}) {
 			const name = page.publicPath.split('::').at(-1);
 			const title =
 				descriptor.slug === 'index'
-					? 'Reference'
+					? 'Rust reference'
 					: page.kind === 'module'
 						? name.replaceAll('_', ' ').replace(/^./, (letter) => letter.toUpperCase())
 						: name;
-			const tree = await markdownToMdast(referenceMarkdown(page, reference, descriptors), {
-				features: { gfm: true },
-			});
+			const tree = await markdownToMdast(
+				referenceMarkdown(page, reference, descriptors, referenceGroups),
+				{
+					features: { gfm: true },
+				},
+			);
 			const normalize = (node) => {
 				if (
 					node.type === 'code' &&

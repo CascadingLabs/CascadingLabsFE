@@ -1,6 +1,7 @@
 ---
 import Tag from '../icons/tag.svg';
 import { readReleaseRegistry } from '../lib/docs-release-data';
+import { visibleReleases } from '../lib/docs-releases';
 import { readSnapshot } from '../lib/yosoi-snapshot';
 const registry = readReleaseRegistry();
 const snapshot = readSnapshot();
@@ -11,7 +12,7 @@ const label = snapshot.source.preview ? 'Preview' : 'Latest';
  <span class="sr-only">Documentation release</span>
  <select aria-label="Documentation release" data-docs-release title={`${label} · ${snapshot.source.version}`} disabled>
   <option value="latest" selected>{snapshot.mode === 'working-tree-preview' ? label : `${label} · ${snapshot.source.version}`}</option>
-  {registry.versions.map((release) => <option value={release.version}>{snapshot.source.preview ? `Preview · ${release.version}` : release.tag}</option>)}
+  {visibleReleases(registry).map((release) => <option value={release.version}>{snapshot.source.preview ? `Preview · ${release.version}` : release.tag}</option>)}
  </select>
 </label>
 <script>
