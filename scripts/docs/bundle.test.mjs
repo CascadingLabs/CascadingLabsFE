@@ -217,7 +217,14 @@ test('published importer downloads only latest, verifies it, and prepares static
 			path.join(projectRoot, 'src/lib/docs-releases.ts'),
 			path.join(frontend, 'src/lib/docs-releases.ts'),
 		);
-		for (const file of ['bundle.mjs', 'prepare.mjs', 'navigation.mjs', 'reference.mjs'])
+		for (const file of [
+			'bundle.mjs',
+			'prepare.mjs',
+			'navigation.mjs',
+			'reference.mjs',
+			'live-snapshot.mjs',
+			'preparation-cache.mjs',
+		])
 			await cp(
 				path.join(projectRoot, 'scripts/docs', file),
 				path.join(frontend, 'scripts/docs', file),

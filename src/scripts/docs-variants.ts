@@ -1,6 +1,44 @@
 type VariantKind = 'code' | 'commands';
 type Variant = { label: string; heading: HTMLElement; nodes: HTMLElement[] };
 
+const variantKey = (label: string) =>
+	label
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, '-')
+		.replace(/^-|-$/g, '');
+
+function updateVariantUrl(kind: string, label: string) {
+	const url = new URL(location.href);
+	url.searchParams.set(kind, variantKey(label));
+	try {
+		const target = document.getElementById(decodeURIComponent(url.hash.slice(1)));
+		const panel = target?.closest<HTMLElement>('[data-docs-variant]');
+		const group = panel?.parentElement;
+		if (target?.closest('.docs-variant-title') && group?.dataset.docsVariantKind === kind) {
+			const selected = [...group.querySelectorAll<HTMLElement>('[data-docs-variant]')].find(
+				(candidate) => candidate.dataset.docsVariant === label,
+			);
+			const heading = selected?.querySelector<HTMLElement>('h3');
+			if (heading) url.hash = heading.id;
+		}
+	} catch {
+		/* Leave malformed fragments alone. */
+	}
+	history.replaceState(history.state, '', url.pathname + url.search + url.hash);
+}
+
+function applyUrlPreferences() {
+	for (const group of document.querySelectorAll<HTMLElement>('[data-docs-variant-kind]')) {
+		const kind = group.dataset.docsVariantKind;
+		if (!kind) continue;
+		const requested = new URL(location.href).searchParams.get(kind);
+		const label = [...group.querySelectorAll<HTMLElement>('[data-docs-variant]')]
+			.map((panel) => panel.dataset.docsVariant)
+			.find((label) => label && variantKey(label) === requested);
+		if (label) group.dispatchEvent(new CustomEvent('docs:select-variant', { detail: label }));
+	}
+}
+
 function headingIn(node: HTMLElement): HTMLElement | null {
 	return node.matches('h2, h3') ? node : node.querySelector(':scope > h2, :scope > h3');
 }
@@ -24,12 +62,20 @@ function revealVariantHash() {
 	const target = document.getElementById(decoded);
 	const panel = target?.closest<HTMLElement>('[data-docs-variant]');
 	if (!panel) return;
+	const kind = panel.parentElement?.dataset.docsVariantKind;
+	if (kind && panel.dataset.docsVariant) updateVariantUrl(kind, panel.dataset.docsVariant);
 	panel.parentElement?.dispatchEvent(
 		new CustomEvent('docs:select-variant', {
 			detail: panel.dataset.docsVariant,
 		}),
 	);
-	(target?.closest('.docs-variant-title') ? panel : target)?.scrollIntoView();
+	(target?.closest('.docs-variant-title')
+		? panel.closest('.docs-variants')
+		: target
+	)?.scrollIntoView({
+		behavior: 'instant',
+		block: 'start',
+	});
 }
 
 let listeningForHash = false;
@@ -47,7 +93,6 @@ export function enhanceCodeVariants(root: ParentNode) {
 		const anchor = heading.parentElement?.classList.contains('sl-heading-wrapper')
 			? heading.parentElement
 			: heading;
-		const labels = kind === 'code' ? ['Rust', 'Python'] : ['Cargo', 'uv'];
 		const variants: Variant[] = [];
 		let node = anchor.nextElementSibling as HTMLElement | null;
 		let current: Variant | undefined;
@@ -57,7 +102,7 @@ export function enhanceCodeVariants(root: ParentNode) {
 			if (childHeading?.tagName === 'H2') break;
 			if (childHeading?.tagName === 'H3') {
 				const label = childHeading.textContent?.trim() || '';
-				if (!labels.includes(label)) {
+				if (!label) {
 					invalid = true;
 					break;
 				}
@@ -69,13 +114,14 @@ export function enhanceCodeVariants(root: ParentNode) {
 		}
 		if (
 			invalid ||
-			variants.length !== 2 ||
-			new Set(variants.map((v) => v.label)).size !== 2 ||
+			variants.length < 2 ||
+			new Set(variants.map((v) => variantKey(v.label))).size !== variants.length ||
 			variants.some((v) => !v.nodes.some((n) => n.matches('pre') || n.querySelector('pre')))
 		)
 			continue;
 		const first = variants[0];
 		if (!first) continue;
+		const labels = variants.map((variant) => variant.label);
 		heading.dataset.docsVariants = 'true';
 		const group = document.createElement('div');
 		group.className = 'docs-variants';
@@ -90,10 +136,12 @@ export function enhanceCodeVariants(root: ParentNode) {
 			const button = document.createElement('button');
 			button.type = 'button';
 			button.textContent = variant.label;
-			const icon = document.createElement('span');
-			icon.className = 'docs-variant-icon docs-variant-icon-' + variant.label.toLowerCase();
-			icon.setAttribute('aria-hidden', 'true');
-			button.prepend(icon);
+			if (['rust', 'python', 'cargo', 'uv'].includes(variantKey(variant.label))) {
+				const icon = document.createElement('span');
+				icon.className = 'docs-variant-icon docs-variant-icon-' + variantKey(variant.label);
+				icon.setAttribute('aria-hidden', 'true');
+				button.prepend(icon);
+			}
 			button.setAttribute('role', 'tab');
 			button.id = variant.heading.id + '-tab';
 			const panel = document.createElement('div');
@@ -130,6 +178,7 @@ export function enhanceCodeVariants(root: ParentNode) {
 			}
 		};
 		const activate = (label: string) => {
+			updateVariantUrl(kind, label);
 			try {
 				localStorage.setItem('yosoi-docs-' + kind, label);
 			} catch {
@@ -139,6 +188,7 @@ export function enhanceCodeVariants(root: ParentNode) {
 				'[data-docs-variant-kind="' + kind + '"]',
 			))
 				sibling.dispatchEvent(new CustomEvent('docs:select-variant', { detail: label }));
+			group.scrollIntoView({ behavior: 'instant', block: 'start' });
 		};
 		group.addEventListener('docs:select-variant', (event) => {
 			const label = (event as CustomEvent<string>).detail;
@@ -159,14 +209,52 @@ export function enhanceCodeVariants(root: ParentNode) {
 				const target = variants[next];
 				if (!target) return;
 				activate(target.label);
-				buttons[next]?.focus();
+				buttons[next]?.focus({ preventScroll: true });
 			});
 		}
 		const preferred = preference(kind);
-		select(preferred && labels.includes(preferred) ? preferred : first.label);
+		const requested = new URL(location.href).searchParams.get(kind);
+		const fromUrl = labels.find((label) => variantKey(label) === requested);
+		select(fromUrl || (preferred && labels.includes(preferred) ? preferred : first.label));
+		if (fromUrl) updateVariantUrl(kind, fromUrl);
 	}
 	if (!listeningForHash) {
 		window.addEventListener('hashchange', revealVariantHash);
+		// A repeated outline click does not fire hashchange; hidden language headings
+		// would otherwise send the browser back to the page top.
+		document.addEventListener('click', (event) => {
+			if (
+				event.defaultPrevented ||
+				event.button !== 0 ||
+				event.metaKey ||
+				event.ctrlKey ||
+				event.shiftKey ||
+				event.altKey
+			)
+				return;
+			const link =
+				event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('a') : null;
+			if (!link?.closest('starlight-toc, mobile-starlight-toc')) return;
+			const url = new URL(link.href);
+			if (
+				url.pathname !== location.pathname ||
+				url.search !== location.search ||
+				url.hash !== location.hash
+			)
+				return;
+			try {
+				const target = document.getElementById(decodeURIComponent(url.hash.slice(1)));
+				if (!target?.closest('.docs-variant-title')) return;
+				event.preventDefault();
+				revealVariantHash();
+			} catch {
+				/* Leave malformed fragments alone. */
+			}
+		});
+		window.addEventListener('popstate', () => {
+			applyUrlPreferences();
+			revealVariantHash();
+		});
 		listeningForHash = true;
 	}
 	revealVariantHash();

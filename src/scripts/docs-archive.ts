@@ -29,10 +29,12 @@ export async function renderArchive(
 		);
 		if (!release) throw new Error('This documentation release is unavailable.');
 		const manifest = await loadArchiveManifest(release);
-		const requested = url.searchParams.get('page') || '';
+		const homepage = manifest.navigation.homepage || '';
+		const requested = url.searchParams.get('page') || homepage;
 		const page =
 			manifest.pages.find((item) => item.route === requested) ||
-			manifest.pages.find((item) => !item.route)!;
+			manifest.pages.find((item) => item.route === homepage);
+		if (!page) throw new Error('This documentation release has no homepage.');
 		const html = new TextDecoder().decode(
 			await fetchVerified(release, releaseFilePath(release, page.file), page.sha256),
 		);
@@ -194,9 +196,17 @@ export async function renderArchive(
 			const top =
 				(headings[0] ? parseFloat(getComputedStyle(headings[0]).scrollMarginTop) || 0 : 0) +
 				(parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0);
+			const visible = headings.flatMap((heading) => {
+				const panel = heading.closest<HTMLElement>('[data-docs-variant]');
+				if (panel && !panel.getClientRects().length) return [];
+				const anchor = heading.closest('.docs-variant-title')
+					? panel?.closest('.docs-variants')
+					: heading;
+				return anchor ? [{ heading, anchor }] : [];
+			});
 			const active =
-				headings.filter((heading) => heading.getBoundingClientRect().top <= top + 1).at(-1) ||
-				headings[0];
+				visible.filter(({ anchor }) => anchor.getBoundingClientRect().top <= top + 1).at(-1)
+					?.heading || visible[0]?.heading;
 			for (const toc of document.querySelectorAll('starlight-toc, mobile-starlight-toc')) {
 				for (const link of toc.querySelectorAll<HTMLAnchorElement>('a')) {
 					if (active && link.hash === '#' + encodeURIComponent(active.id)) {
@@ -222,7 +232,11 @@ export async function renderArchive(
 		enhanceCodeBlocks(view);
 		if (location.hash) {
 			try {
-				document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView();
+				const target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+				const anchor = target?.closest('.docs-variant-title')
+					? target.closest('.docs-variants')
+					: target;
+				anchor?.scrollIntoView({ behavior: 'instant', block: 'start' });
 			} catch {
 				/* Ignore malformed URL fragments. */
 			}

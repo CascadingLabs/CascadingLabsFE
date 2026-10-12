@@ -104,6 +104,21 @@ test('release registry pins source/artifact commits and rejects duplicates, movi
 });
 test('an archived version owns its navigation/page inventory and must match its release identity', () => {
 	expect(parseArchiveManifest(manifest, release).pages[0].title).toBe('Old overview');
+	const withHomepage = {
+		...manifest,
+		navigation: { ...manifest.navigation, homepage: 'introduction' },
+		pages: [...manifest.pages, { ...manifest.pages[0], route: 'introduction' }],
+	};
+	expect(parseArchiveManifest(withHomepage, release).navigation.homepage).toBe('introduction');
+	expect(() =>
+		parseArchiveManifest(
+			{
+				...withHomepage,
+				navigation: { ...withHomepage.navigation, homepage: 'missing' },
+			},
+			release,
+		),
+	).toThrow('Archived homepage is missing.');
 	expect(() =>
 		parseArchiveManifest({ ...manifest, sourceCommit: '4'.repeat(40) }, release),
 	).toThrow();

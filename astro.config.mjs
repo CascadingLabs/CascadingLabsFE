@@ -4,11 +4,18 @@ import starlight from '@astrojs/starlight';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
 import { rename } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { readSnapshot } from './src/lib/yosoi-snapshot.ts';
 import { docsSnapshotIntegration } from './scripts/docs/snapshot-integration.mjs';
+
+const homepage = existsSync(new URL('./.generated/yosoi/routes.json', import.meta.url))
+	? readSnapshot().navigation.homepage
+	: undefined;
 
 export default defineConfig({
 	site: 'https://cascadinglabs.com',
 	output: 'static',
+	redirects: homepage ? { '/yosoi': `/yosoi/${homepage}/` } : {},
 	markdown: {
 		shikiConfig: { themes: { light: 'github-light', dark: 'github-dark' }, defaultColor: false },
 	},
@@ -49,6 +56,7 @@ export default defineConfig({
 				MobileMenuFooter: './src/components/starlight/MobileMenuFooter.astro',
 				MarkdownContent: './src/components/starlight/MarkdownContent.astro',
 				Pagination: './src/components/starlight/Pagination.astro',
+				TableOfContents: './src/components/starlight/TableOfContents.astro',
 			},
 		}),
 	],

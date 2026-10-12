@@ -23,17 +23,18 @@
 		"docs:test": "bun scripts/docs/test.mjs scripts/docs/navigation.test.mjs scripts/docs/prepare.test.mjs scripts/docs/reference.test.mjs scripts/docs/sidebar.test.ts scripts/docs/releases.test.ts scripts/docs/publication.test.mjs",
 		"test": "bun scripts/docs/test.mjs scripts/docs/navigation.test.mjs scripts/docs/prepare.test.mjs scripts/docs/reference.test.mjs scripts/docs/sidebar.test.ts scripts/docs/releases.test.ts scripts/docs/publication.test.mjs scripts/docs/bundle.test.mjs",
 		"docs:test:archive": "bun scripts/docs/test.mjs scripts/docs/archive-browser.test.mjs",
-		"docs:test:ui": "bun scripts/docs/test.mjs scripts/docs/ui-browser.test.mjs",
+		"docs:test:ui": "bun scripts/docs/test.mjs scripts/docs/ui-browser.test.mjs scripts/docs/navigation-browser.test.mjs",
 		"docs:test:preview": "bun scripts/docs/test.mjs scripts/docs/preview.test.mjs",
 		"docs:test:site": "bun scripts/docs/test.mjs scripts/docs/site.test.mjs",
 		"docs:test:live": "bun scripts/docs/test.mjs scripts/docs/live.test.mjs",
-		"docs:test:variants": "bun scripts/docs/test.mjs scripts/docs/code-variants.test.mjs"
+		"docs:test:variants": "bun scripts/docs/test.mjs scripts/docs/code-variants.test.mjs scripts/docs/code-contract.test.mjs"
 	},
 	"dependencies": {
 		"@astrojs/mdx": "8.0.3",
 		"@astrojs/sitemap": "3.7.4",
 		"@astrojs/starlight": "0.42.6",
 		"@astrojs/starlight-tailwind": "5.0.0",
+		"@fontsource-variable/inter": "^5.3.0",
 		"@fontsource/dm-mono": "^5.3.0",
 		"astro": "7.3.8",
 		"dompurify": "3.4.16",

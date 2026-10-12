@@ -5,6 +5,11 @@ import SocialIcons from '@astrojs/starlight/components/SocialIcons.astro';
 import DocsReleaseSelect from '../DocsReleaseSelect.astro';
 ---
 <div class="starlight-docs-header">
+ <a class="starlight-docs-brand" href="/yosoi/" aria-label="Yosoi documentation home">
+  <img class="project-icon-dark" src="/favicon-yosoi-dark.svg" width="32" height="32" alt="" />
+  <img class="project-icon-light" src="/favicon-yosoi-light.svg" width="32" height="32" alt="" />
+  <span>Yosoi</span><span class="starlight-docs-brand-divider" aria-hidden="true">/</span><span class="starlight-docs-brand-section">Docs</span>
+ </a>
  <div class="starlight-docs-search"><Search /></div>
  <div class="starlight-docs-actions">
   <DocsReleaseSelect />

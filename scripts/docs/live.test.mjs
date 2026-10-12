@@ -23,7 +23,7 @@ function ready(child) {
 			reject(new Error('Docs dev did not become ready. ' + output.slice(-1800)));
 		}, 20000);
 		const data = (chunk) => {
-			output += chunk;
+			if (!/^\d.*\[200\] \/yosoi\//.test(chunk.toString())) output += chunk;
 			const match = output.match(/Local\s+(http:\/\/127\.0\.0\.1:\d+\/)/);
 			if (match) {
 				cleanup();
@@ -71,6 +71,12 @@ test('vpr dev refreshes the open browser for Markdown, metadata, and added files
 	let child;
 	let page;
 	let output = '';
+	let serverPid;
+	const serverPids = [];
+	let pollTimer;
+	let pollInFlight = false;
+	const availabilityErrors = [];
+	let successfulRequests = 0;
 	try {
 		await mkdir(frontend);
 		await mkdir(path.join(source, 'docs/public'), { recursive: true });
@@ -268,7 +274,13 @@ test('vpr dev refreshes the open browser for Markdown, metadata, and added files
 		child = spawn('bun', ['scripts/docs/dev.mjs', '--port', String(port)], {
 			cwd: frontend,
 			env,
-			stdio: ['ignore', 'pipe', 'pipe'],
+			stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
+		});
+		child.on('message', (message) => {
+			if (message?.type === 'ready') {
+				serverPid = message.serverPid;
+				serverPids.push(serverPid);
+			}
 		});
 		child.stdout.on('data', (chunk) => {
 			output += chunk;
@@ -296,6 +308,20 @@ test('vpr dev refreshes the open browser for Markdown, metadata, and added files
 		const response = await page.goto(url + 'yosoi/');
 		expect(response.status()).toBe(200);
 		await page.getByText('Initial content.', { exact: true }).waitFor({ timeout: 10000 });
+		pollTimer = setInterval(async () => {
+			if (pollInFlight) return;
+			pollInFlight = true;
+			try {
+				const response = await fetch(url + 'yosoi/', { signal: AbortSignal.timeout(5000) });
+				await response.text();
+				if (response.status !== 200) availabilityErrors.push('HTTP ' + response.status);
+				else successfulRequests++;
+			} catch (error) {
+				availabilityErrors.push(error.message);
+			} finally {
+				pollInFlight = false;
+			}
+		}, 100);
 		await writeFile(
 			path.join(source, 'docs/public/index.md'),
 			'---\ntitle: Live test\n---\n# Live test\n\nEdited content.\n',
@@ -344,7 +370,18 @@ test('vpr dev refreshes the open browser for Markdown, metadata, and added files
 		await page.getByText('Edited content.', { exact: true }).waitFor();
 		await rm(added);
 		await page.locator('.sidebar a[href="/yosoi/guides/added/"]').waitFor({ state: 'detached' });
-		expect((await page.request.get(url + 'yosoi/guides/added/')).status()).toBe(404);
+		await expect
+			.poll(
+				async () => {
+					try {
+						return (await page.request.get(url + 'yosoi/guides/added/')).status();
+					} catch {
+						return 0; // The server may be between snapshots.
+					}
+				},
+				{ timeout: 10000 },
+			)
+			.toBe(404);
 		await writeFile(
 			path.join(source, 'docs/public/_navigation.json'),
 			`{
@@ -386,12 +423,58 @@ test('vpr dev refreshes the open browser for Markdown, metadata, and added files
 		await selectDocsRelease(page, 'latest');
 		await page.getByText('Edited content.', { exact: true }).waitFor();
 		expect(page.url()).toBe(url + 'yosoi/');
+		for (let save = 0; save < 4; save++) {
+			await writeFile(
+				path.join(source, 'docs/public/index.md'),
+				'---\ntitle: Live test\n---\n# Live test\n\nBurst save ' + save + '.\n',
+			);
+		}
+		await page.getByText('Burst save 3.', { exact: true }).waitFor();
+		clearInterval(pollTimer);
+		await expect.poll(() => pollInFlight).toBe(false);
+		expect(availabilityErrors).toEqual([]);
+		expect(successfulRequests).toBeGreaterThan(10);
+		expect(serverPids).toHaveLength(1);
+		expect(output.match(/astro\s+v7\.3\.8 ready/g)).toHaveLength(1);
+		expect(output).not.toContain('transport was disconnected');
+		// Killing the port owner must also stop its watcher, so a replacement
+		// preview cannot compete with an abandoned watcher on the next save.
+		expect(serverPid).toBeGreaterThan(0);
+		const exited = new Promise((resolve, reject) => {
+			const timer = setTimeout(() => reject(new Error('Orphaned docs watcher stayed alive')), 5000);
+			child.once('exit', (code) => {
+				clearTimeout(timer);
+				resolve(code);
+			});
+		});
+		process.kill(serverPid, 'SIGKILL');
+		expect(await exited).toBe(1);
+		child = spawn('bun', ['scripts/docs/dev.mjs', '--port', String(port)], {
+			cwd: frontend,
+			env,
+			stdio: ['ignore', 'pipe', 'pipe'],
+		});
+		child.stdout.on('data', (chunk) => {
+			output += chunk;
+		});
+		child.stderr.on('data', (chunk) => {
+			output += chunk;
+		});
+		await ready(child);
+		await page.reload();
+		await writeFile(
+			path.join(source, 'docs/public/index.md'),
+			'---\ntitle: Live test\n---\n# Live test\n\nRestarted preview content.\n',
+		);
+		await page.getByText('Restarted preview content.', { exact: true }).waitFor();
+		expect(output).not.toContain('Docs preparation is busy');
 	} catch (error) {
 		throw new Error(
 			`${error.message}\nFixture: ${fixture}\nDev output:\n${output.slice(-4000)}\nPage:\n${page ? (await page.locator('body').innerText()).slice(0, 3000) : 'not opened'}`,
 			{ cause: error },
 		);
 	} finally {
+		clearInterval(pollTimer);
 		await browser?.close();
 		await stop(child);
 		if (!process.env.KEEP_DOCS_TEST_FIXTURE) await rm(fixture, { recursive: true, force: true });

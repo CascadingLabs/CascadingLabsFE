@@ -1,4 +1,6 @@
 import { enhanceCodeVariants } from './docs-variants';
+import { enhanceCodeCallouts } from './docs-callouts';
+import { enhanceCodeScroll } from './docs-code-scroll';
 
 /** Attach controls after static rendering or an archive fetch. */
 export function enhanceCodeBlocks(root: ParentNode) {
@@ -10,6 +12,7 @@ export function enhanceCodeBlocks(root: ParentNode) {
 		wrapper.className = 'docs-code-block';
 		pre.before(wrapper);
 		wrapper.append(pre);
+		enhanceCodeCallouts(pre, wrapper);
 		const panel = wrapper.closest('.docs-variant-panel');
 		if (panel && !panel.querySelector('.docs-variant-leading-code')) {
 			wrapper.classList.add('docs-variant-leading-code');
@@ -37,5 +40,6 @@ export function enhanceCodeBlocks(root: ParentNode) {
 			}, 2000);
 		});
 		wrapper.prepend(button);
+		enhanceCodeScroll(pre, wrapper);
 	}
 }

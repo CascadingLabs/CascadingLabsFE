@@ -32,6 +32,8 @@ import {
 	jsonc,
 } from './navigation.mjs';
 import { referenceMarkdown, referenceSummary } from './reference.mjs';
+import { publishLiveSnapshot } from './live-snapshot.mjs';
+import { cachedText, cachedPythonReference } from './preparation-cache.mjs';
 
 export const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 export const repositoryRoot = () =>
@@ -172,7 +174,7 @@ export async function prepareDocs(options = {}) {
 	} catch (error) {
 		if (error.code === 'EEXIST')
 			throw new Error(
-				'Another docs preparation is running. If it was interrupted, remove .generated/yosoi.prepare.lock.',
+				'Docs preparation is busy. Stop the other preview or preparation process and save again.',
 			);
 		throw error;
 	}
@@ -219,12 +221,14 @@ export async function prepareDocs(options = {}) {
 		await mkdir(publicTree, { recursive: true });
 		await copyPublicTree(sourceRoot, publicTree);
 		if (!supplied && preparePythonReference)
-			preparePythonReference(
-				options.source ? path.join(stage, 'checkout') : repo,
-				publicTree,
-				sourceCommit,
+			await cachedPythonReference({
+				repo: options.source ? path.join(stage, 'checkout') : repo,
+				target: publicTree,
+				cache: path.join(generated, 'yosoi-cache/python'),
+				source: sourceCommit,
 				repository,
-			);
+				generate: preparePythonReference,
+			});
 		const manifest = supplied
 			? generator.validateManifest(supplied, { allowPreview: false })
 			: generator.generatePreview({
@@ -236,16 +240,29 @@ export async function prepareDocs(options = {}) {
 		const pages = authoredPages(manifest);
 		const pageMap = new Map(pages.map((page) => [page.file, page]));
 		const assets = new Set(Object.keys(manifest.assets));
+		const transformVersion = digest(await readFile(fileURLToPath(import.meta.url)));
+		const linkInputs = json({
+			pages: [...pageMap].map(([file, page]) => [file, page.route]),
+			assets: [...assets],
+			transformVersion,
+			content: await readFile(path.join(repo, 'scripts/docs/content.mjs'), 'utf8'),
+		});
 		for (const page of pages) {
 			const original = await readFile(path.join(publicTree, page.file), 'utf8');
 			if (digest(original) !== page.sha256)
 				throw new Error(`Document changed during preparation: ${page.file}`);
 			const { body } = generator.parseFrontmatter(original, page.file);
-			const rewritten = await rewriteMarkdown(body, page.file, pageMap, assets);
-			const tree = await markdownToMdast(rewritten, { features: { gfm: true } });
-			if (tree.children[0]?.type === 'heading' && tree.children[0].depth === 1)
-				tree.children.shift();
-			const content = toMarkdown(tree, { extensions: [gfmToMarkdown()] });
+			const content = await cachedText(
+				path.join(generated, 'yosoi-cache/markdown'),
+				json([body, page.file, linkInputs]),
+				async () => {
+					const rewritten = await rewriteMarkdown(body, page.file, pageMap, assets);
+					const tree = await markdownToMdast(rewritten, { features: { gfm: true } });
+					if (tree.children[0]?.type === 'heading' && tree.children[0].depth === 1)
+						tree.children.shift();
+					return toMarkdown(tree, { extensions: [gfmToMarkdown()] });
+				},
+			);
 			await mkdir(path.dirname(path.join(docs, page.file)), { recursive: true });
 			await writeFile(
 				path.join(docs, page.file),
@@ -341,26 +358,32 @@ export async function prepareDocs(options = {}) {
 					: page.kind === 'module'
 						? name.replaceAll('_', ' ').replace(/^./, (letter) => letter.toUpperCase())
 						: name;
-			const tree = await markdownToMdast(
-				referenceMarkdown(page, reference, descriptors, referenceGroups),
-				{
-					features: { gfm: true },
+			const markdown = referenceMarkdown(page, reference, descriptors, referenceGroups);
+			const content = await cachedText(
+				path.join(generated, 'yosoi-cache/rust-markdown'),
+				json([markdown, transformVersion]),
+				async () => {
+					const tree = await markdownToMdast(markdown, {
+						features: { gfm: true },
+					});
+					const normalize = (node) => {
+						if (
+							node.type === 'code' &&
+							/^(rust|compile_fail|no_run|ignore|should_panic|edition20\d\d)(,|$)/.test(
+								node.lang || '',
+							)
+						) {
+							node.meta = node.lang;
+							node.lang = 'rust';
+						}
+						for (const child of node.children || []) normalize(child);
+					};
+					normalize(tree);
+					if (tree.children[0]?.type === 'heading' && tree.children[0].depth === 1)
+						tree.children.shift();
+					return toMarkdown(tree, { extensions: [gfmToMarkdown()] });
 				},
 			);
-			const normalize = (node) => {
-				if (
-					node.type === 'code' &&
-					/^(rust|compile_fail|no_run|ignore|should_panic|edition20\d\d)(,|$)/.test(node.lang || '')
-				) {
-					node.meta = node.lang;
-					node.lang = 'rust';
-				}
-				for (const child of node.children || []) normalize(child);
-			};
-			normalize(tree);
-			if (tree.children[0]?.type === 'heading' && tree.children[0].depth === 1)
-				tree.children.shift();
-			const content = toMarkdown(tree, { extensions: [gfmToMarkdown()] });
 			await mkdir(path.dirname(path.join(docs, file)), { recursive: true });
 			await writeFile(
 				path.join(docs, file),
@@ -416,20 +439,24 @@ export async function prepareDocs(options = {}) {
 					'src/content/docs/yosoi must be the managed snapshot link, not authored content.',
 				);
 		}
-		const previous = `${destination}.previous`;
-		await rm(previous, { recursive: true, force: true });
-		try {
-			await rename(destination, previous);
-		} catch (error) {
-			if (error.code !== 'ENOENT') throw error;
+		if (options.live && existsSync(destination)) {
+			await publishLiveSnapshot(stage, destination);
+		} else {
+			const previous = `${destination}.previous`;
+			await rm(previous, { recursive: true, force: true });
+			try {
+				await rename(destination, previous);
+			} catch (error) {
+				if (error.code !== 'ENOENT') throw error;
+			}
+			try {
+				await rename(stage, destination);
+			} catch (error) {
+				await rename(previous, destination).catch(() => {});
+				throw error;
+			}
+			await rm(previous, { recursive: true, force: true });
 		}
-		try {
-			await rename(stage, destination);
-		} catch (error) {
-			await rename(previous, destination).catch(() => {});
-			throw error;
-		}
-		await rm(previous, { recursive: true, force: true });
 		console.log(
 			`Prepared ${pages.length} pages (${descriptors.length} API) in .generated/yosoi; ${snapshot.mode}.`,
 		);

@@ -158,7 +158,10 @@ test('latest and archived docs share responsive controls, themes, and pagination
 			'v0.2.0',
 			'v0.1.2',
 		]);
-		expect(await page.locator('.starlight-docs-header > a').count()).toBe(0);
+		expect(
+			await page.locator('.starlight-docs-brand').evaluate((link) => new URL(link.href).pathname),
+		).toBe('/yosoi/');
+		expect(await page.locator('.starlight-docs-brand').textContent()).toMatch(/Yosoi\s*\/\s*Docs/);
 		const normalColor = await picker.evaluate((el) => getComputedStyle(el).color);
 		await picker.hover();
 		expect(await picker.evaluate((el) => getComputedStyle(el).color)).not.toBe(normalColor);

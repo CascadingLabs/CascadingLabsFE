@@ -31,3 +31,5 @@ async function stop() {
 }
 process.on('SIGINT', stop);
 process.on('SIGTERM', stop);
+// A forcibly terminated watcher must not leave its Astro child holding the port.
+if (process.connected) process.on('disconnect', stop);

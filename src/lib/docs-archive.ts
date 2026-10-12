@@ -55,6 +55,12 @@ export function parseArchiveManifest(input: unknown, release: DocsRelease): Arch
 		routes.add(page.route);
 	}
 	if (!routes.has('')) throw new Error('Archived docs overview is missing.');
+	if (
+		manifest.navigation.homepage !== undefined &&
+		(typeof manifest.navigation.homepage !== 'string' || !routes.has(manifest.navigation.homepage))
+	) {
+		throw new Error('Archived homepage is missing.');
+	}
 	const visit = (node: NavNode, depth = 0) => {
 		if (
 			depth > 32 ||

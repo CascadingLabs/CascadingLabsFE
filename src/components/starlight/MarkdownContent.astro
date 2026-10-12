@@ -10,5 +10,7 @@ const olderReference = Astro.locals.starlightRoute.entry.id.startsWith('yosoi/ap
 </MarkdownContent>
 <script>
  import { enhanceCodeBlocks } from '../../scripts/docs-code';
+ import { initializeDocsNavigation } from '../../scripts/docs-navigation';
  enhanceCodeBlocks(document.querySelector('.sl-markdown-content') || document);
+ void initializeDocsNavigation();
 </script>

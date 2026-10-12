@@ -14,29 +14,9 @@ await new Promise((resolve, reject) => {
 	});
 });
 await prepareDocs(options);
-const clients = new Set();
-let revision = 0;
-const events = createServer((req, res) => {
-	if (req.url !== '/__yosoi_docs_reload') {
-		res.writeHead(404).end();
-		return;
-	}
-	res.writeHead(200, {
-		'Content-Type': 'text/event-stream',
-		'Cache-Control': 'no-cache',
-		'Access-Control-Allow-Origin': '*',
-		Connection: 'keep-alive',
-	});
-	res.write(`data: ${revision}\n\n`);
-	clients.add(res);
-	res.once('close', () => clients.delete(res));
-});
-await new Promise((resolve, reject) => {
-	events.once('error', reject);
-	events.listen(0, options.host || '127.0.0.1', resolve);
-});
 let server;
-async function startServer(nextRevision) {
+const stoppingServers = new WeakSet();
+async function startServer() {
 	server = spawn(
 		'bun',
 		[
@@ -49,15 +29,15 @@ async function startServer(nextRevision) {
 		{
 			cwd: projectRoot,
 			stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
-			env: {
-				...process.env,
-				YOSOI_DOCS_EVENTS_PORT: String(events.address().port),
-				YOSOI_DOCS_REVISION: String(nextRevision),
-			},
 		},
 	);
+	const child = server;
+	child.once('exit', () => {
+		if (stoppingServers.has(child) || closing) return;
+		console.error('Docs server stopped. Restart with vpr dev.');
+		void stop(1);
+	});
 	await new Promise((resolve, reject) => {
-		const child = server;
 		const ready = (message) => {
 			if (message?.type !== 'ready') return;
 			cleanup();
@@ -75,21 +55,17 @@ async function startServer(nextRevision) {
 		child.once('exit', failed);
 		child.once('error', reject);
 	});
-}
-try {
-	await startServer(revision);
-} catch (error) {
-	events.close();
-	throw error;
+	process.send?.({ type: 'ready', serverPid: child.pid });
 }
 async function stopServer() {
 	if (server.exitCode !== null || server.signalCode !== null) return;
+	stoppingServers.add(server);
 	const stopped = new Promise((resolve) => server.once('exit', resolve));
 	server.kill('SIGTERM');
 	await stopped;
 }
 let timer;
-let running = false;
+let running = true;
 let pending = false;
 let closing = false;
 let activeRefresh = Promise.resolve();
@@ -104,23 +80,12 @@ async function refresh() {
 		do {
 			pending = false;
 			try {
-				await stopServer();
+				await prepareDocs({ ...options, 'docs-only': true, live: true });
 				if (closing) break;
-				await prepareDocs({ ...options, 'docs-only': true });
-				if (closing) break;
-				await startServer(revision + 1);
-				revision++;
-				for (const client of clients) client.write(`data: ${revision}\n\n`);
+
 				console.log('Yosoi snapshot refreshed.');
 			} catch (error) {
-				console.error(`Docs refresh failed; fix the source and save again. ${error.message}`);
-				if (!closing && (server.exitCode !== null || server.signalCode !== null)) {
-					try {
-						await startServer(revision);
-					} catch (restartError) {
-						console.error(`Could not restart the last prepared snapshot: ${restartError.message}`);
-					}
-				}
+				console.error(`Docs refresh failed: ${error.message}`);
 			}
 		} while (pending && !closing);
 	} finally {
@@ -140,20 +105,34 @@ const onSourceChange = () => {
 const watchers = ['docs/public', 'python/yosoi']
 	.map((directory) => path.join(repositoryRoot(), directory))
 	.filter(existsSync)
-	.map((directory) => watch(directory, { recursive: true }, onSourceChange));
+	.map((directory) =>
+		watch(directory, { recursive: true }, (_event, filename) => {
+			const relative = filename?.toString();
+			if (relative?.split(/[\\/]/).some((part) => part === '__pycache__' || part.startsWith('.')))
+				return;
+			if (directory.endsWith('python/yosoi') && relative && !/\.(py|pyi)$/.test(relative)) return;
+			onSourceChange();
+		}),
+	);
 console.log(
 	'Watching Yosoi/docs/public and Python declarations. Changes refresh the prepared snapshot and browser; Rust API compilation stays cached.',
 );
-async function stop() {
+async function stop(exitCode = 0) {
 	if (closing) return;
 	closing = true;
 	clearTimeout(timer);
 	for (const watcher of watchers) watcher.close();
 	await activeRefresh;
 	await stopServer();
-	for (const client of clients) client.end();
-	await new Promise((resolve) => events.close(resolve));
-	process.exit(0);
+	process.exit(exitCode);
 }
-process.on('SIGINT', stop);
-process.on('SIGTERM', stop);
+process.on('SIGINT', () => void stop());
+process.on('SIGTERM', () => void stop());
+try {
+	await startServer();
+	running = false;
+	if (pending) activeRefresh = refresh();
+} catch (error) {
+	console.error(error.message);
+	await stop(1);
+}

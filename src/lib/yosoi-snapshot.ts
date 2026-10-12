@@ -11,6 +11,7 @@ export interface DocPage {
 	publicPath?: string;
 }
 export interface NavNode {
+	homepage?: string;
 	title: string;
 	route: string;
 	id?: string;

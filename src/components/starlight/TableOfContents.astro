@@ -1,0 +1,23 @@
+---
+import TableOfContents from '@astrojs/starlight/components/TableOfContents.astro';
+---
+<script is:inline>
+ (() => {
+  let mode = 'compact';
+  try { mode = localStorage.getItem('yosoi-outline') === 'expanded' ? 'expanded' : 'compact'; } catch {}
+  document.documentElement.dataset.docsOutline = mode;
+ })();
+</script>
+<div class="docs-outline">
+ <button class="docs-outline-toggle" type="button" aria-label="Expand page outline" aria-expanded="false" aria-controls="docs-page-outline" title="Expand page outline" hidden>
+  <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+   <rect x="3" y="3.5" width="14" height="13" rx="2" />
+   <path d="M12.5 3.5v13M6.5 7h3M6.5 10h3M6.5 13h3" />
+  </svg>
+ </button>
+ <div id="docs-page-outline"><TableOfContents /></div>
+</div>
+<script>
+ import { initializeDocsOutline } from '../../scripts/docs-outline';
+ initializeDocsOutline();
+</script>
