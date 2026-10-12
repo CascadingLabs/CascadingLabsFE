@@ -1,5 +1,5 @@
 import { expect, test } from 'vite-plus/test';
-import { mkdtemp, mkdir, cp, writeFile, rm, symlink } from 'node:fs/promises';
+import { mkdtemp, mkdir, cp, writeFile, rm, symlink, stat } from 'node:fs/promises';
 import { createServer } from 'node:net';
 import { createHash } from 'node:crypto';
 import { execFileSync, spawn } from 'node:child_process';
@@ -57,6 +57,26 @@ async function stop(child) {
 			resolve();
 		});
 		child.kill('SIGTERM');
+	});
+}
+
+function diagnostic(child, message) {
+	return new Promise((resolve, reject) => {
+		const timer = setTimeout(() => {
+			cleanup();
+			reject(new Error(`Missing diagnostic: ${message}`));
+		}, 10000);
+		const data = (chunk) => {
+			if (chunk.toString().includes(message)) {
+				cleanup();
+				resolve();
+			}
+		};
+		function cleanup() {
+			clearTimeout(timer);
+			child.stderr.off('data', data);
+		}
+		child.stderr.on('data', data);
 	});
 }
 
@@ -291,6 +311,9 @@ test('vpr dev refreshes the open browser for Markdown, metadata, and added files
 		const url = await ready(child);
 		browser = await launchDocsBrowser();
 		page = await browser.newPage();
+		page.on('framenavigated', (frame) => {
+			if (frame === page.mainFrame()) output += `\nBrowser navigation: ${frame.url()}\n`;
+		});
 		const browserErrors = [];
 		page.on('pageerror', (error) => {
 			browserErrors.push(error.message);
@@ -308,6 +331,10 @@ test('vpr dev refreshes the open browser for Markdown, metadata, and added files
 		const response = await page.goto(url + 'yosoi/');
 		expect(response.status()).toBe(200);
 		await page.getByText('Initial content.', { exact: true }).waitFor({ timeout: 10000 });
+		const referenceFile = path.join(frontend, '.generated/yosoi/docs/api/index.md');
+		const guideFile = path.join(frontend, '.generated/yosoi/docs/guides/index.md');
+		const referenceBefore = await stat(referenceFile);
+		const guideBefore = await stat(guideFile);
 		pollTimer = setInterval(async () => {
 			if (pollInFlight) return;
 			pollInFlight = true;
@@ -327,6 +354,14 @@ test('vpr dev refreshes the open browser for Markdown, metadata, and added files
 			'---\ntitle: Live test\n---\n# Live test\n\nEdited content.\n',
 		);
 		await page.getByText('Edited content.', { exact: true }).waitFor();
+		expect(output).toContain('Prepared 1 changed Markdown page(s); API references retained.');
+		for (const [file, before] of [
+			[referenceFile, referenceBefore],
+			[guideFile, guideBefore],
+		]) {
+			const after = await stat(file);
+			expect([after.ino, after.mtimeMs]).toEqual([before.ino, before.mtimeMs]);
+		}
 		await writeFile(
 			path.join(source, 'docs/public/_navigation.json'),
 			JSON.stringify(meta('Getting started')),
@@ -334,7 +369,7 @@ test('vpr dev refreshes the open browser for Markdown, metadata, and added files
 		await page.locator('.sidebar summary').filter({ hasText: 'Getting started' }).waitFor();
 		const added = path.join(source, 'docs/public/guides/added.md');
 		await writeFile(added, '---\ntitle: Added page\n---\n# Added page\n\nA discovered page.\n');
-		await page.locator('.sidebar a[href="/yosoi/guides/added/"]').waitFor({ state: 'attached' });
+		await page.locator('.sidebar a[href*="/yosoi/guides/added/"]').waitFor({ state: 'attached' });
 		await page.locator('.sidebar summary').filter({ hasText: 'Guides' }).click();
 		await page.getByRole('link', { name: 'Added page', exact: true }).click();
 		await page.getByText('A discovered page.', { exact: true }).waitFor();
@@ -368,8 +403,24 @@ test('vpr dev refreshes the open browser for Markdown, metadata, and added files
 		if (!(await introduction.evaluate((el) => el.parentElement.open))) await introduction.click();
 		await page.getByRole('link', { name: 'Live test', exact: true }).click();
 		await page.getByText('Edited content.', { exact: true }).waitFor();
+		await writeFile(
+			path.join(source, 'docs/public/index.md'),
+			'---\ntitle: Live test\n---\n# Live test\n\nEdited content.\n\n[Temporary guide](guides/added.md)\n',
+		);
+		await page.getByRole('link', { name: 'Temporary guide', exact: true }).waitFor();
+		const deletionReported = diagnostic(child, 'is gone from the source');
 		await rm(added);
-		await page.locator('.sidebar a[href="/yosoi/guides/added/"]').waitFor({ state: 'detached' });
+		await deletionReported;
+		expect(child.exitCode).toBeNull();
+		await page.locator('.sidebar a[href*="/yosoi/guides/added/"]').waitFor({ state: 'detached' });
+		await expect
+			.poll(async () => (await page.request.get(url + 'yosoi/guides/added/')).status())
+			.toBe(404);
+		await writeFile(
+			path.join(source, 'docs/public/index.md'),
+			'---\ntitle: Live test\n---\n# Live test\n\nEdited content.\n',
+		);
+		await page.locator('.sidebar a[href*="/yosoi/guides/added/"]').waitFor({ state: 'detached' });
 		await expect
 			.poll(
 				async () => {
@@ -449,6 +500,10 @@ test('vpr dev refreshes the open browser for Markdown, metadata, and added files
 		});
 		process.kill(serverPid, 'SIGKILL');
 		expect(await exited).toBe(1);
+		await writeFile(
+			path.join(source, 'docs/public/index.md'),
+			'---\ntitle: Live test\norder: invalid\n---\n# Live test\n',
+		);
 		child = spawn('bun', ['scripts/docs/dev.mjs', '--port', String(port)], {
 			cwd: frontend,
 			env,
@@ -461,16 +516,53 @@ test('vpr dev refreshes the open browser for Markdown, metadata, and added files
 			output += chunk;
 		});
 		await ready(child);
+		expect(output).toContain('Serving the last good preview.');
 		await page.reload();
+		await page.getByText('Burst save 3.', { exact: true }).waitFor();
 		await writeFile(
 			path.join(source, 'docs/public/index.md'),
 			'---\ntitle: Live test\n---\n# Live test\n\nRestarted preview content.\n',
 		);
 		await page.getByText('Restarted preview content.', { exact: true }).waitFor();
 		expect(output).not.toContain('Docs preparation is busy');
+		// A fresh checkout with no previous snapshot also keeps watching instead
+		// of exiting. Correcting the source starts Astro through task completion.
+		await stop(child);
+		await rm(path.join(frontend, '.generated/yosoi'), { recursive: true });
+		await writeFile(
+			path.join(source, 'docs/public/index.md'),
+			'---\ntitle: Live test\norder: invalid\n---\n# Live test\n',
+		);
+		child = spawn('bun', ['scripts/docs/dev.mjs', '--port', String(port)], {
+			cwd: frontend,
+			env,
+			stdio: ['ignore', 'pipe', 'pipe'],
+		});
+		child.stdout.on('data', (chunk) => {
+			output += chunk;
+		});
+		child.stderr.on('data', (chunk) => {
+			output += chunk;
+		});
+		await diagnostic(child, 'No valid preview is available yet.');
+		expect(child.exitCode).toBeNull();
+		const started = ready(child);
+		await writeFile(
+			path.join(source, 'docs/public/index.md'),
+			'---\ntitle: Live test\n---\n# Live test\n\nFresh preview recovered.\n',
+		);
+		await started;
+		await page.reload();
+		await page.getByText('Fresh preview recovered.', { exact: true }).waitFor();
 	} catch (error) {
 		throw new Error(
-			`${error.message}\nFixture: ${fixture}\nDev output:\n${output.slice(-4000)}\nPage:\n${page ? (await page.locator('body').innerText()).slice(0, 3000) : 'not opened'}`,
+			`${error.message}\nFixture: ${fixture}\nDev output:\n${output
+				.split('\n')
+				.filter((line) => !/\[200\] \/yosoi/.test(line))
+				.join('\n')
+				.slice(
+					-8000,
+				)}\nPage:\n${page ? (await page.locator('body').innerText()).slice(0, 3000) : 'not opened'}`,
 			{ cause: error },
 		);
 	} finally {

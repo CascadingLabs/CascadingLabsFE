@@ -437,6 +437,18 @@ button {
 	background: var(--sl-color-accent-low);
 }
 
+/* Keep navigation links larger than the section labels at every nesting level. */
+.sidebar-content a {
+	font-size: 13px;
+	line-height: 1.35;
+	padding-block: 0.25em;
+}
+
+.sidebar-content .group-label,
+.sidebar-content .group-label .large {
+	font-size: 12px;
+}
+
 /* Original square, stepped active-link highlight; no measuring script needed. */
 .sidebar-content [aria-current='page'],
 .sidebar-content [aria-current='page']:hover,
@@ -672,6 +684,18 @@ button {
 }
 .docs-variant-icon-python {
 	--docs-variant-icon: url('../icons/language-python.svg');
+}
+.docs-variant-icon-windows {
+	--docs-variant-icon: url('../icons/platform-windows.svg');
+}
+.docs-variant-icon-macos {
+	--docs-variant-icon: url('../icons/platform-macos.svg');
+}
+.docs-variant-icon-linux {
+	--docs-variant-icon: url('../icons/platform-linux.svg');
+}
+.sl-markdown-content h2#verification {
+	font-size: var(--sl-text-h3);
 }
 .sl-markdown-content .docs-copy-code:hover {
 	border-color: var(--sl-color-text-accent);

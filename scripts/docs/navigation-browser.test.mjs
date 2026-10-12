@@ -157,3 +157,79 @@ test('deep links survive late layout changes and scrolling replaces the URL frag
 		await browser.close();
 	}
 });
+
+test('clicking code tabs preserves the reading position instead of snapping the row to the header', async () => {
+	const browser = await launchDocsBrowser();
+	try {
+		const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+		const source = stripTypeScriptTypes(
+			await readFile(new URL('../../src/scripts/docs-variants.ts', import.meta.url), 'utf8'),
+		);
+		await page.route('http://docs.test/**', (route) =>
+			route.fulfill({
+				contentType: 'text/html',
+				body: `<style>
+				html { scroll-padding-top: 88px; overflow-anchor: none; }
+				body { margin: 0; }
+				main { padding-top: 400px; padding-bottom: 100vh; }
+				.docs-variant-title, [hidden] { display: none; }
+				.docs-variant-controls { height: 44px; }
+				pre { margin: 0; }
+			</style><main>
+				<h2>Install</h2><h3 id="cargo">Cargo</h3><pre style="height: 200px">cargo add yosoi</pre>
+				<h3 id="uv">uv</h3><pre style="height: 350px">uv add yosoi</pre>
+			</main>`,
+			}),
+		);
+		await page.goto('http://docs.test/?commands=cargo');
+		await page.addScriptTag({
+			type: 'module',
+			content: source + '\nwindow.enhance = enhanceCodeVariants;',
+		});
+		await page.evaluate(() => window.enhance(document.querySelector('main')));
+		const row = page.locator('.docs-variants');
+		const before = await row.evaluate((el) => el.getBoundingClientRect().top);
+		for (const label of ['uv', 'Cargo', 'uv']) {
+			await page.getByRole('tab', { name: label, exact: true }).click();
+			assert.equal(await row.evaluate((el) => el.getBoundingClientRect().top), before);
+			assert.equal(await page.evaluate(() => scrollY), 0);
+			assert.equal(
+				await page.getByRole('tab', { name: label, exact: true }).getAttribute('aria-selected'),
+				'true',
+			);
+		}
+		await page.getByRole('tab', { name: 'uv', exact: true }).press('ArrowLeft');
+		assert.equal(await row.evaluate((el) => el.getBoundingClientRect().top), before);
+		assert.equal(
+			await page.getByRole('tab', { name: 'Cargo', exact: true }).getAttribute('aria-selected'),
+			'true',
+		);
+		// A second synchronized group must stay in place even when the first
+		// group's newly selected panel changes the height above it.
+		await page.evaluate(() => {
+			const main = document.querySelector('main');
+			main.insertAdjacentHTML(
+				'beforeend',
+				`<div style="height: 500px"></div>
+				<h2>Install: another package</h2>
+				<h3 id="cargo-second">Cargo</h3><pre style="height: 200px">cargo add another</pre>
+				<h3 id="uv-second">uv</h3><pre style="height: 350px">uv add another</pre>`,
+			);
+			window.enhance(main);
+			const second = document.querySelectorAll('.docs-variants')[1];
+			window.scrollTo(0, second.getBoundingClientRect().top - 350);
+		});
+		const second = page.locator('.docs-variants').nth(1);
+		assert.ok(Math.abs((await second.evaluate((el) => el.getBoundingClientRect().top)) - 350) < 1);
+		for (const width of [1440, 390]) {
+			await page.setViewportSize({ width, height: 900 });
+			const top = await second.evaluate((el) => el.getBoundingClientRect().top);
+			for (const label of ['uv', 'Cargo']) {
+				await second.getByRole('tab', { name: label, exact: true }).click();
+				assert.equal(await second.evaluate((el) => el.getBoundingClientRect().top), top);
+			}
+		}
+	} finally {
+		await browser.close();
+	}
+});

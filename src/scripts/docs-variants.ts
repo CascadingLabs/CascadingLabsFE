@@ -136,7 +136,11 @@ export function enhanceCodeVariants(root: ParentNode) {
 			const button = document.createElement('button');
 			button.type = 'button';
 			button.textContent = variant.label;
-			if (['rust', 'python', 'cargo', 'uv'].includes(variantKey(variant.label))) {
+			if (
+				['rust', 'python', 'cargo', 'uv', 'windows', 'macos', 'linux'].includes(
+					variantKey(variant.label),
+				)
+			) {
 				const icon = document.createElement('span');
 				icon.className = 'docs-variant-icon docs-variant-icon-' + variantKey(variant.label);
 				icon.setAttribute('aria-hidden', 'true');
@@ -178,6 +182,7 @@ export function enhanceCodeVariants(root: ParentNode) {
 			}
 		};
 		const activate = (label: string) => {
+			const previousTop = group.getBoundingClientRect().top;
 			updateVariantUrl(kind, label);
 			try {
 				localStorage.setItem('yosoi-docs-' + kind, label);
@@ -188,7 +193,12 @@ export function enhanceCodeVariants(root: ParentNode) {
 				'[data-docs-variant-kind="' + kind + '"]',
 			))
 				sibling.dispatchEvent(new CustomEvent('docs:select-variant', { detail: label }));
-			group.scrollIntoView({ behavior: 'instant', block: 'start' });
+			// Synchronized tabs can resize examples above this one. Keep the clicked
+			// row at its current viewport position instead of treating it as a deep link.
+			window.scrollBy({
+				top: group.getBoundingClientRect().top - previousTop,
+				behavior: 'instant',
+			});
 		};
 		group.addEventListener('docs:select-variant', (event) => {
 			const label = (event as CustomEvent<string>).detail;

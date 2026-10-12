@@ -3,6 +3,7 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:http';
 import { optionsFromArgs, prepareDocs, projectRoot, repositoryRoot } from './prepare.mjs';
+import { lastGoodPreview } from './last-good-preview.mjs';
 
 const options = optionsFromArgs(process.argv.slice(2));
 // Reject duplicate previews before preparation can replace an active server's snapshot.
@@ -13,8 +14,8 @@ await new Promise((resolve, reject) => {
 		portProbe.close((error) => (error ? reject(error) : resolve()));
 	});
 });
-await prepareDocs(options);
 let server;
+let previewCommit;
 const stoppingServers = new WeakSet();
 async function startServer() {
 	server = spawn(
@@ -58,6 +59,7 @@ async function startServer() {
 	process.send?.({ type: 'ready', serverPid: child.pid });
 }
 async function stopServer() {
+	if (!server) return;
 	if (server.exitCode !== null || server.signalCode !== null) return;
 	stoppingServers.add(server);
 	const stopped = new Promise((resolve) => server.once('exit', resolve));
@@ -67,6 +69,7 @@ async function stopServer() {
 let timer;
 let running = true;
 let pending = false;
+const changedFiles = new Set();
 let closing = false;
 let activeRefresh = Promise.resolve();
 
@@ -79,20 +82,35 @@ async function refresh() {
 	try {
 		do {
 			pending = false;
+			const batch = [...changedFiles];
+			changedFiles.clear();
 			try {
-				await prepareDocs({ ...options, 'docs-only': true, live: true });
+				const snapshot = await prepareDocs({
+					...options,
+					'docs-only': true,
+					live: true,
+					changedFiles: batch,
+					previewCommit,
+				});
+				previewCommit ??= snapshot.source.commit;
 				if (closing) break;
+				if (!server) await startServer();
 
-				console.log('Yosoi snapshot refreshed.');
+				console.log('Yosoi preview updated.');
 			} catch (error) {
+				for (const file of batch) changedFiles.add(file);
 				console.error(`Docs refresh failed: ${error.message}`);
+				console.error(
+					'Fix the source or its remaining links and save. The watcher will retry; no restart is needed.',
+				);
 			}
 		} while (pending && !closing);
 	} finally {
 		running = false;
 	}
 }
-const onSourceChange = () => {
+const onSourceChange = (file) => {
+	changedFiles.add(file);
 	clearTimeout(timer);
 	timer = setTimeout(() => {
 		if (running) {
@@ -111,11 +129,15 @@ const watchers = ['docs/public', 'python/yosoi']
 			if (relative?.split(/[\\/]/).some((part) => part === '__pycache__' || part.startsWith('.')))
 				return;
 			if (directory.endsWith('python/yosoi') && relative && !/\.(py|pyi)$/.test(relative)) return;
-			onSourceChange();
+			onSourceChange(
+				relative
+					? path.relative(repositoryRoot(), path.join(directory, relative))
+					: path.relative(repositoryRoot(), directory),
+			);
 		}),
 	);
 console.log(
-	'Watching Yosoi/docs/public and Python declarations. Changes refresh the prepared snapshot and browser; Rust API compilation stays cached.',
+	'Watching Yosoi/docs/public and Python declarations. Markdown edits prepare only changed pages; structural and declaration changes reconcile the snapshot.',
 );
 async function stop(exitCode = 0) {
 	if (closing) return;
@@ -129,7 +151,30 @@ async function stop(exitCode = 0) {
 process.on('SIGINT', () => void stop());
 process.on('SIGTERM', () => void stop());
 try {
-	await startServer();
+	let snapshot;
+	try {
+		snapshot = await prepareDocs(options);
+	} catch (error) {
+		if (options.source || process.env.CI) throw error;
+		console.error(`Docs preparation failed: ${error.message}`);
+		snapshot = await lastGoodPreview(
+			path.join(projectRoot, '.generated/yosoi'),
+			repositoryRoot(),
+			options,
+		);
+		console.error(
+			snapshot
+				? 'Serving the last good preview. Current edits are not served yet. Fix the source or its remaining links and save; no restart is needed.'
+				: 'No valid preview is available yet. Fix the source or its remaining links and save; the watcher will start the server when preparation succeeds.',
+		);
+		// A correction must reconcile the entire source, including edits made
+		// before this watcher started and therefore absent from its event batch.
+		changedFiles.add('docs/public');
+	}
+	if (snapshot) {
+		previewCommit = snapshot.source.commit;
+		await startServer();
+	}
 	running = false;
 	if (pending) activeRefresh = refresh();
 } catch (error) {
