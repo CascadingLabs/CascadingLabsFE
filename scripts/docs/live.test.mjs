@@ -6,7 +6,7 @@ import { execFileSync, spawn } from 'node:child_process';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { projectRoot, repositoryRoot } from './prepare.mjs';
-import { launchDocsBrowser } from './browser.mjs';
+import { launchDocsBrowser, selectDocsRelease } from './browser.mjs';
 
 const availablePort = async () => {
 	const socket = createServer();
@@ -361,10 +361,10 @@ test('vpr dev refreshes the open browser for Markdown, metadata, and added files
 		expect(await page.locator('.sidebar summary').filter({ hasText: 'Reference' }).count()).toBe(0);
 		expect((await page.request.get(url + 'yosoi/guides/')).status()).toBe(200);
 		expect((await page.request.get(url + 'yosoi/api/')).status()).toBe(200);
-		const picker = page.getByRole('combobox', { name: 'Documentation release' });
-		expect(await picker.inputValue()).toBe('latest');
+		const picker = page.getByRole('button', { name: 'Documentation release', exact: true });
+		expect(await picker.innerText()).toContain('Latest');
 		expect((await picker.boundingBox()).width).toBeLessThan(110);
-		await picker.selectOption('0.1.0');
+		await selectDocsRelease(page, '0.1.0');
 		await page.getByText('First release.', { exact: true }).waitFor();
 		expect(await page.locator('main h1').innerText()).toBe('0.1.0 overview');
 		expect(await page.evaluate(() => window.archiveInjected)).toBeUndefined();
@@ -375,7 +375,7 @@ test('vpr dev refreshes the open browser for Markdown, metadata, and added files
 			.click();
 		await page.getByText('Legacy document.', { exact: true }).waitFor();
 		expect(await page.locator('.pagination-links a[rel="prev"]').innerText()).toContain('Go back');
-		await page.getByRole('combobox', { name: 'Documentation release' }).selectOption('0.2.0');
+		await selectDocsRelease(page, '0.2.0');
 		await page.getByText('Second release.', { exact: true }).waitFor();
 		expect(
 			await page.getByText('This page is unavailable in v0.2.0. Showing the overview.').isVisible(),
@@ -383,7 +383,7 @@ test('vpr dev refreshes the open browser for Markdown, metadata, and added files
 		expect(await page.locator('.sidebar a[href*="page=legacy"]').count()).toBe(0);
 		await page.locator('.pagination-links a[rel="next"]').click();
 		await page.getByText('New document.', { exact: true }).waitFor();
-		await page.getByRole('combobox', { name: 'Documentation release' }).selectOption('latest');
+		await selectDocsRelease(page, 'latest');
 		await page.getByText('Edited content.', { exact: true }).waitFor();
 		expect(page.url()).toBe(url + 'yosoi/');
 	} catch (error) {

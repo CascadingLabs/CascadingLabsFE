@@ -1,34 +1,70 @@
 ---
 import Tag from '../icons/tag.svg';
 import { readReleaseRegistry } from '../lib/docs-release-data';
-import { visibleReleases } from '../lib/docs-releases';
+import { archiveHref, visibleReleases } from '../lib/docs-releases';
 import { readSnapshot } from '../lib/yosoi-snapshot';
 const registry = readReleaseRegistry();
 const snapshot = readSnapshot();
 const label = snapshot.source.preview ? 'Preview' : 'Latest';
+const latestLabel = snapshot.mode === 'working-tree-preview' ? label : `${label} · ${snapshot.source.version}`;
 ---
-<label class="docs-release-select">
- <Tag width={13} height={13} aria-hidden="true" />
- <span class="sr-only">Documentation release</span>
- <select aria-label="Documentation release" data-docs-release title={`${label} · ${snapshot.source.version}`} disabled>
-  <option value="latest" selected>{snapshot.mode === 'working-tree-preview' ? label : `${label} · ${snapshot.source.version}`}</option>
-  {visibleReleases(registry, snapshot.source.version).map((release) => <option value={release.version}>{snapshot.source.preview ? `Preview · ${release.version}` : release.tag}</option>)}
- </select>
-</label>
+<details class="docs-release-select">
+ <summary role="button" aria-label="Documentation release" aria-expanded="false">
+  <Tag width={13} height={13} aria-hidden="true" />
+  <span data-docs-release-label>{latestLabel}</span>
+  <span aria-hidden="true">⌄</span>
+ </summary>
+ <nav aria-label="Documentation releases">
+  <a href="/yosoi/" data-docs-release="latest" aria-current="page">{latestLabel}</a>
+  {visibleReleases(registry, snapshot.source.version).map((release) => <a href={archiveHref(release.version)} data-docs-release={release.version}>{snapshot.source.preview ? `Preview · ${release.version}` : release.tag}</a>)}
+ </nav>
+</details>
 <script>
  import { archiveHref } from '../lib/docs-releases';
- const select = document.querySelector<HTMLSelectElement>('[data-docs-release]');
+ const picker = document.querySelector<HTMLDetailsElement>('.docs-release-select');
+ const summary = picker?.querySelector('summary');
+ const links = [...(picker?.querySelectorAll<HTMLAnchorElement>('[data-docs-release]') || [])];
  const url = new URL(location.href);
- const current = url.pathname === '/yosoi/archive/' ? url.searchParams.get('version') : 'latest';
- if (select && [...select.options].some((option) => option.value === current)) select.value = current!;
- select?.addEventListener('change', async () => {
-  const page = url.pathname === '/yosoi/archive/' ? url.searchParams.get('page') || '' : url.pathname.replace(/^\/yosoi\/?/, '').replace(/\/$/, '');
-  if (select.value === 'latest' && url.pathname === '/yosoi/archive/') {
+ const archived = url.pathname === '/yosoi/archive/';
+ const page = archived ? url.searchParams.get('page') || '' : url.pathname.replace(/^\/yosoi\/?/, '').replace(/\/$/, '');
+ const current = archived ? url.searchParams.get('version') : 'latest';
+ for (const link of links) {
+  const selected = link.dataset.docsRelease === current;
+  if (selected) {
+   link.setAttribute('aria-current', 'page');
+   const label = picker?.querySelector('[data-docs-release-label]');
+   if (label) label.textContent = link.textContent;
+  } else link.removeAttribute('aria-current');
+  link.href = link.dataset.docsRelease === 'latest' ? `/yosoi/${archived || !page ? '' : page + '/'}` : archiveHref(link.dataset.docsRelease || '', page);
+ }
+ // Resolve a valid latest destination before the link is used, including opening in a new tab.
+ if (archived) void (async () => {
+  try {
    const response = await fetch('/yosoi/route-index.json', { cache: 'no-cache' });
-   const routes = response.ok ? await response.json() as string[] : [];
-   const target = routes.includes(page) ? page : '';
-   location.assign(`/yosoi/${target ? target + '/' : ''}`);
-  } else location.assign(select.value === 'latest' ? `/yosoi/${page ? page + '/' : ''}` : archiveHref(select.value, page));
+   const routes: string[] = response.ok ? await response.json() : [];
+   const latest = links.find((link) => link.dataset.docsRelease === 'latest');
+   if (latest) latest.href = `/yosoi/${routes.includes(page) && page ? page + '/' : ''}`;
+  } catch { /* The overview remains a usable fallback. */ }
+ })();
+ const close = (restoreFocus = false) => {
+  if (picker) picker.open = false;
+  summary?.setAttribute('aria-expanded', 'false');
+  if (restoreFocus) summary?.focus();
+ };
+ picker?.addEventListener('toggle', () => summary?.setAttribute('aria-expanded', String(picker.open)));
+ document.addEventListener('click', (event) => {
+  if (event.target instanceof Node && !picker?.contains(event.target)) close();
  });
- if (select) select.disabled = false;
+ picker?.addEventListener('focusout', (event) => {
+  if (event.relatedTarget instanceof Node && !picker.contains(event.relatedTarget)) close();
+ });
+ picker?.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') { event.preventDefault(); close(true); return; }
+  if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
+  event.preventDefault();
+  picker.open = true;
+  const index = links.findIndex((link) => link === document.activeElement);
+  const next = event.key === 'Home' ? 0 : event.key === 'End' ? links.length - 1 : event.key === 'ArrowDown' ? (index + 1) % links.length : index < 0 ? links.length - 1 : (index - 1 + links.length) % links.length;
+  links[next]?.focus();
+ });
 </script>

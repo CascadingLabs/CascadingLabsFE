@@ -6,7 +6,26 @@ import DocsReleaseSelect from '../DocsReleaseSelect.astro';
 ---
 <div class="starlight-docs-header">
  <div class="starlight-docs-search"><Search /></div>
- <DocsReleaseSelect />
- <div class="starlight-docs-social"><SocialIcons /></div>
- <ThemeToggle />
+ <div class="starlight-docs-actions">
+  <DocsReleaseSelect />
+  <div class="starlight-docs-social"><SocialIcons /></div>
+  <ThemeToggle />
+ </div>
 </div>
+<script>
+ const header = document.querySelector<HTMLElement>('.starlight-docs-header');
+ const content = document.querySelector<HTMLElement>('.main-pane .sl-container');
+ if (header && content) {
+  const alignSearch = () => {
+   const documentBox = content.getBoundingClientRect();
+   const headerBox = header.getBoundingClientRect();
+   header.style.setProperty('--docs-search-center', `${documentBox.x + documentBox.width / 2 - headerBox.x}px`);
+   header.style.setProperty('--docs-search-width', `${Math.min(352, documentBox.width)}px`);
+  };
+  const observer = new ResizeObserver(alignSearch);
+  observer.observe(content);
+  observer.observe(header);
+  window.addEventListener('resize', alignSearch);
+  alignSearch();
+ }
+</script>

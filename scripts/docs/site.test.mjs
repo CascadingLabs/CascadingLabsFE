@@ -59,9 +59,11 @@ test('built site renders the source-owned sidebar, static docs, themes, and inde
 		expect(await page.locator('.pagination-links a[rel="next"]').getAttribute('href')).toBe(
 			'/yosoi/cli/',
 		);
-		expect(await page.getByRole('combobox', { name: 'Documentation release' }).inputValue()).toBe(
-			'latest',
-		);
+		expect(
+			await page
+				.locator('.docs-release-select a[aria-current="page"]')
+				.getAttribute('data-docs-release'),
+		).toBe('latest');
 		expect((await page.locator('.docs-release-select').boundingBox()).width).toBeLessThan(140);
 		const screenshots = path.join(projectRoot, '.generated/qa');
 		await mkdir(screenshots, { recursive: true });

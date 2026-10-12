@@ -375,11 +375,18 @@ button {
 }
 
 .starlight-docs-header {
+	position: relative;
 	display: flex;
 	align-items: center;
 	gap: 8px;
 	height: 100%;
 	min-width: 0;
+}
+.starlight-docs-actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-inline-start: auto;
 }
 .starlight-docs-header .theme-toggle {
 	margin-inline-start: auto;
@@ -620,7 +627,7 @@ body:has(#docs-archive-view) mobile-starlight-toc a {
 }
 @media (max-width: 49.99rem) {
 	.starlight-docs-header {
-		padding-inline-end: calc(var(--sl-menu-button-size) + 16px);
+		padding-inline-end: 0;
 	}
 	:root[data-has-sidebar] {
 		--sl-text-h1: 2.25rem;
@@ -666,21 +673,58 @@ body:has(#docs-archive-view) mobile-starlight-toc a {
 }
 
 .starlight-docs-search {
+	position: absolute;
+	left: var(--docs-search-center, 50%);
+	top: 50%;
+	transform: translate(-50%, -50%);
 	display: flex;
-	flex: 1;
+	width: var(--docs-search-width, 22rem);
 	justify-content: center;
 	min-width: 0;
 }
 .starlight-docs-search site-search {
 	width: min(100%, 22rem);
 }
-@media (max-width: 49.99rem) {
+@media (max-width: 71.99rem) {
+	:root[data-has-sidebar] {
+		--sl-nav-height: 7rem;
+	}
+	[data-has-sidebar] .page > .header {
+		padding-inline-end: var(--sl-nav-pad-x);
+	}
 	.starlight-docs-search {
-		justify-content: flex-end;
+		top: 0;
+		transform: translateX(-50%);
 	}
-	.starlight-docs-search site-search {
-		width: auto;
+	.starlight-docs-actions {
+		position: absolute;
+		bottom: 0;
+		right: 0;
 	}
+}
+@media (max-width: 49.99rem) {
+	.starlight-docs-actions {
+		right: calc(var(--sl-menu-button-size) + 16px);
+	}
+	.sl-menu-button {
+		top: calc(var(--sl-nav-height) - var(--sl-nav-pad-y) - var(--sl-menu-button-size));
+	}
+}
+.starlight-docs-search button[data-open-modal] {
+	width: 100%;
+	border: 1px solid var(--sl-color-gray-5);
+	border-radius: 0.5rem;
+	padding-inline: 0.75rem 0.5rem;
+	background: var(--sl-color-black);
+	color: var(--sl-color-gray-2);
+	font-size: var(--sl-text-sm);
+}
+.starlight-docs-search button[data-open-modal] > span {
+	display: block;
+}
+.starlight-docs-search button[data-open-modal] > kbd {
+	display: flex;
+	margin-inline-start: auto;
 }
 @media (prefers-color-scheme: light) {
 	:root[data-has-sidebar]:not([data-theme-preference]) {
@@ -724,14 +768,16 @@ body:has(#docs-archive-view) mobile-starlight-toc a {
 }
 .pagination-links {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	align-items: start;
 	gap: 1rem;
 	border-top: 1px solid var(--sl-color-gray-5);
 	padding-top: 1rem;
 }
 .pagination-links a {
+	min-width: 0;
 	display: flex;
-	align-items: center;
+	align-items: flex-start;
 	gap: 0.5rem;
 	width: 100%;
 	text-decoration: none;
@@ -744,6 +790,7 @@ body:has(#docs-archive-view) mobile-starlight-toc a {
 	font-size: var(--sl-text-sm);
 }
 .pagination-links a[rel='next'] {
+	grid-column: 2;
 	justify-content: end;
 	text-align: end;
 	flex-direction: row-reverse;
@@ -753,6 +800,7 @@ body:has(#docs-archive-view) mobile-starlight-toc a {
 }
 .pagination-links svg {
 	flex-shrink: 0;
+	margin-block-start: 0.25rem;
 }
 .pagination-links .link-title {
 	color: var(--sl-color-white);
@@ -760,9 +808,7 @@ body:has(#docs-archive-view) mobile-starlight-toc a {
 	font-size: var(--sl-text-base);
 }
 .docs-release-select {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.25rem;
+	position: relative;
 	color: var(--sl-color-gray-2);
 	font-size: 0.6875rem;
 	min-width: 0;
@@ -776,29 +822,55 @@ body:has(#docs-archive-view) mobile-starlight-toc a {
 .docs-release-select:focus-within {
 	color: var(--sl-color-white);
 }
-.docs-release-select,
-.docs-release-select option {
-	cursor: pointer;
-}
-.docs-release-select select {
+.docs-release-select summary {
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
+	list-style: none;
 	font: inherit;
 	min-width: 0;
 	width: auto;
 	color: inherit;
 	background: var(--sl-color-bg-nav);
 	border: 0;
-	max-width: 9rem;
 	padding: 0.15rem 0;
 	cursor: pointer;
 }
-.docs-release-select select:focus-visible {
+.docs-release-select summary::-webkit-details-marker {
+	display: none;
+}
+.docs-release-select summary:focus-visible {
 	outline: 1px solid var(--sl-color-accent);
 	outline-offset: 4px;
 }
-@media (max-width: 49.99rem) {
-	.docs-release-select select {
-		max-width: 7.5rem;
-	}
+.docs-release-select nav {
+	position: absolute;
+	inset-inline-end: 0;
+	top: calc(100% + 0.5rem);
+	min-width: max-content;
+	max-height: 60vh;
+	overflow-y: auto;
+	padding: 0.25rem;
+	border: 1px solid var(--sl-color-gray-4);
+	background: var(--sl-color-bg-nav);
+	box-shadow: var(--sl-shadow-md);
+}
+.docs-release-select nav a {
+	display: block;
+	padding: 0.5rem 0.75rem;
+	color: var(--sl-color-gray-2);
+	text-decoration: none;
+	cursor: pointer;
+}
+.docs-release-select nav a[aria-current='page'] {
+	color: var(--sl-color-text-accent);
+}
+.docs-release-select nav a:hover,
+.docs-release-select nav a:focus-visible {
+	color: var(--sl-color-white);
+	background: var(--sl-color-accent-low);
+	outline: 1px solid var(--sl-color-accent-high);
+	outline-offset: -1px;
 }
 .sidebar-content a.reference-item {
 	display: flex;

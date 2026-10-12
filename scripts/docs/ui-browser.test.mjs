@@ -4,7 +4,7 @@ import { createServer } from 'node:net';
 import { spawn } from 'node:child_process';
 import { cp, mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { launchDocsBrowser } from './browser.mjs';
+import { launchDocsBrowser, selectDocsRelease } from './browser.mjs';
 import { projectRoot, repositoryRoot } from './prepare.mjs';
 
 const hash = (body) => createHash('sha256').update(body).digest('hex');
@@ -41,7 +41,10 @@ test('latest and archived docs share responsive controls, themes, and pagination
 			route,
 			order,
 			id: route || 'index',
-			title: route || 'Overview',
+			title:
+				route === 'search'
+					? 'Search across multiple providers and inspect their responses'
+					: route || 'Overview',
 			file: `${route || 'index'}.md`,
 		}));
 		const navigation = {
@@ -61,7 +64,7 @@ test('latest and archived docs share responsive controls, themes, and pagination
 		};
 		await writeFile(path.join(root, '.generated/yosoi/routes.json'), JSON.stringify(snapshot));
 		const code =
-			'```sh\nyosoi map https://example.org/ --json\n```\n\n```python\nprint("<hello>")\n```\n\n```rust\nlet answer = 42;\n```\n\n```json\n{"ok": true}\n```\n\n```unknown\nplain <code>\n```\n';
+			'## Examples\n\n```sh\nyosoi map https://example.org/ --json\n```\n\n```python\nprint("<hello>")\n```\n\n```rust\nlet answer = 42;\n```\n\n```json\n{"ok": true}\n```\n\n```unknown\nplain <code>\n```\n';
 		for (const page of pages)
 			await writeFile(
 				path.join(root, 'src/content/docs/yosoi', page.file),
@@ -149,8 +152,8 @@ test('latest and archived docs share responsive controls, themes, and pagination
 		const response = await page.goto(origin + '/yosoi/map/', { waitUntil: 'networkidle' });
 		if (response.status() !== 200)
 			throw new Error(`UI fixture failed: ${output}\n${await page.locator('body').innerText()}`);
-		const picker = page.getByRole('combobox', { name: 'Documentation release' });
-		expect(await picker.locator('option').allTextContents()).toEqual([
+		const picker = page.getByRole('button', { name: 'Documentation release', exact: true });
+		expect(await page.locator('.docs-release-select nav a').allTextContents()).toEqual([
 			'Latest · 0.2.1',
 			'v0.2.0',
 			'v0.1.2',
@@ -160,6 +163,24 @@ test('latest and archived docs share responsive controls, themes, and pagination
 		await picker.hover();
 		expect(await picker.evaluate((el) => getComputedStyle(el).color)).not.toBe(normalColor);
 		expect(await picker.evaluate((el) => getComputedStyle(el).cursor)).toBe('pointer');
+		await picker.click();
+		const option = page.locator('.docs-release-select a[data-docs-release="0.2.0"]');
+		const normalBackground = await option.evaluate((el) => getComputedStyle(el).backgroundColor);
+		await option.hover();
+		expect(await option.evaluate((el) => getComputedStyle(el).cursor)).toBe('pointer');
+		expect(await option.evaluate((el) => getComputedStyle(el).backgroundColor)).not.toBe(
+			normalBackground,
+		);
+		await page.keyboard.press('Escape');
+		expect(await picker.getAttribute('aria-expanded')).toBe('false');
+		await picker.focus();
+		await page.keyboard.press('ArrowDown');
+		expect(
+			await page
+				.locator('.docs-release-select a[data-docs-release="latest"]')
+				.evaluate((el) => el === document.activeElement),
+		).toBe(true);
+		await page.keyboard.press('Escape');
 		const pagination = () =>
 			page
 				.locator('.pagination-links')
@@ -169,13 +190,39 @@ test('latest and archived docs share responsive controls, themes, and pagination
 						.replace(/ data-astro-source-[a-z]+="[^"]*"/g, ''),
 				);
 		const latestPagination = await pagination();
-		for (const width of [320, 390, 414, 768, 1440]) {
+		for (const width of [320, 390, 414, 490, 768, 1024, 1152, 1440, 1920]) {
 			await page.setViewportSize({ width, height: 822 });
+			await expect
+				.poll(
+					async () => {
+						const search = await page
+							.locator('.starlight-docs-search button[data-open-modal]')
+							.boundingBox();
+						const content = await page.locator('.main-pane .sl-container').first().boundingBox();
+						return Math.abs(search.x + search.width / 2 - content.x - content.width / 2);
+					},
+					{ message: `Search is centered over the document at ${width}px` },
+				)
+				.toBeLessThan(2);
 			const searchBox = await page
 				.locator('.starlight-docs-search button[data-open-modal]')
 				.boundingBox();
 			const versionBox = await picker.boundingBox();
-			expect(searchBox.x + searchBox.width).toBeLessThanOrEqual(versionBox.x);
+			const contentBox = await page.locator('.main-pane .sl-container').first().boundingBox();
+			expect(
+				Math.abs(searchBox.x + searchBox.width / 2 - contentBox.x - contentBox.width / 2),
+			).toBeLessThan(2);
+			expect(
+				searchBox.x + searchBox.width <= versionBox.x ||
+					searchBox.y + searchBox.height <= versionBox.y,
+			).toBe(true);
+			const prev = await page.locator('.pagination-links a[rel="prev"]').boundingBox();
+			const next = await page.locator('.pagination-links a[rel="next"]').boundingBox();
+			expect(Math.abs(prev.y - next.y)).toBeLessThan(2);
+			const prevArrow = await page.locator('.pagination-links a[rel="prev"] svg').boundingBox();
+			const nextArrow = await page.locator('.pagination-links a[rel="next"] svg').boundingBox();
+			expect(Math.abs(prevArrow.y - nextArrow.y)).toBeLessThan(2);
+			expect(prev.x + prev.width).toBeLessThanOrEqual(next.x);
 			expect(versionBox.width).toBeGreaterThan(80);
 			expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
 				true,
@@ -183,8 +230,28 @@ test('latest and archived docs share responsive controls, themes, and pagination
 			await page.locator('.starlight-docs-search button[data-open-modal]').click();
 			await page.locator('dialog[open]').waitFor();
 			await page.keyboard.press('Escape');
+			await picker.click();
+			const menu = await page.locator('.docs-release-select nav').boundingBox();
+			expect(menu.x).toBeGreaterThanOrEqual(0);
+			expect(menu.x + menu.width).toBeLessThanOrEqual(width);
+			await page.keyboard.press('Escape');
+			if ([390, 490, 1440].includes(width)) {
+				const screenshots = path.join(projectRoot, '.generated/qa');
+				await mkdir(screenshots, { recursive: true });
+				await page
+					.locator('.page > .header')
+					.screenshot({ path: path.join(screenshots, `header-${width}.png`) });
+				await page
+					.locator('.pagination-links')
+					.screenshot({ path: path.join(screenshots, `pagination-${width}.png`) });
+				await picker.click();
+				await page
+					.locator('.docs-release-select nav')
+					.screenshot({ path: path.join(screenshots, `releases-${width}.png`) });
+				await page.keyboard.press('Escape');
+			}
 		}
-		await picker.selectOption('0.2.0');
+		await selectDocsRelease(page, '0.2.0');
 		await page.locator('#docs-archive-view pre.astro-code').first().waitFor();
 		expect(await pagination()).toBe(latestPagination);
 		expect(await page.locator('#docs-archive-view pre.astro-code').count()).toBe(4);
@@ -194,11 +261,11 @@ test('latest and archived docs share responsive controls, themes, and pagination
 		const light = await token.evaluate((el) => getComputedStyle(el).color);
 		await page.locator('html').evaluate((el) => (el.dataset.theme = 'dark'));
 		expect(await token.evaluate((el) => getComputedStyle(el).color)).not.toBe(light);
-		await page.getByRole('combobox', { name: 'Documentation release' }).selectOption('0.1.2');
+		await selectDocsRelease(page, '0.1.2');
 		await page.locator('#docs-archive-view pre.astro-code').waitFor();
 		expect(await page.locator('#docs-archive-view code').innerText()).toBe('print("<hello>")');
 		expect(await pagination()).toBe(latestPagination);
-		await page.getByRole('combobox', { name: 'Documentation release' }).selectOption('latest');
+		await selectDocsRelease(page, 'latest');
 		await page.waitForURL(origin + '/yosoi/map/');
 		for (const platform of ['MacIntel', 'Win32', 'Linux x86_64']) {
 			const context = await browser.newContext();

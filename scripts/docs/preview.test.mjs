@@ -27,7 +27,7 @@ test('deployed preview serves bundled latest and fetches Markdown/API pages from
 				rawRequests.push(request.url());
 		});
 		await page.goto(new URL('/yosoi/quickstart/', base).href);
-		await page.getByRole('combobox', { name: 'Documentation release' }).waitFor();
+		await page.getByRole('button', { name: 'Documentation release', exact: true }).waitFor();
 		expect(await page.locator('h1').innerText()).toBe('Install and quickstart');
 		expect(rawRequests).toEqual([]);
 		const staticContext = await browser.newContext({ javaScriptEnabled: false });
@@ -35,9 +35,9 @@ test('deployed preview serves bundled latest and fetches Markdown/API pages from
 		await staticPage.goto(new URL('/yosoi/quickstart/', base).href);
 		expect(await staticPage.locator('main').innerText()).toContain('Fetch a page');
 		await staticContext.close();
-		await page
-			.getByRole('combobox', { name: 'Documentation release' })
-			.selectOption(identity.source.version);
+		await page.goto(
+			new URL(`/yosoi/archive/?version=${identity.source.version}&page=quickstart`, base).href,
+		);
 		await page.locator('#docs-archive-view pre code').first().waitFor();
 		expect(await page.locator('h1').innerText()).toBe('Install and quickstart');
 		expect(rawRequests).toEqual([
@@ -58,10 +58,10 @@ test('deployed preview serves bundled latest and fetches Markdown/API pages from
 		await page.setViewportSize({ width: 390, height: 844 });
 		await page.goto(new URL('/yosoi/quickstart/', base).href);
 		const releaseBox = await page
-			.getByRole('combobox', { name: 'Documentation release' })
+			.getByRole('button', { name: 'Documentation release', exact: true })
 			.boundingBox();
 		const searchBox = await page.locator('.starlight-docs-search').boundingBox();
-		expect(releaseBox.x + releaseBox.width).toBeLessThanOrEqual(searchBox.x + 1);
+		expect(searchBox.y + searchBox.height).toBeLessThanOrEqual(releaseBox.y);
 		expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
 			true,
 		);

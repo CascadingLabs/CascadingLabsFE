@@ -1,6 +1,11 @@
 import { mkdtemp, rm } from 'node:fs/promises';
 import { chromium } from 'playwright-core';
 
+export async function selectDocsRelease(page, version) {
+	await page.getByRole('button', { name: 'Documentation release', exact: true }).click();
+	await page.locator(`.docs-release-select a[data-docs-release="${version}"]`).click();
+}
+
 export async function launchDocsBrowser() {
 	// Chromium's Unix socket path must stay short, including in named workspaces.
 	const temp = await mkdtemp('/tmp/cl-docs-');
