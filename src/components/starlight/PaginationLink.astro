@@ -1,0 +1,11 @@
+---
+import { Icon } from '@astrojs/starlight/components';
+interface Props { direction: 'prev' | 'next'; href: string; label: string }
+const { direction, href, label } = Astro.props;
+const isRtl = Astro.locals.starlightRoute.dir === 'rtl';
+const backwards = direction === 'prev';
+---
+<a href={href} rel={direction}>
+ <Icon name={backwards !== isRtl ? 'left-arrow' : 'right-arrow'} size="1.5rem" />
+ <span>{Astro.locals.t(backwards ? 'page.previousLink' : 'page.nextLink')}<br /><span class="link-title">{label}</span></span>
+</a>

@@ -48,6 +48,7 @@ export default defineConfig({
 				Header: './src/components/starlight/Header.astro',
 				MobileMenuFooter: './src/components/starlight/MobileMenuFooter.astro',
 				MarkdownContent: './src/components/starlight/MarkdownContent.astro',
+				Pagination: './src/components/starlight/Pagination.astro',
 			},
 		}),
 	],

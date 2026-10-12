@@ -35,9 +35,12 @@ export function compareReleaseVersions(a: string, b: string): number {
 	const candidateB = BigInt(bb[3]);
 	return candidateA < candidateB ? -1 : candidateA > candidateB ? 1 : 0;
 }
-export function visibleReleases(registry: ReleaseRegistry): DocsRelease[] {
+export function visibleReleases(
+	registry: ReleaseRegistry,
+	latestVersion = registry.latest,
+): DocsRelease[] {
 	return registry.versions
-		.filter((release) => !release.version.includes('-'))
+		.filter((release) => !release.version.includes('-') && release.version !== latestVersion)
 		.sort((a, b) => compareReleaseVersions(b.version, a.version));
 }
 export function artifactPath(path: string): string {

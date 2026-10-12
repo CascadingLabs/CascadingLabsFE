@@ -1,5 +1,6 @@
 import DOMPurify from 'dompurify';
 import { enhanceCodeBlocks } from './docs-code';
+import { highlightArchiveCode } from './docs-highlight';
 import {
 	archiveHref,
 	parseReleaseRegistry,
@@ -39,6 +40,7 @@ export async function renderArchive(
 			USE_PROFILES: { html: true },
 			RETURN_DOM_FRAGMENT: true,
 		});
+		await highlightArchiveCode(fragment);
 		for (const anchor of fragment.querySelectorAll<HTMLAnchorElement>('a[href]')) {
 			const href = anchor.getAttribute('href')!;
 			if (href.startsWith('/yosoi/')) {
@@ -234,16 +236,19 @@ export async function renderArchive(
 		const controls = (['prev', 'next'] as const).flatMap((direction) => {
 			const target = pagination[direction];
 			if (!target) return [];
-			const a = document.createElement('a');
-			a.className = [...(footer?.classList || [])]
-				.filter((name) => name.startsWith('astro-'))
-				.join(' ');
-			a.rel = direction;
+			const template = document.querySelector<HTMLTemplateElement>(
+				`template[data-docs-pagination="${direction}"]`,
+			);
+			const a = template?.content.querySelector('a')?.cloneNode(true) as
+				| HTMLAnchorElement
+				| undefined;
+			if (!a) return [];
 			const route = new URL(target.href, location.origin).pathname
 				.slice('/yosoi/'.length)
 				.replace(/\/$/, '');
 			a.href = archiveHref(release.version, route);
-			a.textContent = `${direction === 'prev' ? 'Go back' : 'Next'} · ${target.label}`;
+			const title = a.querySelector('.link-title');
+			if (title) title.textContent = target.label;
 			return [a];
 		});
 		footer?.replaceChildren(...controls);

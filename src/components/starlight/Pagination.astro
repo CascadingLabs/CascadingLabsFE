@@ -1,0 +1,13 @@
+---
+import PaginationLink from './PaginationLink.astro';
+const { pagination, dir } = Astro.locals.starlightRoute;
+const directions = ['prev', 'next'] as const;
+const archive = Astro.url.pathname === '/yosoi/archive/';
+---
+<div class="pagination-links print:hidden" dir={dir}>
+ {directions.map((direction) => {
+  const target = pagination[direction];
+  return target && <PaginationLink direction={direction} href={target.href} label={target.label} />;
+ })}
+</div>
+{archive && directions.map((direction) => <template data-docs-pagination={direction}><PaginationLink direction={direction} href="#" label="" /></template>)}

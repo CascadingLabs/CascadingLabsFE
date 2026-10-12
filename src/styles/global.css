@@ -379,33 +379,7 @@ button {
 	align-items: center;
 	gap: 8px;
 	height: 100%;
-}
-.starlight-docs-header > a {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	width: 32px;
-	height: 32px;
-	text-decoration: none;
-}
-.starlight-docs-home img {
-	filter: grayscale(1);
-	opacity: 0.55;
-}
-.starlight-docs-home:hover img,
-.starlight-docs-home:focus-visible img {
-	filter: none;
-	opacity: 1;
-}
-.starlight-docs-brand {
-	border: 1px solid var(--sl-color-accent);
-	border-radius: 4px;
-	background: var(--sl-color-accent-low);
-}
-.starlight-docs-header img {
-	width: 26px;
-	height: 26px;
-	border-radius: 3px;
+	min-width: 0;
 }
 .starlight-docs-header .theme-toggle {
 	margin-inline-start: auto;
@@ -749,17 +723,40 @@ body:has(#docs-archive-view) mobile-starlight-toc a {
 	height: 16px;
 }
 .pagination-links {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+	gap: 1rem;
 	border-top: 1px solid var(--sl-color-gray-5);
 	padding-top: 1rem;
 }
 .pagination-links a {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	width: 100%;
+	text-decoration: none;
+	color: var(--sl-color-gray-2);
+	overflow-wrap: anywhere;
 	border: 0;
 	border-radius: 0;
 	box-shadow: none;
 	padding: 0.5rem 0;
 	font-size: var(--sl-text-sm);
 }
+.pagination-links a[rel='next'] {
+	justify-content: end;
+	text-align: end;
+	flex-direction: row-reverse;
+}
+.pagination-links a:hover {
+	color: var(--sl-color-white);
+}
+.pagination-links svg {
+	flex-shrink: 0;
+}
 .pagination-links .link-title {
+	color: var(--sl-color-white);
+	line-height: var(--sl-line-height-headings);
 	font-size: var(--sl-text-base);
 }
 .docs-release-select {
@@ -769,15 +766,24 @@ body:has(#docs-archive-view) mobile-starlight-toc a {
 	color: var(--sl-color-gray-2);
 	font-size: 0.6875rem;
 	min-width: 0;
+	flex-shrink: 0;
 }
 .docs-release-select svg {
 	fill: currentColor;
 	flex-shrink: 0;
 }
+.docs-release-select:hover,
+.docs-release-select:focus-within {
+	color: var(--sl-color-white);
+}
+.docs-release-select,
+.docs-release-select option {
+	cursor: pointer;
+}
 .docs-release-select select {
 	font: inherit;
 	min-width: 0;
-	width: 100%;
+	width: auto;
 	color: inherit;
 	background: var(--sl-color-bg-nav);
 	border: 0;

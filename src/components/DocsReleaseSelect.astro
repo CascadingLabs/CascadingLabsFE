@@ -12,7 +12,7 @@ const label = snapshot.source.preview ? 'Preview' : 'Latest';
  <span class="sr-only">Documentation release</span>
  <select aria-label="Documentation release" data-docs-release title={`${label} · ${snapshot.source.version}`} disabled>
   <option value="latest" selected>{snapshot.mode === 'working-tree-preview' ? label : `${label} · ${snapshot.source.version}`}</option>
-  {visibleReleases(registry).map((release) => <option value={release.version}>{snapshot.source.preview ? `Preview · ${release.version}` : release.tag}</option>)}
+  {visibleReleases(registry, snapshot.source.version).map((release) => <option value={release.version}>{snapshot.source.preview ? `Preview · ${release.version}` : release.tag}</option>)}
  </select>
 </label>
 <script>

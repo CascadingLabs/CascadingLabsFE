@@ -38,7 +38,7 @@ const manifest = {
 	assets: {},
 };
 
-test('the version picker hides RCs and orders final releases newest first without losing archives', () => {
+test('the version picker hides RCs and the duplicated latest release without losing archives', () => {
 	const registry = parseReleaseRegistry({
 		schemaVersion: 1,
 		latest: '0.10.0',
@@ -49,12 +49,15 @@ test('the version picker hides RCs and orders final releases newest first withou
 		})),
 	});
 	expect(visibleReleases(registry).map((release) => release.version)).toEqual([
-		'0.10.0',
 		'0.2.0',
 		'0.1.2',
 		'0.1.0',
 	]);
 	expect(registry.versions.map((release) => release.version)).toContain('0.2.0-rc.1');
+	expect(registry.versions.map((release) => release.version)).toContain('0.10.0');
+	expect(visibleReleases(registry, '0.11.0-preview').map((release) => release.version)).toContain(
+		'0.10.0',
+	);
 });
 
 test('numbered RC docs are valid and sort before the corresponding final release', () => {

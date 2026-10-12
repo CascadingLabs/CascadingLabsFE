@@ -141,6 +141,14 @@ test('archive shell fetches Markdown from a real GitHub source commit and render
 		);
 		await page.getByRole('link', { name: 'Link to Review locally', exact: true }).waitFor();
 		expect(
+			await page.locator('#spike pre.astro-code code span[style*="--shiki-light"]').count(),
+		).toBeGreaterThan(0);
+		expect(
+			await page.locator('#spike pre.astro-code code span[style*="--shiki-dark"]').count(),
+		).toBeGreaterThan(0);
+		expect(await page.locator('#spike pre code').innerText()).toBe('print("<hello>")\n');
+		expect(await page.locator('#spike pre code hello').count()).toBe(0);
+		expect(
 			await page.locator('#spike h2').evaluateAll((items) => items.map((item) => item.id)),
 		).toEqual(['search', 'review-locally', 'search-1']);
 		await page.getByRole('button', { name: 'Copy code', exact: true }).click();
