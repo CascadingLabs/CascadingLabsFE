@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import { cp, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -90,20 +91,31 @@ async function download(url, limit, fetcher, headers = {}) {
 	return Buffer.concat(chunks);
 }
 
-export async function resolveCatalog(fetcher = fetch, env = process.env) {
-	// Resolve the branch through the API, avoiding raw.githubusercontent.com's moving-ref cache.
-	const ref = JSON.parse(
-		await download(
-			`https://api.github.com/repos/${repository}/git/ref/heads/docs-artifacts`,
-			64 * 1024,
-			fetcher,
-			env.GH_TOKEN ? { Authorization: `Bearer ${env.GH_TOKEN}` } : {},
-		),
-	);
-	if (!commit.test(ref.object?.sha)) throw new Error('Invalid docs artifact branch identity');
+export function resolveArtifactCommit(run = execFileSync) {
+	// Git ref discovery avoids the anonymous REST API quota shared by hosted runners.
+	const ref = 'refs/heads/docs-artifacts';
+	const output = run(
+		'git',
+		['ls-remote', '--exit-code', '--refs', `https://github.com/${repository}.git`, ref],
+		{
+			encoding: 'utf8',
+			timeout: 60000,
+			maxBuffer: 64 * 1024,
+			env: { ...process.env, GIT_TERMINAL_PROMPT: '0' },
+		},
+	).trim();
+	const [sha, name] = output.split('\t');
+	if (!commit.test(sha) || name !== ref) throw new Error('Invalid docs artifact branch identity');
+	return sha;
+}
+
+export async function resolveCatalog(fetcher = fetch, resolveBranch = resolveArtifactCommit) {
+	// Resolve once, then bypass raw.githubusercontent.com's moving-ref cache with the full commit.
+	const sha = await resolveBranch();
+	if (!commit.test(sha)) throw new Error('Invalid docs artifact branch identity');
 	return JSON.parse(
 		await download(
-			`https://raw.githubusercontent.com/${repository}/${ref.object.sha}/catalog.json`,
+			`https://raw.githubusercontent.com/${repository}/${sha}/catalog.json`,
 			4 * 1024 * 1024,
 			fetcher,
 		),
@@ -167,9 +179,13 @@ export async function unpackBundle(archive, target, selected) {
 	return bundle;
 }
 
-export async function consumeLatest({ fetcher = fetch, build = true } = {}) {
+export async function consumeLatest({
+	fetcher = fetch,
+	resolveBranch = resolveArtifactCommit,
+	build = true,
+} = {}) {
 	// Resolve latest exactly once. All subsequent requests are immutable commit URLs.
-	const catalog = await resolveCatalog(fetcher);
+	const catalog = await resolveCatalog(fetcher, resolveBranch);
 	const selected = selectBundle(catalog);
 	const registry = bundleRegistry(catalog);
 	const generated = path.join(root, '.generated');

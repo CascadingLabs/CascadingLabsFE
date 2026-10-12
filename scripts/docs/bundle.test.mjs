@@ -4,7 +4,13 @@ import { execFileSync } from 'node:child_process';
 import { cp, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import * as tar from 'tar';
-import { bundleRegistry, resolveCatalog, selectBundle, unpackBundle } from './bundle.mjs';
+import {
+	bundleRegistry,
+	resolveArtifactCommit,
+	resolveCatalog,
+	selectBundle,
+	unpackBundle,
+} from './bundle.mjs';
 import { projectRoot, repositoryRoot } from './prepare.mjs';
 
 const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
@@ -19,21 +25,37 @@ const pointer = (source = '1'.repeat(40), version = '0.1.0') => ({
 	manifestPath: `snapshots/${source}/content/archive-manifest.json`,
 	manifestSha256: '4'.repeat(64),
 });
-test('catalog lookup authenticates only the GitHub API request and raw downloads stay anonymous', async () => {
-	for (const token of ['', 'fixture-token']) {
-		const calls = [];
-		const catalog = { schemaVersion: 1, latest: '1'.repeat(40), snapshots: {} };
-		const fetcher = async (url, options) => {
-			calls.push({ url, headers: options.headers });
-			return Response.json(
-				url.startsWith('https://api.github.com/') ? { object: { sha: '2'.repeat(40) } } : catalog,
-			);
-		};
-		expect(await resolveCatalog(fetcher, { GH_TOKEN: token })).toEqual(catalog);
-		expect(calls[0].headers).toEqual(token ? { Authorization: `Bearer ${token}` } : {});
-		expect(calls[1].url).toContain('/' + '2'.repeat(40) + '/catalog.json');
-		expect(calls[1].headers).toEqual({});
+test('artifact identity uses public Git ref discovery without the REST API', () => {
+	const sha = '2'.repeat(40);
+	const run = (program, args, options) => {
+		expect(program).toBe('git');
+		expect(args).toEqual([
+			'ls-remote',
+			'--exit-code',
+			'--refs',
+			'https://github.com/CascadingLabs/Yosoi.git',
+			'refs/heads/docs-artifacts',
+		]);
+		expect(options.env.GIT_TERMINAL_PROMPT).toBe('0');
+		expect(options.timeout).toBe(60000);
+		return `${sha}\trefs/heads/docs-artifacts\n`;
+	};
+	expect(resolveArtifactCommit(run)).toBe(sha);
+	for (const output of [
+		'',
+		'not-a-commit\trefs/heads/docs-artifacts',
+		`${sha}\trefs/heads/main`,
+		`${sha}\trefs/heads/docs-artifacts\n${sha}\trefs/heads/main`,
+	]) {
+		expect(() => resolveArtifactCommit(() => output)).toThrow(
+			'Invalid docs artifact branch identity',
+		);
 	}
+	expect(() =>
+		resolveArtifactCommit(() => {
+			throw new Error('Git unavailable');
+		}),
+	).toThrow('Git unavailable');
 });
 test('RC bundle pointers and archive registry retain candidate identities and SemVer ordering', () => {
 	const versions = ['0.1.0-rc.2', '0.1.0-rc.10', '0.1.0'];
@@ -51,27 +73,36 @@ test('RC bundle pointers and archive registry retain candidate identities and Se
 		'0.1.0-rc.2',
 	]);
 });
-test('local, pull-request, and main builds resolve the same published catalog', async () => {
-	for (const env of [
-		{},
-		{ DOCS_PREVIEW: '1' },
-		{ CF_PAGES: '1', CF_PAGES_BRANCH: 'feature' },
-		{ CF_PAGES: '1', CF_PAGES_BRANCH: 'main' },
-	]) {
-		const urls = [];
-		const catalog = { schemaVersion: 1, latest: '1'.repeat(40), snapshots: {} };
-		const fetcher = async (url) => {
-			urls.push(url);
-			return Response.json(
-				url.startsWith('https://api.github.com/') ? { object: { sha: '2'.repeat(40) } } : catalog,
-			);
-		};
-		expect(await resolveCatalog(fetcher, env)).toEqual(catalog);
-		expect(urls).toEqual([
-			'https://api.github.com/repos/CascadingLabs/Yosoi/git/ref/heads/docs-artifacts',
-			`https://raw.githubusercontent.com/CascadingLabs/Yosoi/${'2'.repeat(40)}/catalog.json`,
-		]);
-	}
+test('catalog lookup resolves once and downloads anonymously from an immutable commit', async () => {
+	const calls = [];
+	let resolutions = 0;
+	const catalog = { schemaVersion: 1, latest: '1'.repeat(40), snapshots: {} };
+	const fetcher = async (url, options) => {
+		calls.push({ url, headers: options.headers });
+		return Response.json(catalog);
+	};
+	expect(
+		await resolveCatalog(fetcher, () => {
+			resolutions++;
+			return '2'.repeat(40);
+		}),
+	).toEqual(catalog);
+	expect(resolutions).toBe(1);
+	expect(calls).toEqual([
+		{
+			url: `https://raw.githubusercontent.com/CascadingLabs/Yosoi/${'2'.repeat(40)}/catalog.json`,
+			headers: {},
+		},
+	]);
+	await expect(resolveCatalog(fetcher, () => 'bad')).rejects.toThrow(
+		'Invalid docs artifact branch identity',
+	);
+	await expect(
+		resolveCatalog(fetcher, () => {
+			throw new Error('Git unavailable');
+		}),
+	).rejects.toThrow('Git unavailable');
+	expect(calls).toHaveLength(1);
 });
 test('latest is a commit-pinned pointer; SDK versions and docs revisions are independent', () => {
 	const old = pointer('5'.repeat(40));
@@ -238,8 +269,8 @@ test('published importer downloads only latest, verifies it, and prepares static
       const urls = [];
       const catalog = ${JSON.stringify(catalog)};
       const bytes = process.env.BAD_BUNDLE ? 'wrong bytes' : readFileSync(${JSON.stringify(archive)});
-      const fetcher = async (url) => { urls.push(url); return new Response(url.includes('api.github.com') ? JSON.stringify({object:{sha:'7'.repeat(40)}}) : url.endsWith('catalog.json') ? JSON.stringify(catalog) : bytes); };
-      await consumeLatest({fetcher, build:false});
+      const fetcher = async (url) => { urls.push(url); return new Response(url.endsWith('catalog.json') ? JSON.stringify(catalog) : bytes); };
+      await consumeLatest({fetcher, resolveBranch: () => '7'.repeat(40), build:false});
       writeFileSync('requests.json', JSON.stringify(urls));
     `,
 		);
@@ -249,7 +280,6 @@ test('published importer downloads only latest, verifies it, and prepares static
 		});
 		const urls = JSON.parse(await readFile(path.join(frontend, 'requests.json'), 'utf8'));
 		expect(urls).toEqual([
-			'https://api.github.com/repos/CascadingLabs/Yosoi/git/ref/heads/docs-artifacts',
 			`https://raw.githubusercontent.com/CascadingLabs/Yosoi/${'7'.repeat(40)}/catalog.json`,
 			`https://raw.githubusercontent.com/CascadingLabs/Yosoi/${selected.artifactCommit}/${selected.bundlePath}`,
 		]);
