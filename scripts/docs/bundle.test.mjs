@@ -34,18 +34,18 @@ test('artifact identity uses public Git ref discovery without the REST API', () 
 			'--exit-code',
 			'--refs',
 			'https://github.com/CascadingLabs/Yosoi.git',
-			'refs/heads/docs-artifacts',
+			'refs/heads/main',
 		]);
 		expect(options.env.GIT_TERMINAL_PROMPT).toBe('0');
 		expect(options.timeout).toBe(60000);
-		return `${sha}\trefs/heads/docs-artifacts\n`;
+		return `${sha}\trefs/heads/main\n`;
 	};
 	expect(resolveArtifactCommit(run)).toBe(sha);
 	for (const output of [
 		'',
-		'not-a-commit\trefs/heads/docs-artifacts',
-		`${sha}\trefs/heads/main`,
-		`${sha}\trefs/heads/docs-artifacts\n${sha}\trefs/heads/main`,
+		'not-a-commit\trefs/heads/main',
+		`${sha}\trefs/heads/docs-artifacts`,
+		`${sha}\trefs/heads/main\n${sha}\trefs/heads/docs-artifacts`,
 	]) {
 		expect(() => resolveArtifactCommit(() => output)).toThrow(
 			'Invalid docs artifact branch identity',

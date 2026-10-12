@@ -93,7 +93,7 @@ async function download(url, limit, fetcher, headers = {}) {
 
 export function resolveArtifactCommit(run = execFileSync) {
 	// Git ref discovery avoids the anonymous REST API quota shared by hosted runners.
-	const ref = 'refs/heads/docs-artifacts';
+	const ref = 'refs/heads/main';
 	const output = run(
 		'git',
 		['ls-remote', '--exit-code', '--refs', `https://github.com/${repository}.git`, ref],
