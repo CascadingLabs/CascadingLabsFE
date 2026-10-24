@@ -27,7 +27,7 @@ test('deployed preview serves bundled latest and fetches Markdown/API pages from
 				rawRequests.push(request.url());
 		});
 		await page.goto(new URL('/yosoi/quickstart/', base).href);
-		await page.getByRole('button', { name: 'Documentation release', exact: true }).waitFor();
+		await page.locator('summary[aria-label="Documentation release"]').waitFor();
 		expect(await page.locator('h1').innerText()).toBe('Install and quickstart');
 		expect(rawRequests).toEqual([]);
 		const staticContext = await browser.newContext({ javaScriptEnabled: false });
@@ -58,7 +58,7 @@ test('deployed preview serves bundled latest and fetches Markdown/API pages from
 		await page.setViewportSize({ width: 390, height: 844 });
 		await page.goto(new URL('/yosoi/quickstart/', base).href);
 		const releaseBox = await page
-			.getByRole('button', { name: 'Documentation release', exact: true })
+			.locator('summary[aria-label="Documentation release"]')
 			.boundingBox();
 		const searchBox = await page.locator('.starlight-docs-search').boundingBox();
 		expect(searchBox.y + searchBox.height).toBeLessThanOrEqual(releaseBox.y);

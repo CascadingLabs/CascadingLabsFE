@@ -254,6 +254,7 @@ test('published importer downloads only latest, verifies it, and prepares static
 			'navigation.mjs',
 			'reference.mjs',
 			'live-snapshot.mjs',
+			'incremental.mjs',
 			'preparation-cache.mjs',
 		])
 			await cp(

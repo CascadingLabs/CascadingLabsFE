@@ -33,6 +33,9 @@ test('Markdown variants pair explanations, preserve preference, support keyboard
 			<h2 id="commands">Install</h2><h3 id="cargo">Cargo</h3>
 			<pre><code>cargo add yosoi</code></pre><p>Cargo explanation</p>
 			<h3 id="uv">uv</h3><pre><code>uv add yosoi</code></pre><p>uv explanation</p>
+			<h3 id="linux">Linux</h3><pre><code>sh install-yosoi.sh</code></pre>
+			<h3 id="macos">macOS</h3><pre><code>sh install-yosoi.sh</code></pre>
+			<h3 id="windows">Windows</h3><pre><code>./install-yosoi.ps1</code></pre>
 			<h2>Next</h2><p>Unrelated prose</p>
 		`;
 		await page.locator('main').evaluate((root, body) => {
@@ -41,6 +44,9 @@ test('Markdown variants pair explanations, preserve preference, support keyboard
 		}, markup);
 		assert.equal(await page.locator('.docs-variants').count(), 2);
 		assert.equal(await page.locator('.docs-variant-icon-cargo').count(), 1);
+		for (const platform of ['linux', 'macos', 'windows']) {
+			assert.equal(await page.locator('.docs-variant-icon-' + platform).count(), 1);
+		}
 		assert.equal(await page.locator('#cargo').getAttribute('class'), 'docs-variant-title');
 		await page.getByRole('tab', { name: 'Python', exact: true }).click();
 		assert.equal(await page.locator('[data-docs-variant="Rust"]').isVisible(), false);

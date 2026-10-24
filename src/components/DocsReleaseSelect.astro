@@ -9,7 +9,7 @@ const label = snapshot.source.preview ? 'Preview' : 'Latest';
 const latestLabel = snapshot.mode === 'working-tree-preview' ? label : `${label} · ${snapshot.source.version}`;
 ---
 <details class="docs-release-select">
- <summary role="button" aria-label="Documentation release" aria-expanded="false">
+ <summary aria-label="Documentation release" aria-expanded="false">
   <Tag width={13} height={13} aria-hidden="true" />
   <span data-docs-release-label>{latestLabel}</span>
   <span aria-hidden="true">⌄</span>

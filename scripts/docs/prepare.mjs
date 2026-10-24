@@ -34,6 +34,7 @@ import {
 import { referenceMarkdown, referenceSummary } from './reference.mjs';
 import { publishLiveSnapshot } from './live-snapshot.mjs';
 import { cachedText, cachedPythonReference } from './preparation-cache.mjs';
+import { prepareChangedDocs } from './incremental.mjs';
 
 export const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 export const repositoryRoot = () =>
@@ -67,11 +68,45 @@ export function optionsFromArgs(args) {
 	}).values;
 }
 
-export async function rewriteMarkdown(body, file, pages, assets) {
+export async function rewriteMarkdown(body, file, pages, assets, missingPage) {
 	const tree = await markdownToMdast(body, { features: { gfm: true } });
 	validateDocHeadings(tree, file);
-	rewriteMarkdownLinks(tree, file, pages, assets);
+	rewriteMarkdownLinks(tree, file, pages, assets, missingPage);
 	return toMarkdown(tree, { extensions: [gfmToMarkdown()] });
+}
+
+async function renderAuthoredPage(original, page, pageMap, assets, generator, cache, linkInputs) {
+	const { body } = generator.parseFrontmatter(original, page.file);
+	const local = JSON.parse(linkInputs).localPreview;
+	const missingPage = local
+		? ({ file, href, target }) => {
+				const relative = path.posix.normalize(
+					path.posix.join(path.posix.dirname(file), href.split(/[?#]/)[0]),
+				);
+				if (
+					relative === '..' ||
+					relative.startsWith('../') ||
+					!target.endsWith('.md') ||
+					existsSync(path.join(repositoryRoot(), 'docs/public', target))
+				)
+					return;
+				const entry = generator.generatePreviewPage?.(target, Buffer.from('# Missing page\n'));
+				if (!entry) return;
+				console.warn(`${file}: ${target} is gone from the source; its preview link returns 404.`);
+				return entry[0].slice(1);
+			}
+		: undefined;
+	// Validate missing targets against the current source even on cache hits.
+	const rewritten = await rewriteMarkdown(body, page.file, pageMap, assets, missingPage);
+	const content = await cachedText(cache, json([body, page.file, linkInputs]), async () => {
+		const tree = await markdownToMdast(rewritten, { features: { gfm: true } });
+		if (tree.children[0]?.type === 'heading' && tree.children[0].depth === 1) tree.children.shift();
+		return toMarkdown(tree, { extensions: [gfmToMarkdown()] });
+	});
+	return (
+		frontmatter({ title: page.title, description: page.description || '', order: page.order }) +
+		content
+	);
 }
 
 function navigation(pages) {
@@ -131,6 +166,61 @@ export async function prepareDocs(options = {}) {
 	if (options.source && options['docs-only'])
 		throw new Error('--docs-only is for local previews; CI uses complete preparation.');
 	const repo = repositoryRoot();
+	const generated = path.join(projectRoot, '.generated');
+	if (
+		options.live &&
+		options.changedFiles &&
+		!options.source &&
+		existsSync(path.join(generated, 'yosoi/routes.json'))
+	) {
+		const lockPath = path.join(generated, 'yosoi.prepare.lock');
+		let lock;
+		try {
+			lock = await open(lockPath, 'wx');
+		} catch (error) {
+			if (error.code === 'EEXIST')
+				throw new Error('Docs preparation is busy. Save again after it finishes.');
+			throw error;
+		}
+		try {
+			const transformVersion = digest(await readFile(fileURLToPath(import.meta.url)));
+			const snapshot = await prepareChangedDocs({
+				repo,
+				destination: path.join(generated, 'yosoi'),
+				changedFiles: options.changedFiles,
+				rebuildNavigation: async (pages) => {
+					const { metadata, source } = await readPublicNavigation(
+						path.join(repo, 'docs/public'),
+						jsonc,
+					);
+					return {
+						navigation: source ? resolveNavigation(pages, metadata) : navigation(pages),
+						...(source ? { navigationSource: source } : {}),
+					};
+				},
+				renderPage: (original, page, pages, assets, generator) =>
+					renderAuthoredPage(
+						original,
+						page,
+						pages,
+						assets,
+						generator,
+						path.join(generated, 'yosoi-cache/markdown'),
+						json({
+							localPreview: !process.env.CI,
+							pages: [...pages].map(([file, item]) => [file, item.route]),
+							assets: [...assets],
+							transformVersion,
+							content: readFileSync(path.join(repo, 'scripts/docs/content.mjs'), 'utf8'),
+						}),
+					),
+			});
+			if (snapshot) return snapshot;
+		} finally {
+			await lock.close();
+			await rm(lockPath, { force: true });
+		}
+	}
 	const supplied = options['bundle-root']
 		? JSON.parse(await readFile(path.join(options['bundle-root'], 'manifest.json'), 'utf8'))
 		: null;
@@ -142,9 +232,11 @@ export async function prepareDocs(options = {}) {
 	)
 		throw new Error('Published content manifest does not match the selected bundle');
 	const sourceRevision =
-		!options.source && existsSync(path.join(repo, '.jj'))
-			? run('jj', ['log', '-r', '@', '--no-graph', '-T', 'commit_id'], repo).trim()
-			: options.source || 'HEAD';
+		options.previewCommit && !options.source
+			? options.previewCommit
+			: !options.source && existsSync(path.join(repo, '.jj'))
+				? run('jj', ['log', '-r', '@', '--no-graph', '-T', 'commit_id'], repo).trim()
+				: options.source || 'HEAD';
 	const sourceCommit =
 		supplied?.source.commit ||
 		run(
@@ -165,7 +257,6 @@ export async function prepareDocs(options = {}) {
 		throw new Error('Exact-commit builds require matching documentation and API sources.');
 	const repository = options.repository || 'CascadingLabs/Yosoi';
 	const version = options.version || '0.1.0-preview';
-	const generated = path.join(projectRoot, '.generated');
 	await mkdir(generated, { recursive: true });
 	const lockPath = path.join(generated, 'yosoi.prepare.lock');
 	let lock;
@@ -242,6 +333,7 @@ export async function prepareDocs(options = {}) {
 		const assets = new Set(Object.keys(manifest.assets));
 		const transformVersion = digest(await readFile(fileURLToPath(import.meta.url)));
 		const linkInputs = json({
+			localPreview: !options.source && !supplied && !process.env.CI,
 			pages: [...pageMap].map(([file, page]) => [file, page.route]),
 			assets: [...assets],
 			transformVersion,
@@ -251,24 +343,17 @@ export async function prepareDocs(options = {}) {
 			const original = await readFile(path.join(publicTree, page.file), 'utf8');
 			if (digest(original) !== page.sha256)
 				throw new Error(`Document changed during preparation: ${page.file}`);
-			const { body } = generator.parseFrontmatter(original, page.file);
-			const content = await cachedText(
+			const content = await renderAuthoredPage(
+				original,
+				page,
+				pageMap,
+				assets,
+				generator,
 				path.join(generated, 'yosoi-cache/markdown'),
-				json([body, page.file, linkInputs]),
-				async () => {
-					const rewritten = await rewriteMarkdown(body, page.file, pageMap, assets);
-					const tree = await markdownToMdast(rewritten, { features: { gfm: true } });
-					if (tree.children[0]?.type === 'heading' && tree.children[0].depth === 1)
-						tree.children.shift();
-					return toMarkdown(tree, { extensions: [gfmToMarkdown()] });
-				},
+				linkInputs,
 			);
 			await mkdir(path.dirname(path.join(docs, page.file)), { recursive: true });
-			await writeFile(
-				path.join(docs, page.file),
-				frontmatter({ title: page.title, description: page.description || '', order: page.order }) +
-					content,
-			);
+			await writeFile(path.join(docs, page.file), content);
 		}
 		for (const asset of assets) {
 			const bytes = await readFile(path.join(publicTree, asset));
@@ -408,6 +493,7 @@ export async function prepareDocs(options = {}) {
 		const snapshot = {
 			schemaVersion: 1,
 			mode: options.source ? 'commit' : 'working-tree-preview',
+			...(!options.source ? { previewSourceRoot: repo } : {}),
 			source: { repository, commit: sourceCommit, version },
 			pages,
 			navigation: navigationSource

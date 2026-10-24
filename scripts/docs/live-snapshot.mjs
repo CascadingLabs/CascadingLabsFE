@@ -17,6 +17,15 @@ export async function publishLiveSnapshot(stage, destination) {
 	const next = await files(stage);
 	const previous = await files(destination);
 	const retained = new Set(next);
+	await publishLiveFiles(stage, destination, next);
+	for (const relative of previous) {
+		if (!retained.has(relative)) await rm(path.join(destination, relative));
+	}
+}
+
+// A partial preparation owns only these files; everything else stays served.
+export async function publishLiveFiles(stage, destination, next = undefined) {
+	next ??= await files(stage);
 	for (const relative of next) {
 		const source = path.join(stage, relative);
 		const target = path.join(destination, relative);
@@ -36,8 +45,5 @@ export async function publishLiveSnapshot(stage, destination) {
 		} finally {
 			await rm(temporary, { force: true });
 		}
-	}
-	for (const relative of previous) {
-		if (!retained.has(relative)) await rm(path.join(destination, relative));
 	}
 }
