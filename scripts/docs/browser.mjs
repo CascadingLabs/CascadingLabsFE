@@ -2,7 +2,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { chromium } from 'playwright-core';
 
 export async function selectDocsRelease(page, version) {
-	await page.getByRole('button', { name: 'Documentation release', exact: true }).click();
+	await page.locator('summary[aria-label="Documentation release"]').click();
 	await page.locator(`.docs-release-select a[data-docs-release="${version}"]`).click();
 }
 

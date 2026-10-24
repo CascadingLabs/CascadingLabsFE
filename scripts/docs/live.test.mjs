@@ -449,7 +449,7 @@ test('vpr dev refreshes the open browser for Markdown, metadata, and added files
 		expect(await page.locator('.sidebar summary').filter({ hasText: 'Reference' }).count()).toBe(0);
 		expect((await page.request.get(url + 'yosoi/guides/')).status()).toBe(200);
 		expect((await page.request.get(url + 'yosoi/api/')).status()).toBe(200);
-		const picker = page.getByRole('button', { name: 'Documentation release', exact: true });
+		const picker = page.locator('summary[aria-label="Documentation release"]');
 		expect(await picker.innerText()).toContain('Latest');
 		expect((await picker.boundingBox()).width).toBeLessThan(110);
 		await selectDocsRelease(page, '0.1.0');

@@ -152,7 +152,7 @@ test('latest and archived docs share responsive controls, themes, and pagination
 		const response = await page.goto(origin + '/yosoi/map/', { waitUntil: 'networkidle' });
 		if (response.status() !== 200)
 			throw new Error(`UI fixture failed: ${output}\n${await page.locator('body').innerText()}`);
-		const picker = page.getByRole('button', { name: 'Documentation release', exact: true });
+		const picker = page.locator('summary[aria-label="Documentation release"]');
 		expect(await page.locator('.docs-release-select nav a').allTextContents()).toEqual([
 			'Latest · 0.2.1',
 			'v0.2.0',
