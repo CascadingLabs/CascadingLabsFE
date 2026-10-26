@@ -158,6 +158,19 @@ test('latest and archived docs share responsive controls, themes, and pagination
 			'v0.2.0',
 			'v0.1.2',
 		]);
+		await writeFile(
+			path.join(root, '.generated/yosoi/routes.json'),
+			JSON.stringify({ ...snapshot, source: { ...snapshot.source, version: '0.4.0-rc.1' } }),
+		);
+		await page.reload({ waitUntil: 'networkidle' });
+		expect(await page.locator('[data-docs-release-label]').textContent()).toBe(
+			'Preview · 0.4.0-rc.1',
+		);
+		expect(
+			await page.locator('.docs-release-select a[data-docs-release="0.2.1"]').textContent(),
+		).toBe('v0.2.1');
+		await writeFile(path.join(root, '.generated/yosoi/routes.json'), JSON.stringify(snapshot));
+		await page.reload({ waitUntil: 'networkidle' });
 		expect(
 			await page.locator('.starlight-docs-brand').evaluate((link) => new URL(link.href).pathname),
 		).toBe('/yosoi/');
