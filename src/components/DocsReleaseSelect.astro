@@ -5,7 +5,7 @@ import { archiveHref, visibleReleases } from '../lib/docs-releases';
 import { readSnapshot } from '../lib/yosoi-snapshot';
 const registry = readReleaseRegistry();
 const snapshot = readSnapshot();
-const label = snapshot.source.preview ? 'Preview' : 'Latest';
+const label = snapshot.source.preview || snapshot.source.version.includes('-rc.') ? 'Preview' : 'Latest';
 const latestLabel = snapshot.mode === 'working-tree-preview' ? label : `${label} · ${snapshot.source.version}`;
 ---
 <details class="docs-release-select">
@@ -16,7 +16,7 @@ const latestLabel = snapshot.mode === 'working-tree-preview' ? label : `${label}
  </summary>
  <nav aria-label="Documentation releases">
   <a href="/yosoi/" data-docs-release="latest" aria-current="page">{latestLabel}</a>
-  {visibleReleases(registry, snapshot.source.version).map((release) => <a href={archiveHref(release.version)} data-docs-release={release.version}>{snapshot.source.preview ? `Preview · ${release.version}` : release.tag}</a>)}
+  {visibleReleases(registry, snapshot.source.version).map((release) => <a href={archiveHref(release.version)} data-docs-release={release.version}>{release.tag}</a>)}
  </nav>
 </details>
 <script>
