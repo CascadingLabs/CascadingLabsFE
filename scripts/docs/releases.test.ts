@@ -157,3 +157,32 @@ test('transport verifies immutable manifest/page bytes and rejects mismatched ha
 		),
 	).rejects.toThrow(/404/);
 });
+
+test('archive navigation accepts synthetic groups without treating them as pages', () => {
+	const group = { title: 'Types', route: 'api/_types', children: [] };
+	const grouped = {
+		...manifest,
+		navigation: {
+			...manifest.navigation,
+			children: [group, { ...group, title: '0.3.x', route: 'releases/_0-3' }],
+		},
+	};
+	expect(parseArchiveManifest(grouped, release).navigation.children).toHaveLength(2);
+	for (const invalid of [
+		{ ...group, id: 'fake-page' },
+		{ ...group, route: 'api/../_types' },
+		{ ...group, route: 'https://example.org/_types' },
+	])
+		expect(() =>
+			parseArchiveManifest(
+				{ ...grouped, navigation: { ...grouped.navigation, children: [invalid] } },
+				release,
+			),
+		).toThrow('Invalid archived navigation');
+	expect(() =>
+		parseArchiveManifest(
+			{ ...manifest, pages: [...manifest.pages, { ...manifest.pages[0], route: 'api/_types' }] },
+			release,
+		),
+	).toThrow('Invalid archived documentation page');
+});

@@ -9,6 +9,7 @@ import {
 	resolveArtifactCommit,
 	resolveCatalog,
 	selectBundle,
+	selectDefaultBundle,
 	unpackBundle,
 } from './bundle.mjs';
 import { projectRoot, repositoryRoot } from './prepare.mjs';
@@ -67,11 +68,42 @@ test('RC bundle pointers and archive registry retain candidate identities and Se
 	);
 	const catalog = { schemaVersion: 1, latest: '1'.repeat(40), snapshots };
 	expect(selectBundle(catalog).version).toBe('0.1.0-rc.2');
+	expect(selectDefaultBundle(catalog).version).toBe('0.1.0');
+	expect(bundleRegistry(catalog).latest).toBe('0.1.0');
 	expect(bundleRegistry(catalog).versions.map((item) => item.version)).toEqual([
 		'0.1.0',
 		'0.1.0-rc.10',
 		'0.1.0-rc.2',
 	]);
+});
+test('a newer RC never becomes the default, and final publication promotes automatically', () => {
+	const old = pointer('1'.repeat(40), '0.2.0');
+	const final = pointer('2'.repeat(40), '0.3.0');
+	const correction = pointer('3'.repeat(40), '0.3.0');
+	const rc = pointer('4'.repeat(40), '0.4.0-rc.1');
+	const catalog = {
+		schemaVersion: 1,
+		latest: rc.sourceCommit,
+		snapshots: Object.fromEntries(
+			[old, final, correction, rc].map((item) => [item.sourceCommit, item]),
+		),
+	};
+	expect(selectDefaultBundle(catalog)).toEqual(correction);
+	expect(
+		bundleRegistry(catalog).versions.find((item) => item.version === rc.version)?.sourceCommit,
+	).toBe(rc.sourceCommit);
+	const promoted = pointer('5'.repeat(40), '0.4.0');
+	catalog.snapshots[promoted.sourceCommit] = promoted;
+	catalog.latest = promoted.sourceCommit;
+	expect(selectDefaultBundle(catalog)).toEqual(promoted);
+	expect(bundleRegistry(catalog).latest).toBe('0.4.0');
+	expect(() =>
+		selectDefaultBundle({
+			schemaVersion: 1,
+			latest: rc.sourceCommit,
+			snapshots: { [rc.sourceCommit]: rc },
+		}),
+	).toThrow('No final Yosoi documentation release');
 });
 test('catalog lookup resolves once and downloads anonymously from an immutable commit', async () => {
 	const calls = [];

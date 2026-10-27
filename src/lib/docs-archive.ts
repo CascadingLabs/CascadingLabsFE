@@ -24,6 +24,7 @@ export interface ArchiveManifest {
 }
 const hashPattern = /^[a-f0-9]{64}$/;
 const routePattern = /^(?:[a-z0-9]+(?:-[a-z0-9]+)*(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)*)?$/;
+const groupRoutePattern = /^(?:[a-z0-9]+(?:-[a-z0-9]+)*\/)*_[a-z0-9]+(?:-[a-z0-9]+)*$/;
 export function parseArchiveManifest(input: unknown, release: DocsRelease): ArchiveManifest {
 	const manifest = input as ArchiveManifest;
 	if (
@@ -66,7 +67,10 @@ export function parseArchiveManifest(input: unknown, release: DocsRelease): Arch
 			depth > 32 ||
 			!node ||
 			typeof node.title !== 'string' ||
-			!routePattern.test(node.route) ||
+			!(
+				routePattern.test(node.route) ||
+				(node.id === undefined && groupRoutePattern.test(node.route))
+			) ||
 			!Array.isArray(node.children) ||
 			(node.id !== undefined && !routes.has(node.route))
 		)
