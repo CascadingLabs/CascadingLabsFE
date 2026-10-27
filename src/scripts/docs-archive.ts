@@ -80,6 +80,8 @@ export async function renderArchive(
 		const title = document.querySelector('main h1');
 		if (title) title.textContent = page.title;
 		document.title = `${page.title} | Yosoi ${release.tag}`;
+		const releaseLabel = document.querySelector('[data-docs-release-label]');
+		if (releaseLabel) releaseLabel.textContent = release.tag;
 		const sidebar = document.querySelector('sl-sidebar-state-persist > ul');
 		// Borrow Starlight's rendered templates, including its scoped CSS classes and caret.
 		const scoped = <K extends keyof HTMLElementTagNameMap>(tag: K): HTMLElementTagNameMap[K] =>

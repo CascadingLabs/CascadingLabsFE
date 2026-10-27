@@ -71,7 +71,7 @@ test('latest and archived docs share responsive controls, themes, and pagination
 				`---\ntitle: ${page.title}\n---\n\n${code}`,
 			);
 		const artifacts = new Map();
-		const releases = ['0.2.1', '0.2.0', '0.1.2'].map((version) => {
+		const releases = ['0.4.0-rc.1', '0.2.1', '0.2.0', '0.1.2'].map((version) => {
 			const manifest = {
 				schemaVersion: 1,
 				version,
@@ -299,6 +299,15 @@ test('latest and archived docs share responsive controls, themes, and pagination
 			await nativePage.locator('dialog[open]').waitFor();
 			await context.close();
 		}
+		await page.goto(origin + '/yosoi/archive/?version=0.4.0-rc.1&page=map');
+		await page.locator('#docs-archive-view pre.astro-code').first().waitFor();
+		expect(await page.locator('[data-docs-release-label]').textContent()).toBe('v0.4.0-rc.1');
+		expect(
+			await page.locator('.docs-release-select a[data-docs-release="0.4.0-rc.1"]').count(),
+		).toBe(0);
+		await selectDocsRelease(page, 'latest');
+		await page.waitForURL(origin + '/yosoi/map/');
+		expect(await page.locator('[data-docs-release-label]').textContent()).toBe('Latest · 0.2.1');
 		expect(errors).toEqual([]);
 	} finally {
 		await browser?.close();

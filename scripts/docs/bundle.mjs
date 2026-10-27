@@ -36,7 +36,7 @@ export function selectBundle(catalog) {
 }
 
 export function bundleRegistry(catalog) {
-	const latest = selectBundle(catalog);
+	const latest = selectDefaultBundle(catalog);
 	const versions = new Map();
 	for (const item of Object.values(catalog.snapshots)) {
 		const selected = selectBundle({ ...catalog, latest: item.sourceCommit });
@@ -56,7 +56,7 @@ export function bundleRegistry(catalog) {
 		});
 	}
 	// The chosen latest snapshot wins if its SDK version also has docs corrections.
-	const chosen = catalog.snapshots[catalog.latest];
+	const chosen = catalog.snapshots[latest.sourceCommit];
 	versions.set(latest.version, {
 		version: chosen.version,
 		tag: `v${chosen.version}`,
@@ -71,6 +71,20 @@ export function bundleRegistry(catalog) {
 		latest: latest.version,
 		versions: [...versions.values()].sort((a, b) => compareReleaseVersions(b.version, a.version)),
 	};
+}
+
+export function selectDefaultBundle(catalog) {
+	const latest = selectBundle(catalog);
+	if (!latest.version.includes('-rc.')) return latest;
+	let selected;
+	for (const item of Object.values(catalog.snapshots)) {
+		const candidate = selectBundle({ ...catalog, latest: item.sourceCommit });
+		if (candidate.version.includes('-rc.')) continue;
+		if (!selected || compareReleaseVersions(candidate.version, selected.version) >= 0)
+			selected = candidate;
+	}
+	if (!selected) throw new Error('No final Yosoi documentation release is available');
+	return selected;
 }
 
 async function download(url, limit, fetcher, headers = {}) {
@@ -186,7 +200,7 @@ export async function consumeLatest({
 } = {}) {
 	// Resolve latest exactly once. All subsequent requests are immutable commit URLs.
 	const catalog = await resolveCatalog(fetcher, resolveBranch);
-	const selected = selectBundle(catalog);
+	const selected = selectDefaultBundle(catalog);
 	const registry = bundleRegistry(catalog);
 	const generated = path.join(root, '.generated');
 	await mkdir(generated, { recursive: true });
@@ -242,7 +256,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
 		bundleRegistry(catalog);
 		await writeFile(
 			path.join(root, 'docs-bundle.lock.json'),
-			JSON.stringify(selectBundle(catalog), null, '\t') + '\n',
+			JSON.stringify(selectDefaultBundle(catalog), null, '\t') + '\n',
 		);
 	} else await consumeLatest({ build: !values['prepare-only'] });
 }
